@@ -17,6 +17,9 @@
           <TextBlock Text="API Key" Classes="muted" />
           <TextBox Classes="field" PasswordChar="●" Text="{Binding ApiKey}" />
           <TextBlock Text="{Binding ProviderHint}" Classes="muted" TextWrapping="Wrap" />
+          <Border Background="#0AFFFFFF" CornerRadius="8" Padding="8">
+            <TextBlock Text="{Binding ToolSummary}" Classes="muted" TextWrapping="Wrap" FontSize="11" />
+          </Border>
           <Button Classes="ghost" Content="保存配置" Command="{Binding SaveProviderCommand}" />
           <Button Classes="ghost" Content="清空对话" Command="{Binding ClearChatCommand}" />
           <TextBlock Text="{Binding ErrorText}" Foreground="#FF8A8A" FontSize="12" TextWrapping="Wrap" />

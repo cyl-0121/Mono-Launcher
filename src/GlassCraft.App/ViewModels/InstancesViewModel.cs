@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GlassCraft.App.Services;
 using GlassCraft.Core.Auth;
+using GlassCraft.Core.Importers;
 using GlassCraft.Core.Instances;
 using GlassCraft.Core.Java;
 using GlassCraft.Core.Launch;
@@ -17,6 +18,7 @@ public sealed partial class InstancesViewModel : ObservableObject
 
     public ObservableCollection<InstanceItem> Instances { get; } = new();
     public ObservableCollection<string> InstalledVersions { get; } = new();
+    public ObservableCollection<ImportCandidate> Candidates { get; } = new();
 
     [ObservableProperty] private InstanceItem? _selectedInstance;
     [ObservableProperty] private string _newName = "";
@@ -27,6 +29,7 @@ public sealed partial class InstancesViewModel : ObservableObject
     [ObservableProperty] private bool _isRunning;
     [ObservableProperty] private string _gameLog = "";
     [ObservableProperty] private string _gameState = "未启动";
+    [ObservableProperty] private ImportCandidate? _selectedCandidate;
 
     public InstancesViewModel()
     {
@@ -78,6 +81,52 @@ public sealed partial class InstancesViewModel : ObservableObject
         catch (Exception ex)
         {
             ErrorText = ex.Message;
+        }
+    }
+
+    [RelayCommand]
+    private void ScanImport()
+    {
+        try
+        {
+            var importer = new InstanceImporter(AppServices.Paths, AppServices.Instances);
+            Candidates.Clear();
+            foreach (var c in importer.Detect()) Candidates.Add(c);
+            SelectedCandidate = Candidates.FirstOrDefault();
+            StatusText = Candidates.Count == 0
+                ? "没有找到可导入的实例（.minecraft / PCL2 / HMCL / Prism）"
+                : $"找到 {Candidates.Count} 个可导入实例";
+            AppServices.Log.Info("import", StatusText);
+        }
+        catch (Exception ex)
+        {
+            ErrorText = "扫描失败：" + ex.Message;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ImportAsync()
+    {
+        if (SelectedCandidate is null)
+        {
+            ErrorText = "请先扫描并选择一个实例";
+            return;
+        }
+        try
+        {
+            StatusText = $"正在导入 {SelectedCandidate.Name}…";
+            var importer = new InstanceImporter(AppServices.Paths, AppServices.Instances);
+            var progress = new Progress<string>(s => StatusText = s);
+            var result = await importer.ImportAsync(SelectedCandidate, progress);
+            Refresh();
+            SelectedInstance = Instances.FirstOrDefault(i => i.Record.Id == result.Instance.Id);
+            StatusText = $"已导入 {result.Instance.Name}：存档 {result.CopiedSaves} 个，Mod {result.CopiedMods} 个（源目录未改动）";
+            AppServices.Log.Info("import", StatusText);
+        }
+        catch (Exception ex)
+        {
+            ErrorText = "导入失败：" + ex.Message;
+            AppServices.Log.Error("import", "导入失败", ex);
         }
     }
 

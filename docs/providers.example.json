@@ -1,0 +1,55 @@
+{
+  "$comment": "GlassCraft agent provider examples. Copy the fields you need into %APPDATA%\\GlassCraft\\config\\agent.json. Never put real API keys in this file; keys belong in the DPAPI store.",
+  "providers": [
+    {
+      "ProviderId": "openai",
+      "BaseUrl": "https://api.openai.com/v1",
+      "Model": "gpt-4o-mini",
+      "Temperature": 0.7,
+      "MaxTokens": 2048,
+      "ExtraHeaders": {}
+    },
+    {
+      "ProviderId": "deepseek",
+      "BaseUrl": "https://api.deepseek.com/v1",
+      "Model": "deepseek-chat",
+      "Temperature": 0.7,
+      "MaxTokens": 2048,
+      "ExtraHeaders": {}
+    },
+    {
+      "ProviderId": "anthropic",
+      "BaseUrl": "https://api.anthropic.com/v1",
+      "Model": "claude-sonnet-4-5",
+      "Temperature": 0.7,
+      "MaxTokens": 2048,
+      "ExtraHeaders": {}
+    },
+    {
+      "ProviderId": "gemini",
+      "BaseUrl": "https://generativelanguage.googleapis.com/v1beta/openai",
+      "Model": "gemini-2.5-flash",
+      "Temperature": 0.7,
+      "MaxTokens": 2048,
+      "ExtraHeaders": {}
+    },
+    {
+      "ProviderId": "ollama",
+      "BaseUrl": "http://localhost:11434/v1",
+      "Model": "qwen2.5:7b",
+      "Temperature": 0.7,
+      "MaxTokens": 2048,
+      "ExtraHeaders": {}
+    },
+    {
+      "ProviderId": "custom",
+      "BaseUrl": "https://api.example.com/v1",
+      "Model": "my-model",
+      "Temperature": 0.7,
+      "MaxTokens": 2048,
+      "ExtraHeaders": {
+        "X-Api-Version": "2025-01-01"
+      }
+    }
+  ]
+}

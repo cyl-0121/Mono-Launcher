@@ -4,7 +4,7 @@
              x:Class="GlassCraft.App.Views.InstancesView">
   <Grid ColumnDefinitions="400,*" ColumnSpacing="14">
     <controls:GlassCard Grid.Column="0" CornerRadius="18" TintOpacity="0.28" Padding="16">
-      <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10">
+      <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" RowSpacing="10">
         <StackPanel Grid.Row="0" Spacing="2">
           <TextBlock Text="实例" Classes="h2" />
           <TextBlock Text="每个实例拥有独立游戏目录，互不干扰。" Classes="muted" />
@@ -45,6 +45,29 @@
           <Button Classes="ghost" Content="打开目录" Command="{Binding OpenFolderCommand}" />
           <Button Classes="ghost" Content="移入回收站" Command="{Binding DeleteCommand}" />
         </StackPanel>
+
+        <Border Grid.Row="4" Background="#0AFFFFFF" CornerRadius="10" Padding="10">
+          <StackPanel Spacing="6">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="导入现有实例" Classes="muted" VerticalAlignment="Center" />
+              <Button Grid.Column="1" Classes="ghost" Content="扫描" Padding="10,5"
+                      Command="{Binding ScanImportCommand}" />
+            </Grid>
+            <ListBox ItemsSource="{Binding Candidates}" SelectedItem="{Binding SelectedCandidate}"
+                     Background="Transparent" BorderThickness="0" MaxHeight="96">
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Spacing="1">
+                    <TextBlock Text="{Binding Name}" Foreground="#E8EFFF" FontSize="12" />
+                    <TextBlock Text="{Binding SourceText}" Classes="muted" />
+                  </StackPanel>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+            <Button Classes="ghost" Content="导入所选（复制存档，不改源目录）"
+                    Command="{Binding ImportCommand}" />
+          </StackPanel>
+        </Border>
       </Grid>
     </controls:GlassCard>
 

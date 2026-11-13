@@ -1,12 +1,15 @@
 using System.Text;
+using GlassCraft.Agent.Tools;
 using GlassCraft.Core;
 using GlassCraft.Core.Auth;
 using GlassCraft.Core.Download;
+using GlassCraft.Core.Instances;
 using GlassCraft.Core.Java;
 using GlassCraft.Core.Launch;
 using GlassCraft.Core.Loaders;
 using GlassCraft.Core.Logging;
 using GlassCraft.Core.Models;
+using GlassCraft.Core.Mods;
 using GlassCraft.Core.Versions;
 
 Console.OutputEncoding = Encoding.UTF8;
@@ -35,6 +38,7 @@ var http = new HttpClient(handler)
 http.DefaultRequestHeaders.UserAgent.ParseAdd("GlassCraft-CLI/0.9");
 
 var versions = new VersionListService(http, paths);
+var instancesStore = new InstanceStore(paths);
 
 try
 {
@@ -80,6 +84,45 @@ async Task<int> RunAsync(string[] args)
                         Console.WriteLine($"    inner2: {ex.InnerException.InnerException.Message}");
                 }
             }
+            return 0;
+        }
+        case "import-scan":
+        {
+            var importer = new GlassCraft.Core.Importers.InstanceImporter(paths, instancesStore);
+            var found = importer.Detect();
+            if (found.Count == 0) Console.WriteLine("没有找到可导入的实例");
+            foreach (var c in found)
+                Console.WriteLine($"{c.Name} | {c.SourceText} | mc={c.MinecraftVersion} loader={c.Loader} mods={c.ModCount} saves={c.SaveCount} | {c.SourceDirectory}");
+            return 0;
+        }
+        case "import":
+        {
+            var name = args.ElementAtOrDefault(1) ?? throw new ArgumentException("用法: import <实例名>");
+            var importer = new GlassCraft.Core.Importers.InstanceImporter(paths, instancesStore);
+            var candidate = importer.Detect().FirstOrDefault(c => c.Name == name)
+                            ?? throw new InvalidOperationException($"未找到实例 {name}");
+            var result = await importer.ImportAsync(candidate);
+            Console.WriteLine($"已导入 {result.Instance.Name} -> {result.TargetDirectory}");
+            Console.WriteLine($"存档 {result.CopiedSaves}，Mod {result.CopiedMods}，options.txt={result.CopiedOptions}");
+            return 0;
+        }
+        case "tools":
+        {
+            var instances = new InstanceStore(paths);
+            var accounts = new AccountStore(paths);
+            var loaders = new LoaderService(http, paths, versions);
+            var modrinth = new ModrinthService(http);
+            var launchService = new LaunchService(paths);
+            var javaScanner = new JavaScanner();
+            var bridge = new DownloadCenterBridge(_ => { }, _ => { }, _ => { });
+            var tools = new LauncherTools(paths, instances, versions, loaders, modrinth,
+                launchService, javaScanner, accounts, bridge);
+            Console.WriteLine("== list_instances ==");
+            Console.WriteLine(tools.ListInstances());
+            Console.WriteLine("== list_installed_versions ==");
+            Console.WriteLine(tools.ListInstalledVersions());
+            Console.WriteLine("== search_modrinth(jei, 1.21.1, neoforge) ==");
+            Console.WriteLine(await tools.SearchModrinth("jei", "1.21.1", "neoforge"));
             return 0;
         }
         case "list":

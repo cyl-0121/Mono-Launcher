@@ -52,6 +52,9 @@ public sealed partial class AgentViewModel : ObservableObject
     [ObservableProperty] private string _statusText = "就绪";
     [ObservableProperty] private bool _showSettings = true;
     [ObservableProperty] private string _providerHint = "";
+
+    public string ToolSummary =>
+        "已注册工具：list_instances · list_installed_versions · get_instance_status · install_version · launch_instance · read_log · get_instance_crash_report · search_modrinth（安装/启动前会弹窗确认）";
     [ObservableProperty] private string? _errorText;
 
     public AgentViewModel()
