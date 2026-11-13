@@ -15,6 +15,7 @@ public partial class App : Application
     public static bool ExitAfterScreenshot { get; set; }
     public static string? StartupPage { get; set; }
     public static string? AgentStartupMessage { get; set; }
+    public static string? LaunchInstanceId { get; set; }
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -53,7 +54,7 @@ public partial class App : Application
             desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
             if (!string.IsNullOrWhiteSpace(StartupPage) && desktop.MainWindow.DataContext is ViewModels.MainWindowViewModel vm)
-                vm.CurrentPage = StartupPage!;
+                vm.NavigateCommand.Execute(StartupPage);
 
             if (!string.IsNullOrWhiteSpace(ScreenshotPath))
             {
@@ -78,7 +79,9 @@ public partial class App : Application
                     }
                     if (ExitAfterScreenshot)
                         (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown();
-                }, TimeSpan.FromSeconds(string.IsNullOrWhiteSpace(AgentStartupMessage) ? 4 : 14));
+                }, TimeSpan.FromSeconds(
+                    !string.IsNullOrWhiteSpace(LaunchInstanceId) ? 22 :
+                    !string.IsNullOrWhiteSpace(AgentStartupMessage) ? 14 : 4));
             }
         }
         base.OnFrameworkInitializationCompleted();

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GlassCraft.Agent;
 using GlassCraft.Agent.Providers;
+using GlassCraft.Agent.Tools;
 using GlassCraft.App.Services;
 using GlassCraft.Core.Security;
 using Microsoft.SemanticKernel;
@@ -240,7 +241,9 @@ public sealed partial class AgentViewModel : ObservableObject
         }
 
         var kernel = Kernel.CreateBuilder().Build();
-        return new AgentSession(chat, kernel, new UiToolApproval(), new AgentSessionOptions())
+        kernel.Plugins.Add(LauncherTools.CreatePlugin(AppServices.Tools));
+        var approval = new UiToolApproval { Handler = request => Dialogs.ConfirmToolAsync(request) };
+        return new AgentSession(chat, kernel, approval, new AgentSessionOptions())
         {
             ProviderName = SelectedProvider.Name,
             ModelName = Model

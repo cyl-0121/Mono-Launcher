@@ -26,6 +26,9 @@ internal static class Program
         var messageIndex = Array.IndexOf(args, "--agent-message");
         if (messageIndex >= 0 && messageIndex + 1 < args.Length)
             App.AgentStartupMessage = args[messageIndex + 1];
+        var launchIndex = Array.IndexOf(args, "--launch-instance");
+        if (launchIndex >= 0 && launchIndex + 1 < args.Length)
+            App.LaunchInstanceId = args[launchIndex + 1];
 
         try
         {

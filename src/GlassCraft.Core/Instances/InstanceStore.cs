@@ -23,9 +23,14 @@ public sealed class InstanceRecord
     public string? ImportedFrom { get; set; }
     public string? Group { get; set; }
 
-    public string VersionId => string.IsNullOrWhiteSpace(Loader)
-        ? MinecraftVersion
-        : (LoaderVersion is null ? MinecraftVersion : $"{MinecraftVersion}-{Loader}-{LoaderVersion}");
+    /// <summary>Exact installed version id (may be "neoforge-21.1.1", "fabric-loader-0.16-1.21.1", ...).</summary>
+    public string? InstalledVersionId { get; set; }
+
+    public string VersionId => !string.IsNullOrWhiteSpace(InstalledVersionId)
+        ? InstalledVersionId!
+        : string.IsNullOrWhiteSpace(Loader)
+            ? MinecraftVersion
+            : (LoaderVersion is null ? MinecraftVersion : $"{MinecraftVersion}-{Loader}-{LoaderVersion}");
 
     public string LoaderDisplay => Loader switch
     {
@@ -71,15 +76,39 @@ public sealed class InstanceStore
             ? Path.Combine(InstanceDirectory(record.Id), "minecraft")
             : Path.Combine(_paths.Root, "data", "minecraft");
 
-    public InstanceRecord Create(string name, string minecraftVersion, string? loader = null, string? loaderVersion = null)
+    public InstanceRecord Create(string name, string minecraftVersion, string? loader = null, string? loaderVersion = null, string? installedVersionId = null)
     {
+        var effectiveVersion = string.IsNullOrWhiteSpace(installedVersionId) ? minecraftVersion : installedVersionId!;
+        // Infer the loader from the installed version id so the UI shows the right badge.
+        if (string.IsNullOrWhiteSpace(loader))
+        {
+            if (effectiveVersion.StartsWith("neoforge-", StringComparison.OrdinalIgnoreCase))
+            {
+                loader = "neoforge";
+                loaderVersion ??= effectiveVersion["neoforge-".Length..];
+            }
+            else if (effectiveVersion.StartsWith("fabric-loader-", StringComparison.OrdinalIgnoreCase))
+            {
+                loader = "fabric";
+            }
+            else if (effectiveVersion.StartsWith("quilt-loader-", StringComparison.OrdinalIgnoreCase))
+            {
+                loader = "quilt";
+            }
+            else if (effectiveVersion.Contains("-forge-", StringComparison.OrdinalIgnoreCase))
+            {
+                loader = "forge";
+            }
+        }
+
         var record = new InstanceRecord
         {
             Id = Guid.NewGuid().ToString("N"),
-            Name = string.IsNullOrWhiteSpace(name) ? $"{minecraftVersion} 实例" : name.Trim(),
+            Name = string.IsNullOrWhiteSpace(name) ? $"{effectiveVersion} 实例" : name.Trim(),
             MinecraftVersion = minecraftVersion,
             Loader = loader,
             LoaderVersion = loaderVersion,
+            InstalledVersionId = effectiveVersion,
             CreatedAt = DateTimeOffset.Now
         };
         Save(record);

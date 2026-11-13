@@ -1,0 +1,101 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:GlassCraft.App.Controls"
+             x:Class="GlassCraft.App.Views.HomeView">
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Top">
+    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="14" Margin="0,0,10,10">
+      <controls:GlassCard Grid.Row="0" CornerRadius="20" TintOpacity="0.30" Padding="24">
+        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+          <StackPanel Grid.Row="0" Grid.Column="0" Spacing="6">
+            <TextBlock Text="欢迎回来" Classes="muted" />
+            <TextBlock Text="GlassCraft 原生启动器" Classes="h1" />
+            <TextBlock Text="Avalonia + Skia 原生渲染，无 WebView。玻璃效果由自研着色管线实时绘制。"
+                       Foreground="#9EB0C9" FontSize="13" TextWrapping="Wrap" MaxWidth="560" />
+          </StackPanel>
+          <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="10"
+                      VerticalAlignment="Top">
+            <Button Classes="primary" Content="新建离线账户" Command="{Binding AddOfflineAccountCommand}" />
+            <Button Classes="ghost" Content="打开数据目录" Command="{Binding OpenDataFolderCommand}" />
+          </StackPanel>
+
+          <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="*,*,*" Margin="0,22,0,0">
+            <StackPanel Grid.Column="0" Spacing="4">
+              <TextBlock Text="当前账户" Classes="muted" />
+              <TextBlock Text="{Binding SelectedAccount.Name, FallbackValue=未登录}" FontSize="15"
+                         Foreground="#E8EFFF" />
+              <TextBlock Text="{Binding SelectedAccount.KindText}" Classes="muted" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Spacing="4">
+              <TextBlock Text="Java 运行时" Classes="muted" />
+              <TextBlock Text="{Binding JavaSummary}" FontSize="15" Foreground="#E8EFFF" />
+              <TextBlock Text="{Binding Status}" Classes="muted" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" Spacing="4">
+              <TextBlock Text="实例" Classes="muted" />
+              <TextBlock Text="{Binding InstanceSummary}" FontSize="15" Foreground="#E8EFFF" />
+              <TextBlock Text="可导入现有 .minecraft" Classes="muted" />
+            </StackPanel>
+          </Grid>
+
+          <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding DataDirectory}"
+                     Classes="muted" Margin="0,16,0,0" TextTrimming="CharacterEllipsis" />
+        </Grid>
+      </controls:GlassCard>
+
+      <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="14">
+        <controls:GlassCard Grid.Column="0" CornerRadius="18" TintOpacity="0.26" Padding="20">
+          <StackPanel Spacing="10">
+            <TextBlock Text="账户" Classes="h2" />
+            <ListBox ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount}"
+                     Background="Transparent" MaxHeight="160">
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Border Width="28" Height="28" CornerRadius="8" Background="#3D6BFF">
+                      <TextBlock Text="{Binding Initial}" Foreground="White" FontWeight="SemiBold"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel>
+                      <TextBlock Text="{Binding Name}" Foreground="#E8EFFF" />
+                      <TextBlock Text="{Binding KindText}" Classes="muted" />
+                    </StackPanel>
+                  </StackPanel>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+              <TextBox Grid.Column="0" Classes="field" Watermark="离线用户名"
+                       Text="{Binding NewOfflineName}" />
+              <Button Grid.Column="1" Classes="ghost" Content="添加"
+                      Command="{Binding AddOfflineAccountCommand}" />
+            </Grid>
+            <Button Classes="ghost" Content="移除所选账户" Command="{Binding RemoveAccountCommand}" />
+          </StackPanel>
+        </controls:GlassCard>
+
+        <controls:GlassCard Grid.Column="1" CornerRadius="18" TintOpacity="0.26" Padding="20">
+          <StackPanel Spacing="10">
+            <TextBlock Text="性能档位" Classes="h2" />
+            <TextBlock Text="切换立即生效：玻璃管线会按档位重建，无需重启。" Classes="muted" TextWrapping="Wrap" />
+            <ComboBox x:Name="TierCombo" Classes="field" SelectionChanged="OnTierChanged" SelectedIndex="1">
+              <ComboBoxItem Content="高性能（完整玻璃管线）" />
+              <ComboBoxItem Content="均衡（模糊 + 色调 + 高光）" />
+              <ComboBoxItem Content="低功耗（静态半透明）" />
+              <ComboBoxItem Content="关闭（纯色）" />
+            </ComboBox>
+          </StackPanel>
+        </controls:GlassCard>
+      </Grid>
+
+      <controls:GlassCard Grid.Row="2" CornerRadius="18" TintOpacity="0.26" Padding="20">
+        <StackPanel Spacing="8">
+          <TextBlock Text="实例" Classes="h2" />
+          <TextBlock Text="{Binding InstanceSummary}" Foreground="#E8EFFF" />
+          <TextBlock Text="下一步：下载原版 1.21.1、安装 NeoForge、启动并捕获日志。"
+                     Classes="muted" TextWrapping="Wrap" />
+        </StackPanel>
+      </controls:GlassCard>
+    </Grid>
+  </ScrollViewer>
+</UserControl>

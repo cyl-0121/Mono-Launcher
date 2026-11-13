@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:GlassCraft.App.Controls"
+             x:Class="GlassCraft.App.Views.VersionsView">
+  <Grid ColumnDefinitions="*,370" ColumnSpacing="14">
+    <controls:GlassCard Grid.Column="0" CornerRadius="18" TintOpacity="0.28" Padding="16">
+      <Grid RowDefinitions="Auto,Auto,*" RowSpacing="10">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+          <TextBox Grid.Column="0" Classes="field" Watermark="搜索版本，例如 1.21.1"
+                   Text="{Binding SearchText}" />
+          <Button Grid.Column="1" Classes="ghost" Content="刷新清单" Command="{Binding RefreshCommand}" />
+          <ComboBox Grid.Column="2" Classes="field" Width="118" SelectionChanged="OnFilterChanged" SelectedIndex="0">
+            <ComboBoxItem Content="全部版本" />
+            <ComboBoxItem Content="正式版" />
+            <ComboBoxItem Content="快照" />
+            <ComboBoxItem Content="历史版本" />
+          </ComboBox>
+        </Grid>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="14">
+          <TextBlock Text="{Binding StatusText}" Classes="muted" />
+          <TextBlock Text="{Binding ErrorText}" Foreground="#FF8A8A" FontSize="12" />
+        </StackPanel>
+        <ListBox Grid.Row="2" ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}"
+                 Background="Transparent" BorderThickness="0">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Margin="2">
+                <Border Grid.Column="0" Width="3" Height="30" CornerRadius="2" Background="{Binding TypeBadge}" />
+                <StackPanel Grid.Column="1" Spacing="1">
+                  <TextBlock Text="{Binding Id}" Foreground="#E8EFFF" FontSize="13" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding ReleaseDate}" Classes="muted" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding JavaText}" Classes="muted" />
+                  <Border Background="#14FFFFFF" CornerRadius="6" Padding="6,2">
+                    <TextBlock Text="{Binding TypeText}" FontSize="11" Foreground="#9EB0C9" />
+                  </Border>
+                  <TextBlock Text="已安装" FontSize="11" Foreground="#4ADE80" IsVisible="{Binding IsInstalled}" />
+                </StackPanel>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+    </controls:GlassCard>
+
+    <controls:GlassCard Grid.Column="1" CornerRadius="18" TintOpacity="0.30" Padding="18">
+      <ScrollViewer HorizontalContentAlignment="Stretch">
+        <StackPanel Spacing="12">
+          <TextBlock Text="安装版本" Classes="h2" />
+          <TextBlock Text="{Binding SelectedVersionTitle}" FontSize="22" FontWeight="SemiBold" Foreground="#F2F6FF" />
+          <TextBlock Text="{Binding StatusText}" Classes="muted" TextWrapping="Wrap" />
+
+          <TextBlock Text="Mod Loader" Classes="muted" Margin="0,6,0,0" />
+          <ComboBox Classes="field" ItemsSource="{Binding LoaderKinds}" SelectedItem="{Binding SelectedLoaderKind}" />
+          <ComboBox Classes="field" ItemsSource="{Binding LoaderVersions}" SelectedItem="{Binding SelectedLoaderVersion}"
+                    IsVisible="{Binding ShowLoaderVersionPicker}" />
+          <TextBlock Text="原版安装会下载 Client JAR、Libraries、Assets 与 Natives，并做 SHA-1 校验。"
+                     Classes="muted" TextWrapping="Wrap" />
+
+          <Button Classes="primary" Content="下载并安装" Command="{Binding InstallCommand}" HorizontalAlignment="Left" />
+
+          <Border Background="#10FFFFFF" CornerRadius="10" Padding="12" IsVisible="{Binding Downloads.IsActive}">
+            <StackPanel Spacing="6">
+              <TextBlock Text="{Binding Downloads.Stage}" Foreground="#E8EFFF" FontSize="13" />
+              <ProgressBar Value="{Binding Downloads.Fraction}" Maximum="1" Height="6" />
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{Binding Downloads.BytesText}" Classes="muted" />
+                <TextBlock Grid.Column="1" Text="{Binding Downloads.SpeedText}" Classes="muted" />
+              </Grid>
+              <TextBlock Text="{Binding Downloads.Detail}" Classes="muted" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+          </Border>
+
+          <TextBlock Text="{Binding ErrorText}" Foreground="#FF8A8A" FontSize="12" TextWrapping="Wrap" />
+        </StackPanel>
+      </ScrollViewer>
+    </controls:GlassCard>
+  </Grid>
+</UserControl>

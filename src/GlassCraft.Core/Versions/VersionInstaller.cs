@@ -144,33 +144,96 @@ public sealed class VersionInstaller
                 Size = idx.Size,
                 DisplayName = $"asset index {idx.Id}"
             });
-
-            var objects = await ReadAssetObjectsAsync(indexPath, ct).ConfigureAwait(false);
-            if (objects is not null)
-            {
-                progress?.Report(new InstallProgress
-                {
-                    Stage = "准备资源",
-                    Detail = $"资源索引 {idx.Id}: {objects.Count} 个对象",
-                    FilesTotal = objects.Count
-                });
-                foreach (var (name, obj) in objects)
-                {
-                    var dest = _paths.AssetObject(obj.Hash);
-                    if (string.IsNullOrWhiteSpace(obj.Hash) || obj.Hash.Length < 2) continue;
-                    items.Add(new DownloadItem
-                    {
-                        Url = ResourcesBase + obj.Hash[..2] + "/" + obj.Hash,
-                        Destination = dest,
-                        Sha1 = obj.Hash,
-                        Size = obj.Size,
-                        DisplayName = name
-                    });
-                }
-            }
+            // Asset objects are enumerated in a second phase, after the index file exists on disk.
         }
 
         return items;
+    }
+
+    /// <summary>Builds the download list for every asset object referenced by the installed index.</summary>
+    public async Task<List<DownloadItem>> BuildAssetFileListAsync(VersionInfo resolved, CancellationToken ct = default)
+    {
+        var result = new List<DownloadItem>();
+        if (resolved.AssetIndex is not { } idx) return result;
+        var indexFile = _paths.AssetIndexFile(idx.Id);
+        if (!File.Exists(indexFile)) return result;
+        var objects = await ReadAssetObjectsAsync(indexFile, ct).ConfigureAwait(false);
+        if (objects is null) return result;
+        foreach (var (name, obj) in objects)
+        {
+            if (string.IsNullOrWhiteSpace(obj.Hash) || obj.Hash.Length < 2) continue;
+            result.Add(new DownloadItem
+            {
+                Url = ResourcesBase + obj.Hash[..2] + "/" + obj.Hash,
+                Destination = _paths.AssetObject(obj.Hash),
+                Sha1 = obj.Hash,
+                Size = obj.Size,
+                DisplayName = name
+            });
+        }
+        return result;
+    }
+
+    private async Task DownloadBatchAsync(
+        DownloadEngine engine,
+        List<DownloadItem> files,
+        string stage,
+        int filesOffset,
+        long bytesTotal,
+        IProgress<InstallProgress>? progress,
+        CancellationToken ct)
+    {
+        if (files.Count == 0) return;
+        progress?.Report(new InstallProgress
+        {
+            Stage = stage,
+            Detail = $"{files.Count} 个文件",
+            FilesTotal = filesOffset + files.Count,
+            BytesTotal = bytesTotal
+        });
+
+        var last = 0L;
+        var downloadProgress = new Progress<DownloadProgress>(p =>
+        {
+            var done = Interlocked.Read(ref last);
+            if (p.DownloadedBytes - done < 2_000_000 && p.CompletedFiles < p.TotalFiles) return;
+            Interlocked.Exchange(ref last, p.DownloadedBytes);
+            progress?.Report(new InstallProgress
+            {
+                Stage = stage,
+                Detail = p.CurrentFile,
+                FilesDone = filesOffset + p.CompletedFiles,
+                FilesTotal = filesOffset + p.TotalFiles,
+                BytesDone = p.DownloadedBytes,
+                BytesTotal = Math.Max(p.TotalBytes, bytesTotal)
+            });
+        });
+
+        var result = await engine.DownloadAsync(files, downloadProgress, null, ct).ConfigureAwait(false);
+        if (!result.Success)
+        {
+            // One retry pass for transient failures (slow CDN, dropped connections).
+            var failedDestinations = result.Failures.Select(f => f.Destination).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var retryItems = files.Where(f => failedDestinations.Contains(Path.GetFullPath(f.Destination)) ||
+                                              failedDestinations.Contains(f.Destination)).ToList();
+            if (retryItems.Count > 0)
+            {
+                progress?.Report(new InstallProgress
+                {
+                    Stage = stage + "（重试）",
+                    Detail = $"{retryItems.Count} 个失败文件",
+                    FilesTotal = filesOffset + files.Count,
+                    BytesTotal = bytesTotal
+                });
+                result = await engine.DownloadAsync(retryItems, downloadProgress, null, ct).ConfigureAwait(false);
+            }
+        }
+
+        if (!result.Success)
+        {
+            var msg = string.Join("\n", result.Failures.Take(8).Select(f => $"· {f}"));
+            throw new InstallException($"有 {result.Failed} 个文件下载失败：\n{msg}", result.Failures);
+        }
     }
 
     private static async Task<Dictionary<string, AssetObject>?> ReadAssetObjectsAsync(string indexPath, CancellationToken ct)
@@ -202,45 +265,26 @@ public sealed class VersionInstaller
 
         progress?.Report(new InstallProgress { Stage = "分析文件" });
         var files = await CollectFilesAsync(resolved, progress, ct).ConfigureAwait(false);
-
         var totalBytes = files.Sum(f => f.Size ?? 0);
-        progress?.Report(new InstallProgress
-        {
-            Stage = "下载文件",
-            Detail = $"{files.Count} 个文件",
-            FilesTotal = files.Count,
-            BytesTotal = totalBytes
-        });
 
-        var lastReport = 0L;
-        var downloadProgress = new Progress<DownloadProgress>(p =>
-        {
-            var done = Interlocked.Read(ref lastReport);
-            if (p.DownloadedBytes - done < 1_000_000 && p.CompletedFiles < p.TotalFiles) return;
-            Interlocked.Exchange(ref lastReport, p.DownloadedBytes);
-            progress?.Report(new InstallProgress
-            {
-                Stage = "下载文件",
-                Detail = p.CurrentFile,
-                FilesDone = p.CompletedFiles,
-                FilesTotal = p.TotalFiles,
-                BytesDone = p.DownloadedBytes,
-                BytesTotal = Math.Max(p.TotalBytes, totalBytes)
-            });
-        });
+        // Phase 1: client jar, libraries, natives and the asset index.
+        await DownloadBatchAsync(engine, files, "下载核心文件", 0, totalBytes, progress, ct).ConfigureAwait(false);
 
-        var result = await engine.DownloadAsync(files, downloadProgress, null, ct).ConfigureAwait(false);
-        if (!result.Success)
+        // Phase 2: asset objects (the index now exists on disk).
+        var assetFiles = await BuildAssetFileListAsync(resolved, ct).ConfigureAwait(false);
+        if (assetFiles.Count > 0)
         {
-            var msg = string.Join("\n", result.Failures.Take(5).Select(f => $"· {f}"));
-            throw new InstallException($"有 {result.Failed} 个文件下载失败：\n{msg}", result.Failures);
+            var assetBytes = assetFiles.Sum(f => f.Size ?? 0);
+            await DownloadBatchAsync(engine, assetFiles, "下载资源文件", files.Count, assetBytes, progress, ct).ConfigureAwait(false);
+            totalBytes += assetBytes;
         }
 
+        var totalFiles = files.Count + assetFiles.Count;
         progress?.Report(new InstallProgress
         {
             Stage = "解压原生库",
-            FilesTotal = files.Count,
-            FilesDone = files.Count,
+            FilesTotal = totalFiles,
+            FilesDone = totalFiles,
             BytesTotal = totalBytes,
             BytesDone = totalBytes
         });

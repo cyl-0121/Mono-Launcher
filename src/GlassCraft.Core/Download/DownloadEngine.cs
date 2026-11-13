@@ -28,7 +28,7 @@ public sealed class DownloadOptions
     public int MaxRetries { get; set; } = 3;
     public TimeSpan InitialRetryDelay { get; set; } = TimeSpan.FromMilliseconds(600);
     public TimeSpan MaxRetryDelay { get; set; } = TimeSpan.FromSeconds(15);
-    public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(60);
+    public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(300);
     public string? ProxyUrl { get; set; }
     /// <summary>Optional global cap in bytes/sec; 0 = unlimited.</summary>
     public long MaxBytesPerSecond { get; set; }
@@ -379,13 +379,15 @@ public sealed class DownloadEngine : IDisposable
 
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);
         linked.CancelAfter(_options.Timeout);
-        var token = linked.Token;
+        // The timeout applies to connection + response headers only; streamed bodies may take longer.
+        var headerToken = linked.Token;
+        var token = ct;
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         if (existing > 0)
             request.Headers.Range = new RangeHeaderValue(existing, null);
 
-        using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
+        using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, headerToken).ConfigureAwait(false);
 
         if (existing > 0 && response.StatusCode == HttpStatusCode.OK)
         {

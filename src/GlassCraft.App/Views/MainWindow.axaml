@@ -1,11 +1,12 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="using:GlassCraft.App.Controls"
+        xmlns:views="using:GlassCraft.App.Views"
         xmlns:vm="using:GlassCraft.App.ViewModels"
         x:Class="GlassCraft.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="GlassCraft 启动器"
-        Width="1040" Height="660" MinWidth="900" MinHeight="560"
+        Width="1160" Height="720" MinWidth="960" MinHeight="600"
         WindowStartupLocation="CenterScreen"
         Background="#05070D"
         FontFamily="Inter, Microsoft YaHei UI, Segoe UI">
@@ -27,8 +28,8 @@
     <Style Selector="Button.nav">
       <Setter Property="HorizontalAlignment" Value="Stretch" />
       <Setter Property="HorizontalContentAlignment" Value="Left" />
-      <Setter Property="Height" Value="42" />
-      <Setter Property="Margin" Value="0,2" />
+      <Setter Property="Height" Value="40" />
+      <Setter Property="Margin" Value="0,1" />
       <Setter Property="Padding" Value="14,0" />
       <Setter Property="CornerRadius" Value="10" />
       <Setter Property="Background" Value="Transparent" />
@@ -37,6 +38,9 @@
     </Style>
     <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
       <Setter Property="Background" Value="#22FFFFFF" />
+    </Style>
+    <Style Selector="Button.nav.active /template/ ContentPresenter">
+      <Setter Property="Background" Value="#2E4F8BFF" />
     </Style>
     <Style Selector="Button.primary">
       <Setter Property="Background" Value="#3D6BFF" />
@@ -94,16 +98,19 @@
       <Setter Property="CornerRadius" Value="8" />
       <Setter Property="MinHeight" Value="36" />
     </Style>
+    <Style Selector="ListBox">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
   </Window.Styles>
 
   <Grid>
     <controls:AuroraBackground />
 
-    <Grid ColumnDefinitions="238,*" Margin="0">
+    <Grid ColumnDefinitions="238,*">
       <!-- Sidebar -->
       <controls:GlassCard Grid.Column="0" Margin="12,12,0,12" CornerRadius="20" TintOpacity="0.34">
         <DockPanel Margin="14,16">
-          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="6,6,0,22">
+          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="6,6,0,20">
             <Border Width="34" Height="34" CornerRadius="10" Background="#3D6BFF">
               <TextBlock Text="G" FontSize="19" FontWeight="Bold" Foreground="White"
                          HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -121,202 +128,65 @@
 
           <StackPanel>
             <TextBlock Text="导航" Classes="muted" Margin="8,0,0,6" />
-            <Button Classes="nav" Content="🏠  首页" Command="{Binding NavigateCommand}" CommandParameter="home" />
-            <Button Classes="nav" Content="✦  AI Agent" Command="{Binding NavigateCommand}" CommandParameter="agent" />
-            <Button Classes="nav" Content="⬇  游戏下载" IsEnabled="False" Opacity="0.45" />
-            <Button Classes="nav" Content="▦  实例管理" IsEnabled="False" Opacity="0.45" />
-            <Button Classes="nav" Content="🧩  Mod 管理" IsEnabled="False" Opacity="0.45" />
-            <Button Classes="nav" Content="⚙  设置" IsEnabled="False" Opacity="0.45" />
+            <Button Classes="nav" Name="NavHome" Content="🏠  首页" Command="{Binding NavigateCommand}" CommandParameter="home" />
+            <Button Classes="nav" Name="NavVersions" Content="⬇  游戏下载" Command="{Binding NavigateCommand}" CommandParameter="versions" />
+            <Button Classes="nav" Name="NavInstances" Content="▦  实例管理" Command="{Binding NavigateCommand}" CommandParameter="instances" />
+            <Button Classes="nav" Name="NavMods" Content="🧩  Mod 管理" Command="{Binding NavigateCommand}" CommandParameter="mods" />
+            <Button Classes="nav" Name="NavDownloads" Content="⇩  下载管理" Command="{Binding NavigateCommand}" CommandParameter="downloads" />
+            <Button Classes="nav" Name="NavLogs" Content="📄  日志" Command="{Binding NavigateCommand}" CommandParameter="logs" />
+            <Button Classes="nav" Name="NavAgent" Content="✦  AI Agent" Command="{Binding NavigateCommand}" CommandParameter="agent" />
+            <Button Classes="nav" Name="NavSettings" Content="⚙  设置" Command="{Binding NavigateCommand}" CommandParameter="settings" />
           </StackPanel>
         </DockPanel>
       </controls:GlassCard>
 
       <!-- Main -->
       <Grid Grid.Column="1" RowDefinitions="Auto,*">
-        <Grid Grid.Row="0" Name="TitleBar" Height="52" Margin="20,10,20,0">
-          <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-            <TextBlock Text="首页" FontSize="13" Foreground="#8A97AD" IsVisible="{Binding IsHome}" />
-            <TextBlock Text="AI Agent" FontSize="13" Foreground="#8A97AD" IsVisible="{Binding IsAgent}" />
+        <Grid Grid.Row="0" Name="TitleBar" Height="54" Margin="20,8,20,0">
+          <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <TextBlock Text="{Binding CurrentPageTitle}" FontSize="14" Foreground="#DCE6F7" />
+            <TextBlock Text="{Binding CurrentPageSubtitle}" FontSize="12" Foreground="#6E7F99" />
           </StackPanel>
-          <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" VerticalAlignment="Center">
+          <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" VerticalAlignment="Center">
             <Border Background="#14FFFFFF" CornerRadius="9" Padding="10,5">
               <TextBlock Text="{Binding FpsText}" FontSize="12" Foreground="#B9C7DD" />
             </Border>
-            <Button Content="—" Width="30" Height="26" CornerRadius="6" Background="Transparent"
-                    Foreground="#8A97AD" Click="OnMinimizeClick" />
-            <Button Content="✕" Width="30" Height="26" CornerRadius="6" Background="Transparent"
-                    Foreground="#8A97AD" Click="OnCloseClick" />
+            <Border Background="#10FFFFFF" CornerRadius="9" Padding="10,5">
+              <TextBlock Text="{Binding ActiveProfileText}" FontSize="12" Foreground="#B9C7DD" />
+            </Border>
           </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="20,6,20,18">
-          <!-- Home -->
-          <ScrollViewer IsVisible="{Binding IsHome}" HorizontalScrollBarVisibility="Disabled"
-                        HorizontalContentAlignment="Stretch" VerticalContentAlignment="Top">
-            <Grid DataContext="{Binding Home}" RowDefinitions="Auto,Auto,Auto" RowSpacing="14" Margin="0,0,10,10">
-              <controls:GlassCard Grid.Row="0" CornerRadius="20" TintOpacity="0.30" Padding="24">
-                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
-                  <StackPanel Grid.Row="0" Grid.Column="0" Spacing="6">
-                    <TextBlock Text="欢迎回来" Classes="muted" />
-                    <TextBlock Text="GlassCraft 原生启动器" Classes="h1" />
-                    <TextBlock Text="Avalonia + Skia 原生渲染，无 WebView。玻璃效果由自研着色管线实时绘制。"
-                               Foreground="#9EB0C9" FontSize="13" TextWrapping="Wrap" MaxWidth="560" />
-                  </StackPanel>
-                  <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="10"
-                              VerticalAlignment="Top">
-                    <Button Classes="primary" Content="新建离线账户" Command="{Binding AddOfflineAccountCommand}" />
-                    <Button Classes="ghost" Content="打开数据目录" Command="{Binding OpenDataFolderCommand}" />
-                  </StackPanel>
-
-                  <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="*,*,*" Margin="0,22,0,0">
-                    <StackPanel Grid.Column="0" Spacing="4">
-                      <TextBlock Text="当前账户" Classes="muted" />
-                      <TextBlock Text="{Binding SelectedAccount.Name, FallbackValue=未登录}" FontSize="15"
-                                 Foreground="#E8EFFF" />
-                      <TextBlock Text="{Binding SelectedAccount.KindText}" Classes="muted" />
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Spacing="4">
-                      <TextBlock Text="Java 运行时" Classes="muted" />
-                      <TextBlock Text="{Binding JavaSummary}" FontSize="15" Foreground="#E8EFFF" />
-                      <TextBlock Text="{Binding Status}" Classes="muted" />
-                    </StackPanel>
-                    <StackPanel Grid.Column="2" Spacing="4">
-                      <TextBlock Text="实例" Classes="muted" />
-                      <TextBlock Text="{Binding InstanceSummary}" FontSize="15" Foreground="#E8EFFF" />
-                      <TextBlock Text="可导入现有 .minecraft" Classes="muted" />
-                    </StackPanel>
-                  </Grid>
-
-                  <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding DataDirectory}"
-                             Classes="muted" Margin="0,16,0,0" TextTrimming="CharacterEllipsis" />
-                </Grid>
-              </controls:GlassCard>
-
-              <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="14">
-                <controls:GlassCard Grid.Column="0" CornerRadius="18" TintOpacity="0.26" Padding="20">
-                  <StackPanel Spacing="10">
-                    <TextBlock Text="账户" Classes="h2" />
-                    <ListBox ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount}"
-                             Background="Transparent" MaxHeight="160">
-                      <ListBox.ItemTemplate>
-                        <DataTemplate>
-                          <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Border Width="28" Height="28" CornerRadius="8" Background="#3D6BFF">
-                              <TextBlock Text="{Binding Initial}" Foreground="White" FontWeight="SemiBold"
-                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </Border>
-                            <StackPanel>
-                              <TextBlock Text="{Binding Name}" Foreground="#E8EFFF" />
-                              <TextBlock Text="{Binding KindText}" Classes="muted" />
-                            </StackPanel>
-                          </StackPanel>
-                        </DataTemplate>
-                      </ListBox.ItemTemplate>
-                    </ListBox>
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                      <TextBox Grid.Column="0" Classes="field" Watermark="离线用户名"
-                               Text="{Binding NewOfflineName}" />
-                      <Button Grid.Column="1" Classes="ghost" Content="添加"
-                              Command="{Binding AddOfflineAccountCommand}" />
-                    </Grid>
-                    <Button Classes="ghost" Content="移除所选账户" Command="{Binding RemoveAccountCommand}" />
-                  </StackPanel>
-                </controls:GlassCard>
-
-                <controls:GlassCard Grid.Column="1" CornerRadius="18" TintOpacity="0.26" Padding="20">
-                  <StackPanel Spacing="10">
-                    <TextBlock Text="性能档位" Classes="h2" />
-                    <TextBlock Text="切换立即生效：玻璃管线会按档位重建，无需重启。" Classes="muted" TextWrapping="Wrap" />
-                    <ComboBox x:Name="TierCombo" Classes="field" SelectionChanged="OnTierChanged" SelectedIndex="1">
-                      <ComboBoxItem Content="高性能（完整玻璃管线）" />
-                      <ComboBoxItem Content="均衡（模糊 + 色调 + 高光）" />
-                      <ComboBoxItem Content="低功耗（静态半透明）" />
-                      <ComboBoxItem Content="关闭（纯色）" />
-                    </ComboBox>
-                  </StackPanel>
-                </controls:GlassCard>
-              </Grid>
-
-              <controls:GlassCard Grid.Row="2" CornerRadius="18" TintOpacity="0.26" Padding="20">
-                <StackPanel Spacing="8">
-                  <TextBlock Text="实例" Classes="h2" />
-                  <TextBlock Text="{Binding InstanceSummary}" Foreground="#E8EFFF" />
-                  <TextBlock Text="下一步：下载原版 1.21.1、安装 NeoForge、启动并捕获日志。"
-                             Classes="muted" TextWrapping="Wrap" />
-                </StackPanel>
-              </controls:GlassCard>
-            </Grid>
-          </ScrollViewer>
-
-          <!-- Agent -->
-          <Grid IsVisible="{Binding IsAgent}">
-          <Grid DataContext="{Binding Agent}" ColumnDefinitions="330,*" ColumnSpacing="14">
-            <controls:GlassCard Grid.Column="0" CornerRadius="18" TintOpacity="0.28" Padding="18">
-              <ScrollViewer HorizontalContentAlignment="Stretch">
-                <StackPanel Spacing="10">
-                  <TextBlock Text="Agent 提供商" Classes="h2" />
-                  <ComboBox Classes="field" ItemsSource="{Binding Providers}"
-                            SelectedItem="{Binding SelectedProvider}" />
-                  <TextBlock Text="模型" Classes="muted" />
-                  <ComboBox Classes="field" IsEditable="True" ItemsSource="{Binding Models}"
-                            Text="{Binding Model}" />
-                  <TextBlock Text="Base URL（自定义端点）" Classes="muted" />
-                  <TextBox Classes="field" Text="{Binding BaseUrl}" />
-                  <TextBlock Text="API Key" Classes="muted" />
-                  <TextBox Classes="field" PasswordChar="●" Text="{Binding ApiKey}" />
-                  <TextBlock Text="{Binding ProviderHint}" Classes="muted" TextWrapping="Wrap" />
-                  <Button Classes="ghost" Content="保存配置" Command="{Binding SaveProviderCommand}" />
-                  <Button Classes="ghost" Content="清空对话" Command="{Binding ClearChatCommand}" />
-                  <TextBlock Text="{Binding ErrorText}" Foreground="#FF8A8A" FontSize="12" TextWrapping="Wrap" />
-                </StackPanel>
-              </ScrollViewer>
-            </controls:GlassCard>
-
-            <controls:GlassCard Grid.Column="1" CornerRadius="18" TintOpacity="0.28" Padding="16">
-              <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="10">
-                <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
-                  <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBlock Text="对话" Classes="h2" />
-                    <TextBlock Text="{Binding SelectedProvider.Name}" Classes="muted" VerticalAlignment="Center" />
-                  </StackPanel>
-                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                    <TextBlock Text="{Binding StatusText}" Classes="muted" VerticalAlignment="Center" />
-                    <Button Classes="ghost" Content="取消" Command="{Binding CancelCommand}" />
-                  </StackPanel>
-                </Grid>
-
-                <ScrollViewer Grid.Row="1" Name="ChatScroll" VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
-                  <ItemsControl ItemsSource="{Binding Messages}" Margin="0,4">
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate>
-                        <Border Classes="msg"
-                                Classes.user="{Binding IsUser}"
-                                Classes.tool="{Binding IsTool}"
-                                Classes.system="{Binding IsSystem}">
-                          <StackPanel Spacing="4">
-                            <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Foreground="#E9F0FB" FontSize="13" />
-                            <TextBlock Text="{Binding Meta}" Classes="muted" />
-                          </StackPanel>
-                        </Border>
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
-                </ScrollViewer>
-
-                <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                  <TextBox Grid.Column="0" Classes="field" AcceptsReturn="True" MinHeight="64" MaxHeight="140"
-                           TextWrapping="Wrap" Watermark="问点什么，例如：这台机器装的是 Java 几？"
-                           Text="{Binding InputText}" />
-                  <Button Grid.Column="1" Classes="primary" Content="发送" Width="84" Height="42"
-                          VerticalAlignment="Bottom" Command="{Binding SendCommand}" />
-                </Grid>
-                <TextBlock Grid.Row="3" Text="密钥经 Windows DPAPI 加密存储，仅本机当前用户可解密；日志会脱敏。"
-                           Classes="muted" />
-              </Grid>
-            </controls:GlassCard>
-          </Grid>
-          </Grid>
+        <Grid Grid.Row="1" Margin="20,4,20,16">
+          <ContentControl Content="{Binding CurrentViewModel}" HorizontalContentAlignment="Stretch"
+                          VerticalContentAlignment="Stretch">
+            <ContentControl.DataTemplates>
+              <DataTemplate DataType="vm:HomeViewModel">
+                <views:HomeView />
+              </DataTemplate>
+              <DataTemplate DataType="vm:AgentViewModel">
+                <views:AgentView />
+              </DataTemplate>
+              <DataTemplate DataType="vm:VersionsViewModel">
+                <views:VersionsView />
+              </DataTemplate>
+              <DataTemplate DataType="vm:InstancesViewModel">
+                <views:InstancesView />
+              </DataTemplate>
+              <DataTemplate DataType="vm:ModsViewModel">
+                <views:ModsView />
+              </DataTemplate>
+              <DataTemplate DataType="vm:DownloadsViewModel">
+                <views:DownloadsView />
+              </DataTemplate>
+              <DataTemplate DataType="vm:LogsViewModel">
+                <views:LogsView />
+              </DataTemplate>
+              <DataTemplate DataType="vm:SettingsViewModel">
+                <views:SettingsView />
+              </DataTemplate>
+            </ContentControl.DataTemplates>
+          </ContentControl>
         </Grid>
       </Grid>
     </Grid>

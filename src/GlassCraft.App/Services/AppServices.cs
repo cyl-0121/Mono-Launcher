@@ -1,6 +1,7 @@
 using System.Net.Http;
 using GlassCraft.Agent.Local;
 using GlassCraft.Agent.Providers;
+using GlassCraft.Agent.Tools;
 using GlassCraft.Core;
 using GlassCraft.Core.Auth;
 using GlassCraft.Core.Config;
@@ -8,7 +9,9 @@ using GlassCraft.Core.Download;
 using GlassCraft.Core.Instances;
 using GlassCraft.Core.Java;
 using GlassCraft.Core.Launch;
+using GlassCraft.Core.Loaders;
 using GlassCraft.Core.Logging;
+using GlassCraft.Core.Mods;
 using GlassCraft.Core.Security;
 using GlassCraft.Core.Versions;
 
@@ -29,8 +32,12 @@ public static class AppServices
     public static MicrosoftAuthService MsAuth { get; private set; } = null!;
     public static InstanceStore Instances { get; private set; } = null!;
     public static LaunchService Launch { get; private set; } = null!;
+    public static LoaderService Loaders { get; private set; } = null!;
+    public static ModrinthService Modrinth { get; private set; } = null!;
+    public static LauncherTools Tools { get; private set; } = null!;
     public static AgentProviderFactory Providers { get; private set; } = null!;
     public static LocalLlamaService LocalAi { get; private set; } = null!;
+    public static DownloadCenter Downloads { get; } = new();
     public static bool Initialized { get; private set; }
 
     public static event Action<Exception>? UnhandledError;
@@ -65,6 +72,14 @@ public static class AppServices
         MsAuth = new MicrosoftAuthService(Http);
         Instances = new InstanceStore(Paths);
         Launch = new LaunchService(Paths);
+        Loaders = new LoaderService(Http, Paths, Versions);
+        Modrinth = new ModrinthService(Http);
+        Tools = new LauncherTools(
+            Paths, Instances, Versions, Loaders, Modrinth, Launch, Java, Accounts,
+            new DownloadCenterBridge(
+                stage => Downloads.Begin(stage),
+                message => Downloads.Complete(message),
+                error => Downloads.Fail(error)));
         Providers = new AgentProviderFactory(Http, Secrets);
         LocalAi = new LocalLlamaService();
 

@@ -41,9 +41,22 @@ public sealed class LaunchService
             if (seen.Add(p)) entries.Add(p);
         }
 
-        var jarId = string.IsNullOrWhiteSpace(resolved.Jar) ? resolved.Id : resolved.Jar!;
-        var jar = _paths.VersionJar(jarId);
-        if (seen.Add(jar)) entries.Add(jar);
+        // Forge/NeoForge replace the vanilla jar with a patched client jar that modlauncher finds
+        // through -DlibraryDirectory. Adding the vanilla jar as well makes both end up as modules
+        // and Java fails with "Modules minecraft and _1._21._1 export package ...".
+        var bootstrapped = resolved.MainClass?.Contains("BootstrapLauncher", StringComparison.OrdinalIgnoreCase) == true
+                           || resolved.Libraries.Any(l =>
+                               l.Name.Contains("neoforge", StringComparison.OrdinalIgnoreCase) &&
+                               l.Name.Contains("client", StringComparison.OrdinalIgnoreCase));
+
+        if (!bootstrapped)
+        {
+            var jarId = string.IsNullOrWhiteSpace(resolved.Jar) ? resolved.Id : resolved.Jar!;
+            var jar = _paths.VersionJar(jarId);
+            if (seen.Add(jar)) entries.Add(jar);
+        }
+        // For bootstrapped loaders the patched client jar lives under libraries and is discovered
+        // by modlauncher via -DlibraryDirectory, so it must not be added to the classpath here.
 
         return string.Join(Path.PathSeparator, entries);
     }

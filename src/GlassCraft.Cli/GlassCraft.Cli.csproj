@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>GlassCraft.Cli</RootNamespace>
+    <AssemblyName>GlassCraft.Cli</AssemblyName>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GlassCraft.Core\GlassCraft.Core.csproj" />
+    <ProjectReference Include="..\GlassCraft.Agent\GlassCraft.Agent.csproj" />
+  </ItemGroup>
+</Project>
