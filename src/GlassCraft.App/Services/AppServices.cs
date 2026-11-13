@@ -1,0 +1,113 @@
+using System.Net.Http;
+using GlassCraft.Agent.Local;
+using GlassCraft.Agent.Providers;
+using GlassCraft.Core;
+using GlassCraft.Core.Auth;
+using GlassCraft.Core.Config;
+using GlassCraft.Core.Download;
+using GlassCraft.Core.Instances;
+using GlassCraft.Core.Java;
+using GlassCraft.Core.Launch;
+using GlassCraft.Core.Logging;
+using GlassCraft.Core.Security;
+using GlassCraft.Core.Versions;
+
+namespace GlassCraft.App.Services;
+
+/// <summary>Composition root. One place that owns every long-lived service.</summary>
+public static class AppServices
+{
+    public static AppPaths Paths { get; private set; } = AppPaths.Default;
+    public static LogService Log { get; private set; } = null!;
+    public static SettingsService Settings { get; private set; } = null!;
+    public static SecretStore Secrets { get; private set; } = null!;
+    public static HttpClient Http { get; private set; } = null!;
+    public static HttpClient DownloadHttp { get; private set; } = null!;
+    public static VersionListService Versions { get; private set; } = null!;
+    public static JavaScanner Java { get; private set; } = null!;
+    public static AccountStore Accounts { get; private set; } = null!;
+    public static MicrosoftAuthService MsAuth { get; private set; } = null!;
+    public static InstanceStore Instances { get; private set; } = null!;
+    public static LaunchService Launch { get; private set; } = null!;
+    public static AgentProviderFactory Providers { get; private set; } = null!;
+    public static LocalLlamaService LocalAi { get; private set; } = null!;
+    public static bool Initialized { get; private set; }
+
+    public static event Action<Exception>? UnhandledError;
+
+    public static void Initialize()
+    {
+        if (Initialized) return;
+        Paths.EnsureDirectories();
+        Log = new LogService(Paths);
+        Settings = new SettingsService(Paths);
+        Secrets = new SecretStore(Paths);
+
+        Http = new HttpClient(new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+            AutomaticDecompression = System.Net.DecompressionMethods.All
+        })
+        {
+            Timeout = TimeSpan.FromSeconds(180)
+        };
+        Http.DefaultRequestHeaders.UserAgent.ParseAdd("GlassCraft/0.9 (launcher)");
+
+        DownloadHttp = DownloadEngine.CreateClient(new DownloadOptions
+        {
+            MaxConcurrency = Settings.Current.DownloadConcurrency,
+            ProxyUrl = Settings.Current.ProxyUrl
+        });
+
+        Versions = new VersionListService(Http, Paths);
+        Java = new JavaScanner();
+        Accounts = new AccountStore(Paths);
+        MsAuth = new MicrosoftAuthService(Http);
+        Instances = new InstanceStore(Paths);
+        Launch = new LaunchService(Paths);
+        Providers = new AgentProviderFactory(Http, Secrets);
+        LocalAi = new LocalLlamaService();
+
+        ApplySettings();
+        Initialized = true;
+        Log.Info("app", $"GlassCraft 启动，数据目录 {Paths.Root}");
+    }
+
+    public static void ApplySettings()
+    {
+        var s = Settings.Current;
+        PerformanceState.Apply(ParseTier(s.PerformanceTier), s.AnimationsEnabled, s.PointerLighting);
+        AutoDegrade.Enabled = s.AutoDowngrade;
+        AutoDegrade.Threshold = s.AutoDowngradeFpsThreshold;
+    }
+
+    public static GlassTier ParseTier(string? value) => value switch
+    {
+        "HighPerformance" => GlassTier.HighPerformance,
+        "LowPower" => GlassTier.LowPower,
+        "Off" => GlassTier.Off,
+        _ => GlassTier.Balanced
+    };
+
+    public static string TierKey(GlassTier tier) => tier switch
+    {
+        GlassTier.HighPerformance => "HighPerformance",
+        GlassTier.LowPower => "LowPower",
+        GlassTier.Off => "Off",
+        _ => "Balanced"
+    };
+
+    public static HttpClient CreateDownloadClient() => DownloadEngine.CreateClient(new DownloadOptions
+    {
+        MaxConcurrency = Settings.Current.DownloadConcurrency,
+        ProxyUrl = Settings.Current.ProxyUrl,
+        UseMirror = Settings.Current.UseMirror,
+        UserAgent = Settings.Current.UserAgent
+    });
+
+    public static void ReportError(Exception ex, string category = "app")
+    {
+        Log.Error(category, ex.Message, ex);
+        UnhandledError?.Invoke(ex);
+    }
+}

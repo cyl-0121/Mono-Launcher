@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);CA1416;NU1903;NU1902;CS8618</NoWarn>
+    <Version>0.9.0</Version>
+    <Company>GlassCraft</Company>
+    <Product>GlassCraft Launcher</Product>
+    <Copyright>GlassCraft contributors. Original code licensed under MIT.</Copyright>
+    <Deterministic>true</Deterministic>
+    <DebugType>embedded</DebugType>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <SatelliteResourceLanguages>zh-Hans;en</SatelliteResourceLanguages>
+    <UseArtifactsOutput>false</UseArtifactsOutput>
+  </PropertyGroup>
+</Project>
