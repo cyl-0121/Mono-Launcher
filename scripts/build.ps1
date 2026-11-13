@@ -1,4 +1,4 @@
-#requires -Version 7.0
+﻿#requires -Version 5.1
 <#
 .SYNOPSIS
   GlassCraft 可复现构建脚本。

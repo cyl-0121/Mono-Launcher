@@ -1,4 +1,4 @@
-#requires -Version 7.0
+﻿#requires -Version 5.1
 <#
 .SYNOPSIS
   以开发模式运行 GlassCraft。
