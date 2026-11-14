@@ -156,6 +156,7 @@
       <b id="metaVersion">—</b> · <span id="metaSize">—</span> · Windows 10/11 x64 · 免安装
       <br /><span id="metaSha" style="word-break:break-all"></span>
     </div>
+    <p id="downloadTip" style="display:none; margin-top:14px; font-size:13px; color:#ffcf6b;"></p>
   </section>
 
   <section class="grid" id="download">
@@ -264,6 +265,29 @@
     tag.style.display = text ? '' : 'none';
   }
 
+  // HEAD 探测本站安装包；不可用时把主按钮切到 GitHub，并给出提示
+  function probeDownload(dl, latest) {
+    if (!latest.github || !dl || dl === '#') return;
+    fetch(dl, { method: 'HEAD', cache: 'no-store' })
+      .then((r) => {
+        if (r.ok) return;
+        fallbackToGithub(r.status, latest);
+      })
+      .catch(() => fallbackToGithub('网络错误', latest));
+  }
+
+  function fallbackToGithub(status, latest) {
+    const btn = $('downloadBtn');
+    btn.href = latest.github;
+    btn.removeAttribute('download');
+    $('downloadLabel').textContent = '从 GitHub 下载 v' + (latest.version || '');
+    const tip = $('downloadTip');
+    if (tip) {
+      tip.style.display = '';
+      tip.textContent = '本站安装包暂时不可用（' + status + '），已切换到 GitHub 下载。若 GitHub 也打不开，请联系站长。';
+    }
+  }
+
   function render(data) {
     const latest = data && data.latest;
     if (!latest) throw new Error('releases.json 缺少 latest 字段');
@@ -281,6 +305,9 @@
     $('downloadLabel').textContent = '下载 v' + (latest.version || '');
 
     if (latest.github) $('githubBtn').href = latest.github;
+
+    // 本站安装包不可用（未上传 / 403 / 404）时自动回退到 GitHub，避免用户点了没反应
+    probeDownload(dl, latest);
 
     const notes = $('relNotes');
     notes.textContent = latest.notes || '';
