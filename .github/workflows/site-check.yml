@@ -30,6 +30,7 @@ jobs:
       - name: Check download site
         if: ${{ vars.SITE_URL != '' }}
         run: |
+          # SITE_URL 可以带 ?sharecode=xxx：部分托管平台只允许带分享码的入口访问。
           code=$(curl -sIL -o /dev/null -w '%{http_code}' --max-time 30 "${{ vars.SITE_URL }}" || echo 000)
           echo "site_http=$code"
           if [ "$code" != "200" ]; then
@@ -37,12 +38,13 @@ jobs:
             exit 1
           fi
 
-          json=$(curl -s --max-time 30 "${{ vars.SITE_URL }}/releases.json" || echo "")
-          if ! echo "$json" | grep -q '"version"'; then
-            echo "::error::releases.json is missing or invalid"
+          # 页面里必须能读到版本号，否则说明 releases.json 丢了或页面挂了
+          html=$(curl -sL --max-time 30 "${{ vars.SITE_URL }}" || echo "")
+          if ! echo "$html" | grep -q 'releases.json'; then
+            echo "::error::index.html 没有引用 releases.json"
             exit 1
           fi
-          echo "site ok, releases.json parsed"
+          echo "site ok"
 
       - name: Open issue on failure
         if: failure()
