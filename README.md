@@ -4,20 +4,45 @@
 
 # MonoLauncher
 
-> 一个面向 Windows 11 的 Minecraft: Java Edition 启动器。纯黑白界面、原生 Avalonia 渲染，内置多提供商 AI Agent 与本地模型推理，联机部分集成 [Terracotta](https://github.com/burningtnt/Terracotta)。
+> 面向 Windows 11 的 Minecraft: Java Edition 启动器。纯黑白界面、原生 Avalonia 渲染，内置应用内自动更新、多提供商 AI Agent 与本地模型推理，联机部分集成 [Terracotta](https://github.com/burningtnt/Terracotta)。
 
-没有 WebView，没有 HTML / CSS。所有界面由 Avalonia 控件与 Skia 自绘。
+没有 WebView，没有 HTML / CSS，界面全部由 Avalonia 控件与 Skia 自绘。
+
+**当前版本：v0.9.0** · Windows 10/11 x64 · 免安装
+
+---
+
+## 下载
+
+| 来源 | 地址 |
+|---|---|
+| **GitHub Releases（主）** | [github.com/cyl-0121/Mono-Launcher/releases](https://github.com/cyl-0121/Mono-Launcher/releases) |
+| 国内镜像 | [ada1f3c4ba9a13ac3.app.workbuddy.host](https://ada1f3c4ba9a13ac3.app.workbuddy.host/?sharecode=2TEW6KGZWT) |
+
+下载 `MonoLauncher-win-x64.zip`（约 68 MB），解压后双击 `MonoLauncher.exe` 即可，**不需要安装 .NET**。
+
+数据目录：`%APPDATA%\MonoLauncher`（存档、实例、配置都在这里，删程序不会丢）。
+
+> 镜像站由社区托管，访问时可能需要链接里的分享码；主下载还是 GitHub。
 
 ---
 
 ## 特性
 
-### 启动与版本
+### 版本与加载器
 
-- 读取 Mojang 官方版本清单，按 **正式版 / 测试版 / 愚人节版 / 远古版 / 全部** 分类浏览（含计数）
+- 读取 Mojang 官方版本清单，按 **正式版 / 测试版 / 愚人节版 / 远古版 / 全部** 分类浏览（带数量统计）
 - 两步式安装：先选版本 → 再选加载器（原版 / Fabric / Quilt / NeoForge / Forge）→ 下载
-- 下载引擎：并发下载、断点续传（`.part` + sidecar）、指数退避重试、SHA-1/SHA-256 校验、原子改名
+- 下载引擎：并发、断点续传（`.part` + sidecar）、指数退避重试、SHA-1/SHA-256 校验、原子改名
 - 资源文件分批下载，进度、速度、当前文件实时显示
+
+### 应用内自动更新
+
+- 启动时自动检查最新版本（读 GitHub Release 的 Atom feed，不受 API 限额影响）
+- 首页显示更新公告：版本号、日期、完整更新说明
+- 发现新版本 → 点「更新到 vX」→ **下载 → 替换自身 → 自动重启**，不用手动下载解压
+- 替换前把旧程序备份为 `MonoLauncher.exe.bak`，失败自动回滚并提示
+- 下载源优先用配置的镜像站，失败回退 GitHub
 
 ### 实例与 Mod
 
@@ -37,12 +62,12 @@
 ### 账户
 
 - 微软正版登录：OAuth 设备码 → Xbox Live → XSTS → Minecraft Services
-- 登录窗口显示代码、有效期倒计时，可随时换码
+- 登录窗口显示代码和有效期倒计时，可随时换码
 - 凭据经 Windows DPAPI 加密保存在本机，日志自动脱敏
 
 ### AI Agent
 
-- 基于 Semantic Kernel 的多提供商接口：OpenAI、Azure OpenAI、Anthropic、Gemini、DeepSeek、OpenRouter、智谱、通义、Kimi、硅基流动、Ollama、LM Studio 及任意 OpenAI 兼容端点
+- Semantic Kernel 多提供商：OpenAI、Azure OpenAI、Anthropic、Gemini、DeepSeek、OpenRouter、智谱、通义、Kimi、硅基流动、Ollama、LM Studio 及任意 OpenAI 兼容端点
 - 流式输出、取消、工具调用中间状态
 - 高风险工具（安装 / 启动 / 删除）强制原生确认框
 - LLamaSharp 本地 GGUF 推理（GPU 层数 / 上下文 / 线程可调）
@@ -56,21 +81,13 @@
 
 ---
 
-## 快速开始
-
-### 方式一：直接运行
-
-从 [Releases](../../releases) 下载 `MonoLauncher-win-x64.zip`，解压后双击 `MonoLauncher.exe`，无需安装 .NET。
-
-数据目录：`%APPDATA%\MonoLauncher`。
-
-### 方式二：从源码构建
+## 从源码构建
 
 需要 .NET SDK 10.0.100 或更高。
 
 ```bash
-git clone <this-repo>
-cd MonoLauncher
+git clone https://github.com/cyl-0121/Mono-Launcher.git
+cd Mono-Launcher
 dotnet build MonoLauncher.slnx -c Release
 dotnet run --project src/MonoLauncher.App
 ```
@@ -93,26 +110,33 @@ MonoLauncher/
 ├─ src/
 │  ├─ MonoLauncher.Core/     核心：版本、下载、启动、账户、Loader、Mod、联机、更新
 │  ├─ MonoLauncher.Agent/    AI：Semantic Kernel 封装、工具、本地 GGUF
-│  ├─ MonoLauncher.App/      Avalonia 界面（MVVM + 自绘控件）
+│  ├─ MonoLauncher.App/      Avalonia 界面（MVVM + 自绘控件 + 更新器）
 │  └─ MonoLauncher.Cli/      命令行：list / install / launch / java / nettest / terracotta …
 ├─ tests/MonoLauncher.Tests/ xUnit 单元测试
 ├─ docs/                     使用指南、界面说明、性能档位、测试记录、许可调研
-└─ website/                  可选：纯静态下载站（国内加速用，见其 README）
+├─ website/                  国内镜像站（纯静态，见 website/README.md）
+├─ scripts/                  构建、运行、站点发布脚本
+├─ assets/                   应用图标（SVG / PNG）
+└─ .github/workflows/        每日可用性检查
 ```
 
-### 国内下载站（可选）
+### 镜像站
 
-GitHub 在国内访问可能很慢。`website/` 目录是一个纯静态下载页，把整个目录丢到任意静态服务器即可：
+`website/` 是一个纯静态下载页，丢到任意静态托管即可，不需要后端：
 
 ```
 website/
-├─ index.html      页面（无外部依赖）
-├─ releases.json   版本数据，发新版只改这个文件
+├─ index.html      下载页（自动跟随 GitHub 最新 Release）
+├─ admin.html      发布页（填版本号/说明/选 zip → 生成 releases.json）
+├─ releases.json   版本数据（页面兜底用）
 ├─ icon.svg
 └─ downloads/      放 MonoLauncher-win-x64.zip
 ```
 
-启动器「设置 → 下载站地址」填上站点地址后，首页「查看新版本」会直接跳到你的站，而不是 GitHub。详情见 `website/README.md`。
+- 支持 `?v=0.9.0` 参数自动判断是否最新
+- 页面会去 GitHub 查最新 Release，所以发版后镜像站会自动显示新版本号与说明
+- 如果镜像站里还没有新 zip，下载按钮会自动回退到 GitHub 直链
+- 启动器「设置 → 下载站地址」填上站点地址后，自动更新会优先从镜像站下载
 
 ---
 
@@ -120,7 +144,7 @@ website/
 
 | 层 | 选型 |
 |---|---|
-| 运行时 | .NET 10（自包含发布） |
+| 运行时 | .NET 10（自包含单文件发布） |
 | UI | Avalonia 12.1.6 + SkiaSharp |
 | 模式 | CommunityToolkit.Mvvm（`[ObservableProperty]` / `[RelayCommand]`） |
 | AI | Microsoft.SemanticKernel 1.82 |
@@ -142,24 +166,26 @@ website/
 - 局域网扫描与直连启动
 - Terracotta 二进制下载、启动、`/state` 轮询、优雅退出
 - 微软设备码申请（拿到 `user_code` 与 `verification_uri`）
+- **应用内自动更新全流程**：下载 68 MB → 解压 → 备份 73 MB → 替换 → 新程序正常启动
 
-**未验证（无对应条件，代码按公开协议实现）：**
+**未验证（缺少对应条件，按公开协议实现）：**
 
-- 微软正版登录的 XBL / XSTS / Minecraft Services 换取环节（无正版账号）
+- 微软正版登录的 XBL / XSTS / Minecraft Services 换取环节（没有正版账号）
 - Fabric / Quilt / Forge 的实际安装（NeoForge 已验证）
-- 陶瓦联机的创建 / 加入房间全流程（需两名玩家与游戏内局域网开放）
-- 真实 LLM 调用与本地 GGUF 推理（无 API Key / 模型文件）
+- 陶瓦联机的创建 / 加入房间全流程（需要两名玩家和游戏内局域网开放）
+- 真实 LLM 调用与本地 GGUF 推理（没有 API Key / 模型文件）
 - 整合包（`.mrpack`）与 CurseForge 支持（未实现）
 
 ---
 
 ## 已知限制
 
-1. 仅支持 Windows 10/11 x64；不提供 macOS / Linux 构建。
-2. 微软登录端点依赖网络可达；部分网络环境需自备代理（设置页可填）。
-3. 更新公告需要 GitHub API 可访问，失败时显示缓存。
-4. 陶瓦联机的公共节点由 Terracotta 项目维护，本仓库不担保其可用性。
-5. 单文件发布体积约 70 MB（含 LLamaSharp CPU 后端）。
+1. 仅支持 Windows 10/11 x64，不提供 macOS / Linux 构建。
+2. 微软登录端点需要网络可达，部分网络环境要在设置里填代理。
+3. 自动更新要求程序所在目录可写；放在 `Program Files` 下会提示没有写入权限。
+4. 陶瓦联机的公共节点由 Terracotta 项目维护，本项目不担保其可用性。
+5. 单文件发布体积约 68 MB（含 LLamaSharp CPU 后端）。
+6. 镜像站依赖第三方静态托管，可能要求分享码或延迟同步。
 
 ---
 
@@ -167,13 +193,13 @@ website/
 
 本项目原创代码以 **MIT** 发布，见 [LICENSE](LICENSE)。
 
-第三方依赖与参考实现的许可见 [docs/reference-licenses.md](docs/reference-licenses.md)。要点：
+第三方依赖与参考实现的许可见 [docs/reference-licenses.md](docs/reference-licenses.md)：
 
 - **Avalonia / SkiaSharp / Semantic Kernel / LLamaSharp**：MIT
-- **Terracotta**：AGPL-3.0-or-later。本仓库**不包含**其二进制，运行时通过 `terracotta --hmcl` 启动官方原版，并只调用其本地 HTTP API；界面中标注了版权信息，符合其 AGPL 例外条款
+- **Terracotta**：AGPL-3.0-or-later。本仓库**不包含**其二进制，运行时通过 `terracotta --hmcl` 启动官方原版，只调用其本地 HTTP API；界面中标注了版权信息，符合其 AGPL 例外条款
 - **Minecraft**：Mojang Studios 商标。本软件不包含任何游戏本体、资源或账号
 
-> 本项目早期使用 Apple SF Pro 字体做界面，因其许可仅限 Apple 平台，现已改为系统字体 Segoe UI Variable。若你希望使用自定义字体，可直接修改 `MainWindow.axaml` 与 `HomeView.axaml` 中的 `FontFamily`。
+> 早期版本使用 Apple SF Pro 字体，因其许可仅限 Apple 平台，现已改为系统字体 Segoe UI Variable。想换字体可改 `MainWindow.axaml` 与 `HomeView.axaml` 里的 `FontFamily`。
 
 ---
 
@@ -184,7 +210,7 @@ website/
 - 使用本软件造成的存档损坏、数据丢失、账号封禁或服务器纠纷，作者与贡献者不承担责任。请自行备份重要存档。
 - 禁止将本软件用于传播盗版、绕过正版验证、搭建未经授权的付费私服或其他违法违规行为。
 
-首次启动会显示《用户协议与免责声明》，不同意将直接退出。
+首次启动会显示《用户协议与免责声明》，不同意会直接退出。
 
 ---
 
@@ -195,4 +221,4 @@ website/
 - [Terracotta](https://github.com/burningtnt/Terracotta)（陶瓦联机）
 - [BMCLAPI](https://bmclapi2.bangbang93.com/)（下载镜像）
 - [Modrinth](https://modrinth.com/)（Mod 平台）
-- 界面布局参考了 PCL2 的公开截图（未使用其代码或资源）
+- 界面布局参考了 PCL2 的公开截图，未使用其代码或资源
