@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/icon-256.png" width="112" alt="MonoLauncher" />
+</p>
+
 # MonoLauncher
 
 > 一个面向 Windows 11 的 Minecraft: Java Edition 启动器。纯黑白界面、原生 Avalonia 渲染，内置多提供商 AI Agent 与本地模型推理，联机部分集成 [Terracotta](https://github.com/burningtnt/Terracotta)。
