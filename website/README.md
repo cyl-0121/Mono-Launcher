@@ -41,40 +41,40 @@
 
 4. 浏览器打开域名，检查下面「验收清单」
 
-### 用命令行（SSH）
+### 通用步骤（任何托管方式都行）
+
+1. 打开你的静态托管面板（宝塔「网站」/ 阿里云 OSS / 腾讯云 COS / Cloudflare Pages / Vercel / 任何 FTP）
+2. 新建一个站点或存储桶，**不需要改任何配置**
+3. 把本目录下**所有文件**上传进去，保持结构：
+
+   ```
+   站点根目录/
+   ├─ index.html
+   ├─ releases.json
+   ├─ icon.svg
+   ├─ preview.png
+   └─ downloads/
+      └─ MonoLauncher-win-x64.zip
+   ```
+
+4. 浏览器打开域名，检查下面「验收清单」
+
+**为什么不需要改 Nginx：**
+
+- 这是个纯静态站，默认的静态托管全都能跑
+- zip 文件浏览器默认就是下载，不需要额外加 `Content-Disposition`
+- `releases.json` 默认 MIME 就是 `application/json`（Nginx/Apache/OSS 都内置）
+
+唯一可能需要确认的：站点根目录里 `index.html` 和 `releases.json` **在同一层**。
+
+### 如果用命令行（可选）
 
 ```bash
-# 1. 传文件
 scp -r index.html releases.json icon.svg preview.png downloads root@你的服务器:/var/www/monolauncher/
-
-# 2. 给静态目录权限
 chmod -R 755 /var/www/monolauncher
 ```
 
-Nginx 最小配置：
-
-```nginx
-server {
-    listen 80;
-    server_name 你的域名或IP;
-    root /var/www/monolauncher;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # 让安装包直接下载，而不是在浏览器里预览
-    location /downloads/ {
-        add_header Content-Disposition "attachment";
-        add_header Cache-Control "public, max-age=3600";
-    }
-}
-```
-
-配好后 `nginx -t && nginx -s reload`。
-
-> HTTPS 建议直接开：宝塔里一键申请 Let's Encrypt 证书就行。
+> 如果服务器上已经有站点，直接把文件丢进现有根目录即可，不用新建。HTTPS 用面板一键申请证书就行。
 
 ---
 
@@ -155,10 +155,10 @@ server {
 ## 七、常见问题
 
 **Q：打开是空白页 / 404？**
-A：`index.html` 不在站点根目录，或者 Nginx 的 `root` 指错了。
+A：`index.html` 不在站点根目录，或者面板里绑定的根目录指错了。
 
 **Q：页面显示「无法读取 releases.json」？**
-A：`releases.json` 没上传，或者文件名大小写不一致，或者 MIME 不是 `application/json`（Nginx 默认就支持）。
+A：`releases.json` 没上传，或者文件名大小写不一致，或者它和 `index.html` 不在同一目录。
 
 **Q：点下载提示 404？**
 A：`downloads/` 里没有 zip，或者文件名和 JSON 里的 `download` 不一致。
@@ -166,8 +166,8 @@ A：`downloads/` 里没有 zip，或者文件名和 JSON 里的 `download` 不�
 **Q：中文显示成问号？**
 A：`releases.json` 必须用 **UTF-8 无 BOM** 保存；用记事本另存为时选「UTF-8」。
 
-**Q：能不能不装 Nginx，用 Apache？**
-A：可以，纯静态文件，Apache 默认就能跑，记得给 `downloads/` 加 `Header set Content-Disposition attachment`。
+**Q：用得着装 Nginx / Apache 吗？**
+A：如果用的是宝塔、OSS、COS、Cloudflare Pages 这类平台，它们自带静态托管，不用装也不用改配置，上传文件就行。只有一台裸机时才需要装 Web 服务器。
 
 ---
 
