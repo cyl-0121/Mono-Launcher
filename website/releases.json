@@ -1,14 +1,20 @@
 {
     "latest":  {
-                   "version":  "0.9.0",
+                   "version":  "0.9.1",
                    "date":  "2026-11-14",
                    "size":  "68.3 MB",
-                   "sha256":  "2780C6F0671FD694F5DBE7048F42CFD6615C8726CA685451285D1158B3540ED5",
+                   "sha256":  "89DC839FBC5EDA01D4779B75F796FE5FFB9C1BD4ABDA07E019BCCC7B469D20DF",
                    "download":  "https://ada1f3c4ba9a13ac3.app.workbuddy.host/downloads/MonoLauncher-win-x64.zip?sharecode=2TEW6KGZWT",
-                   "github":  "https://github.com/cyl-0121/Mono-Launcher/releases/download/v0.9.0/MonoLauncher-win-x64.zip",
-                   "notes":  "首个公开版本。\n\n- 版本分类下载（正式版 / 测试版 / 愚人节版 / 远古版）\n- 两步式安装：选版本 → 选加载器（Fabric / Quilt / NeoForge / Forge）\n- 实例隔离、Modrinth 搜索安装、导入现有实例\n- 陶瓦联机（Terracotta）、局域网扫描、手动直连\n- 微软正版登录（设备码）\n- AI Agent：Semantic Kernel 多提供商 + 本地 GGUF\n\n下载：MonoLauncher-win-x64.zip（约 68 MB，自包含，无需安装 .NET）"
+                   "github":  "https://github.com/cyl-0121/Mono-Launcher/releases/download/v0.9.1/MonoLauncher-win-x64.zip",
+                   "notes":  "新增\n- 应用内自动更新：检测到新版本后直接下载并替换自身，更新前自动备份为 MonoLauncher.exe.bak，失败自动回滚\n- 全新应用图标（黑色圆角方块 + 白色播放键）\n- 新增纯静态下载站（website/）：自动跟随 GitHub 最新 Release，支持 ?v= 参数检查更新\n- 站点发布页 admin.html：填版本号、更新说明、选择安装包即可生成 releases.json\n- 每日可用性检查：GitHub Actions 每天检查下载链接和站点，异常自动开 issue\n\n改进\n- 更新检查改读 Release 的 Atom feed，不再受 GitHub API 60 次/小时限额影响\n- 镜像站安装包不可用时，下载按钮自动回退到 GitHub 直链\n- 默认下载站地址指向国内镜像，开箱即用\n\n修复\n- 登录窗口设备码不显示\n- 登录代码增加有效期倒计时与「换一个代码」按钮\n- Win11 最小化后窗口位置和尺寸可能错乱\n- 顶栏按钮与登录页文字垂直居中偏上"
                },
     "history":  [
+                    {
+                        "version":  "0.9.1",
+                        "date":  "2026-11-14",
+                        "size":  "68.3 MB",
+                        "download":  "https://ada1f3c4ba9a13ac3.app.workbuddy.host/downloads/MonoLauncher-win-x64.zip?sharecode=2TEW6KGZWT"
+                    },
                     {
                         "version":  "0.9.0",
                         "date":  "2026-11-14",

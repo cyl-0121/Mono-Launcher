@@ -58,7 +58,7 @@ public sealed partial class HomeViewModel : ObservableObject
     [ObservableProperty] private string _updateUrl = "";
     [ObservableProperty] private bool _isCheckingUpdate;
 
-    public string AppVersion => "0.9.0";
+    public string AppVersion => "0.9.1";
 
     public HomeViewModel(InstancesViewModel instances, Action<string> navigate)
     {
