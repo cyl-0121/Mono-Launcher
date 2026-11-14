@@ -3,10 +3,11 @@
                    "version":  "1.0.1",
                    "date":  "2026-11-14",
                    "size":  "68.3 MB",
-                   "sha256":  "E33DE2C1B67F4622E433592FF5B27E2100ED87FE94FB22D890D9F6F59A28C81C",
+                   "sha256":  "62C1531F932BC3F01BCBB7171A51B5E689BD166B023DB0D99EDDFEED1EAC40D6",
                    "download":  "https://ada1f3c4ba9a13ac3.app.workbuddy.host/downloads/MonoLauncher-win-x64.zip?sharecode=2TEW6KGZWT",
                    "github":  "https://github.com/cyl-0121/Mono-Launcher/releases/download/v1.0.1/MonoLauncher-win-x64.zip",
-                   "notes":  "维护版本：内容与 1.0.0 一致，仅提升版本号，用于验证应用内自动更新流程。\n\n更新渠道\n- 更新检查与下载默认走国内镜像站，GitHub 作为备用渠道\n\n如果你从 1.0.0 升级，首页会出现「更新到 v1.0.1」，点击即可自动下载、替换并重启。更新失败会自动回滚，旧版本备份为 MonoLauncher.exe.bak。"
+                   "notes":  "维护版本：内容与 1.0.0 一致，新增强制更新机制与字体垂直居中修正，用于验证应用内自动更新流程。\n\n新增\n- 强制更新：当 releases.json 里把 latest.mandatory 设为 true 时，旧版本会显示无法关闭的遮罩，禁用启动与导航，只能更新后才能继续\n- 发布页 admin.html 增加「强制更新」勾选项\n\n修正\n- 按钮与标题文字在行框内偏上（统一增加 1px 垂直补偿）\n- 强制更新遮罩的说明文字未显示\n\n更新渠道\n- 更新检查与下载默认走国内镜像站，GitHub 作为备用渠道",
+                   "mandatory":  false
                },
     "history":  [
                     {
@@ -17,12 +18,6 @@
                     },
                     {
                         "version":  "1.0.0",
-                        "date":  "2026-11-14",
-                        "size":  "68.3 MB",
-                        "download":  "https://ada1f3c4ba9a13ac3.app.workbuddy.host/downloads/MonoLauncher-win-x64.zip?sharecode=2TEW6KGZWT"
-                    },
-                    {
-                        "version":  "0.9.1",
                         "date":  "2026-11-14",
                         "size":  "68.3 MB",
                         "download":  "https://ada1f3c4ba9a13ac3.app.workbuddy.host/downloads/MonoLauncher-win-x64.zip?sharecode=2TEW6KGZWT"

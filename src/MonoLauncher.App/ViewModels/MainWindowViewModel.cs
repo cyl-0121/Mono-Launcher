@@ -27,6 +27,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string _fpsText = "-- FPS";
     [ObservableProperty] private string _tierText = "";
     [ObservableProperty] private string _activeProfileText = "未登录";
+    [ObservableProperty] private bool _isForcedUpdate;
+    [ObservableProperty] private string _forcedUpdateText = "";
+    [ObservableProperty] private string _forcedUpdateButtonText = "立即更新";
 
     public HomeViewModel Home { get; }
     public AgentViewModel Agent { get; }
@@ -56,6 +59,12 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             if (e.PropertyName == nameof(HomeViewModel.SelectedAccount))
                 ActiveProfileText = Home.SelectedAccount is null ? "未登录" : $"账户：{Home.SelectedAccount.Name}";
+            if (e.PropertyName == nameof(HomeViewModel.IsForcedUpdate))
+                IsForcedUpdate = Home.IsForcedUpdate;
+            if (e.PropertyName is nameof(HomeViewModel.ForcedUpdateText) or nameof(HomeViewModel.IsForcedUpdate))
+                ForcedUpdateText = Home.ForcedUpdateText;
+            if (e.PropertyName == nameof(HomeViewModel.UpdateButtonText))
+                ForcedUpdateButtonText = Home.UpdateButtonText;
         };
         ActiveProfileText = Home.SelectedAccount is null ? "未登录" : $"账户：{Home.SelectedAccount.Name}";
 
@@ -95,6 +104,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
         if (page == "network") Network.RefreshInstances();
         if (page == "logs") Logs.Reload();
     }
+
+    [RelayCommand]
+    private void ForceUpdate() => Home.UpdateAppCommand.Execute(null);
 
     public void UpdateFps(double fps)
     {

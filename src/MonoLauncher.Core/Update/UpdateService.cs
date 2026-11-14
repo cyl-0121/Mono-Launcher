@@ -21,6 +21,9 @@ public sealed class UpdateInfo
 
     public DateTimeOffset PublishedAt { get; init; }
     public bool IsNewer { get; init; }
+
+    /// <summary>Set by the mirror when the release must be installed before the app can be used.</summary>
+    public bool Mandatory { get; init; }
 }
 
 /// <summary>
@@ -116,6 +119,7 @@ public sealed class UpdateService
                 : (Uri.TryCreate(download, UriKind.Absolute, out var abs) ? abs.ToString() : BuildMirrorUrl(download, site));
 
             var dateText = Get("date");
+            var mandatory = latest.TryGetProperty("mandatory", out var mv) && mv.ValueKind == JsonValueKind.True;
             return await SaveAndBuildAsync(new UpdateInfo
             {
                 Tag = "v" + version,
@@ -124,6 +128,7 @@ public sealed class UpdateService
                 HtmlUrl = site,
                 DownloadUrl = downloadUrl,
                 Source = "mirror",
+                Mandatory = mandatory,
                 PublishedAt = DateTimeOffset.TryParse(dateText, out var dt) ? dt : DateTimeOffset.Now,
                 IsNewer = IsNewerVersion(version, CurrentVersion)
             }, ct).ConfigureAwait(false);

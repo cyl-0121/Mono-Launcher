@@ -101,6 +101,10 @@ public sealed partial class HomeViewModel : ObservableObject
             UpdateTag = info.Tag;
             UpdateUrl = info.HtmlUrl;
             UpdatePackageUrl = info.DownloadUrl;
+            ForcedUpdateText = info.Mandatory && info.IsNewer
+                ? $"当前版本存在必须修复的问题，请更新到 v{info.Tag.TrimStart('v', 'V')} 后继续使用。"
+                : "";
+            IsForcedUpdate = info.Mandatory && info.IsNewer;
             UpdateStatus = info.IsNewer ? $"发现新版本 {info.Tag}" : "已是最新版本";
             AppServices.Log.Info("update", $"最新版本 {info.Tag}（来源 {info.Source}），是否更新={info.IsNewer}");
         }
@@ -121,6 +125,8 @@ public sealed partial class HomeViewModel : ObservableObject
 
     [ObservableProperty] private bool _isUpdating;
     [ObservableProperty] private string? _updatePackageUrl;
+    [ObservableProperty] private bool _isForcedUpdate;
+    [ObservableProperty] private string _forcedUpdateText = "";
     [ObservableProperty] private double _updateProgress;
 
     partial void OnUpdateTagChanged(string value) => OnPropertyChanged(nameof(UpdateButtonText));
@@ -223,6 +229,12 @@ public sealed partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task LaunchAsync()
     {
+        if (IsForcedUpdate)
+        {
+            LaunchHint = "当前版本需要先更新，更新后即可启动游戏。";
+            _navigate("home");
+            return;
+        }
         if (SelectedInstance is null)
         {
             LaunchHint = "还没有实例，请先去「下载」安装版本，再在「版本列表」里创建实例";

@@ -11,7 +11,7 @@
         WindowStartupLocation="CenterScreen"
         SystemDecorations="None"
         Background="#000000"
-        FontFamily="Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI">
+        FontFamily="Segoe UI, Microsoft YaHei UI">
   <Window.Resources>
     <SolidColorBrush x:Key="ComboBoxBackground" Color="#0A0A0A" />
     <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="#141414" />
@@ -29,16 +29,20 @@
     <Style Selector="Button TextBlock">
       <Setter Property="LineHeight" Value="17" />
       <Setter Property="VerticalAlignment" Value="Center" />
+      <!-- Segoe UI sits ~2px high inside the line box on Skia; nudge the glyphs down. -->
+      <Setter Property="Margin" Value="0,1,0,0" />
     </Style>
     <Style Selector="TextBlock.h1">
       <Setter Property="FontSize" Value="24" />
       <Setter Property="FontWeight" Value="Bold" />
       <Setter Property="Foreground" Value="#FFFFFF" />
+      <Setter Property="Margin" Value="0,1,0,0" />
     </Style>
     <Style Selector="TextBlock.h2">
       <Setter Property="FontSize" Value="15" />
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="Foreground" Value="#FFFFFF" />
+      <Setter Property="Margin" Value="0,1,0,0" />
     </Style>
     <Style Selector="TextBlock.muted">
       <Setter Property="Foreground" Value="#8A8A8A" />
@@ -239,7 +243,8 @@
               </Transitions>
             </Border.Transitions>
           </Border>
-          <StackPanel Name="NavStack" Orientation="Horizontal" Spacing="0">
+          <StackPanel Name="NavStack" Orientation="Horizontal" Spacing="0"
+                    IsEnabled="{Binding !IsForcedUpdate}">
           <Button Classes="nav" Name="NavHome" Command="{Binding NavigateCommand}" CommandParameter="home">
             <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
               <TextBlock Text="▶" FontSize="12" VerticalAlignment="Center" />
@@ -341,5 +346,23 @@
         </ContentControl.DataTemplates>
       </ContentControl>
     </Grid>
+
+    <!-- Mandatory update overlay: blocks the content area and navigation -->
+    <Border Grid.Row="1" Background="#E6000000" IsVisible="{Binding IsForcedUpdate}" ZIndex="100">
+      <Border Background="#0D0D0D" BorderBrush="#2A2A2A" BorderThickness="1" CornerRadius="14"
+              Width="540" Padding="30" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Spacing="14">
+          <TextBlock Text="需要更新" FontSize="22" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,1,0,1" />
+          <TextBlock Text="{Binding ForcedUpdateText}" TextWrapping="Wrap" Foreground="#C9C9C9"
+                     FontSize="13" LineHeight="21" />
+          <TextBlock Text="这个版本存在必须修复的问题。更新完成前，启动游戏和导航会被禁用；你可以关闭窗口稍后再来。"
+                     TextWrapping="Wrap" Foreground="#8A8A8A" FontSize="12" LineHeight="19" />
+          <Button Classes="primary" Content="{Binding ForcedUpdateButtonText}" Height="42"
+                  HorizontalAlignment="Stretch" Command="{Binding ForceUpdateCommand}" />
+          <TextBlock Text="更新会自动下载并重启，旧版本会备份为 MonoLauncher.exe.bak"
+                     FontSize="11" Foreground="#5F5F5F" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+    </Border>
   </Grid>
 </Window>

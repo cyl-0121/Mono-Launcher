@@ -87,6 +87,11 @@
     <label>更新说明（会原样显示在下载页和启动器里，可以多行）</label>
     <textarea id="notes" placeholder="本次更新：&#10;- 修复 xxx&#10;- 新增 xxx"></textarea>
 
+    <label style="display:flex;align-items:center;gap:8px;margin-top:16px;color:#fff;font-size:13px">
+      <input id="mandatory" type="checkbox" style="width:16px;height:16px" />
+      强制更新（有重大问题时勾选：旧版本不更新就无法启动游戏）
+    </label>
+
     <label>安装包 zip</label>
     <input id="file" type="file" accept=".zip" />
     <div class="fileinfo" id="fileinfo"></div>
@@ -187,6 +192,7 @@
         download: 'downloads/' + fileInfo.name,
         github: `https://github.com/${REPO}/releases/download/v${ver}/MonoLauncher-win-x64.zip`,
         notes: $('notes').value.trim(),
+        mandatory: $('mandatory').checked,
       },
       history: [
         { version: ver, date: date, size: fileInfo.sizeText, download: 'downloads/' + fileInfo.name },
