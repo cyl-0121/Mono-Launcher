@@ -4,8 +4,6 @@
 
 没有 WebView，没有 HTML / CSS。所有界面由 Avalonia 控件与 Skia 自绘。
 
-![主页](docs/monolauncher-home2.png)
-
 ---
 
 ## 特性
