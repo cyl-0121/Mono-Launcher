@@ -4,60 +4,75 @@
              x:Class="GlassCraft.App.Views.HomeView">
   <ScrollViewer HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch"
                 VerticalContentAlignment="Top">
-    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="14" Margin="0,0,10,10">
-      <controls:GlassCard Grid.Row="0" CornerRadius="20" TintOpacity="0.30" Padding="24">
+    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="12" Margin="0,0,10,10">
+
+      <!-- Quick launch -->
+      <controls:GlassCard Grid.Row="0" CornerRadius="4" Padding="22">
         <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
-          <StackPanel Grid.Row="0" Grid.Column="0" Spacing="6">
-            <TextBlock Text="欢迎回来" Classes="muted" />
-            <TextBlock Text="GlassCraft 原生启动器" Classes="h1" />
-            <TextBlock Text="Avalonia + Skia 原生渲染，无 WebView。玻璃效果由自研着色管线实时绘制。"
-                       Foreground="#9EB0C9" FontSize="13" TextWrapping="Wrap" MaxWidth="560" />
-          </StackPanel>
-          <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="10"
-                      VerticalAlignment="Top">
-            <Button Classes="primary" Content="新建离线账户" Command="{Binding AddOfflineAccountCommand}" />
-            <Button Classes="ghost" Content="打开数据目录" Command="{Binding OpenDataFolderCommand}" />
+          <StackPanel Grid.Row="0" Grid.Column="0" Spacing="8">
+            <TextBlock Text="快速启动" Classes="h1" />
+            <ComboBox Classes="field" Width="360" HorizontalAlignment="Left"
+                      ItemsSource="{Binding Instances}" SelectedItem="{Binding SelectedInstance}"
+                      PlaceholderText="选择实例">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel>
+                    <TextBlock Text="{Binding Name}" />
+                    <TextBlock Text="{Binding VersionText}" FontSize="10" Foreground="#8A8A8A" />
+                  </StackPanel>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Text="{Binding LaunchHint}" Classes="muted" />
           </StackPanel>
 
-          <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="*,*,*" Margin="0,22,0,0">
-            <StackPanel Grid.Column="0" Spacing="4">
+          <Button Grid.Row="0" Grid.Column="1" Classes="primary" Content="▶  启动游戏"
+                  Width="168" Height="54" FontSize="16" VerticalAlignment="Center"
+                  Command="{Binding LaunchCommand}" />
+
+          <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="*,*,*" Margin="0,18,0,0">
+            <StackPanel Grid.Column="0" Spacing="3">
               <TextBlock Text="当前账户" Classes="muted" />
-              <TextBlock Text="{Binding SelectedAccount.Name, FallbackValue=未登录}" FontSize="15"
-                         Foreground="#E8EFFF" />
+              <TextBlock Text="{Binding SelectedAccount.Name, FallbackValue=未登录}" FontSize="14"
+                         Foreground="#EAEAEA" />
               <TextBlock Text="{Binding SelectedAccount.KindText}" Classes="muted" />
             </StackPanel>
-            <StackPanel Grid.Column="1" Spacing="4">
-              <TextBlock Text="Java 运行时" Classes="muted" />
-              <TextBlock Text="{Binding JavaSummary}" FontSize="15" Foreground="#E8EFFF" />
+            <StackPanel Grid.Column="1" Spacing="3">
+              <TextBlock Text="Java" Classes="muted" />
+              <TextBlock Text="{Binding JavaSummary}" FontSize="14" Foreground="#EAEAEA" />
               <TextBlock Text="{Binding Status}" Classes="muted" />
             </StackPanel>
-            <StackPanel Grid.Column="2" Spacing="4">
+            <StackPanel Grid.Column="2" Spacing="3">
               <TextBlock Text="实例" Classes="muted" />
-              <TextBlock Text="{Binding InstanceSummary}" FontSize="15" Foreground="#E8EFFF" />
-              <TextBlock Text="可导入现有 .minecraft" Classes="muted" />
+              <TextBlock Text="{Binding InstanceSummary}" FontSize="14" Foreground="#EAEAEA" />
+              <TextBlock Text="每个实例独立目录" Classes="muted" />
             </StackPanel>
           </Grid>
 
           <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding DataDirectory}"
-                     Classes="muted" Margin="0,16,0,0" TextTrimming="CharacterEllipsis" />
+                     Classes="muted" Margin="0,14,0,0" TextTrimming="CharacterEllipsis" />
         </Grid>
       </controls:GlassCard>
 
-      <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="14">
-        <controls:GlassCard Grid.Column="0" CornerRadius="18" TintOpacity="0.26" Padding="20">
-          <StackPanel Spacing="10">
-            <TextBlock Text="账户" Classes="h2" />
+      <!-- Accounts + effects -->
+      <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="12">
+        <controls:GlassCard Grid.Column="0" CornerRadius="4" Padding="18">
+          <StackPanel Spacing="8">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="账户" Classes="h2" />
+              <TextBlock Grid.Column="1" Text="离线 / 微软" Classes="muted" VerticalAlignment="Center" />
+            </Grid>
             <ListBox ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount}"
-                     Background="Transparent" MaxHeight="160">
+                     Background="Transparent" BorderThickness="0" MaxHeight="150">
               <ListBox.ItemTemplate>
                 <DataTemplate>
                   <StackPanel Orientation="Horizontal" Spacing="10">
-                    <Border Width="28" Height="28" CornerRadius="8" Background="#3D6BFF">
+                    <Border Width="26" Height="26" CornerRadius="3" Background="#3C8527">
                       <TextBlock Text="{Binding Initial}" Foreground="White" FontWeight="SemiBold"
                                  HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <StackPanel>
-                      <TextBlock Text="{Binding Name}" Foreground="#E8EFFF" />
+                      <TextBlock Text="{Binding Name}" Foreground="#EAEAEA" />
                       <TextBlock Text="{Binding KindText}" Classes="muted" />
                     </StackPanel>
                   </StackPanel>
@@ -65,35 +80,58 @@
               </ListBox.ItemTemplate>
             </ListBox>
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-              <TextBox Grid.Column="0" Classes="field" Watermark="离线用户名"
-                       Text="{Binding NewOfflineName}" />
-              <Button Grid.Column="1" Classes="ghost" Content="添加"
-                      Command="{Binding AddOfflineAccountCommand}" />
+              <TextBox Grid.Column="0" Classes="field" PlaceholderText="离线用户名" Text="{Binding NewOfflineName}" />
+              <Button Grid.Column="1" Classes="ghost" Content="添加" Command="{Binding AddOfflineAccountCommand}" />
             </Grid>
-            <Button Classes="ghost" Content="移除所选账户" Command="{Binding RemoveAccountCommand}" />
+            <Button Classes="ghost" Content="移除所选账户" HorizontalAlignment="Left"
+                    Command="{Binding RemoveAccountCommand}" />
           </StackPanel>
         </controls:GlassCard>
 
-        <controls:GlassCard Grid.Column="1" CornerRadius="18" TintOpacity="0.26" Padding="20">
+        <controls:GlassCard Grid.Column="1" CornerRadius="4" Padding="18">
           <StackPanel Spacing="10">
-            <TextBlock Text="性能档位" Classes="h2" />
-            <TextBlock Text="切换立即生效：玻璃管线会按档位重建，无需重启。" Classes="muted" TextWrapping="Wrap" />
+            <TextBlock Text="界面效果" Classes="h2" />
+            <TextBlock Text="调整卡片阴影与界面绘制强度；不影响游戏内性能。" Classes="muted" TextWrapping="Wrap" />
             <ComboBox x:Name="TierCombo" Classes="field" SelectionChanged="OnTierChanged" SelectedIndex="1">
-              <ComboBoxItem Content="高性能（完整玻璃管线）" />
-              <ComboBoxItem Content="均衡（模糊 + 色调 + 高光）" />
-              <ComboBoxItem Content="低功耗（静态半透明）" />
+              <ComboBoxItem Content="完整（阴影 + 高光）" />
+              <ComboBoxItem Content="标准（默认）" />
+              <ComboBoxItem Content="简洁（无阴影）" />
               <ComboBoxItem Content="关闭（纯色）" />
             </ComboBox>
+            <Button Classes="ghost" Content="打开数据目录" HorizontalAlignment="Left"
+                    Command="{Binding OpenDataFolderCommand}" />
+            <TextBlock Text="Minecraft 元素：方块图标、草绿主色、像素网格背景。"
+                       Classes="muted" TextWrapping="Wrap" />
           </StackPanel>
         </controls:GlassCard>
       </Grid>
 
-      <controls:GlassCard Grid.Row="2" CornerRadius="18" TintOpacity="0.26" Padding="20">
+      <!-- Instances shortcut -->
+      <controls:GlassCard Grid.Row="2" CornerRadius="4" Padding="18">
         <StackPanel Spacing="8">
-          <TextBlock Text="实例" Classes="h2" />
-          <TextBlock Text="{Binding InstanceSummary}" Foreground="#E8EFFF" />
-          <TextBlock Text="下一步：下载原版 1.21.1、安装 NeoForge、启动并捕获日志。"
-                     Classes="muted" TextWrapping="Wrap" />
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Text="实例" Classes="h2" />
+            <TextBlock Grid.Column="1" Text="{Binding InstanceSummary}" Classes="muted" VerticalAlignment="Center" />
+          </Grid>
+          <ItemsControl ItemsSource="{Binding Instances}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel Orientation="Horizontal" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Background="#242424" BorderBrush="#333333" BorderThickness="1" CornerRadius="3"
+                        Padding="12,8" Margin="0,0,8,8" MinWidth="180">
+                  <StackPanel Spacing="2">
+                    <TextBlock Text="{Binding Name}" Foreground="#EAEAEA" FontWeight="SemiBold" FontSize="12" />
+                    <TextBlock Text="{Binding VersionText}" Classes="muted" />
+                    <TextBlock Text="{Binding LastPlayedText}" Classes="muted" FontSize="10" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
         </StackPanel>
       </controls:GlassCard>
     </Grid>

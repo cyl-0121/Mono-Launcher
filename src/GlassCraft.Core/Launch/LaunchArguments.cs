@@ -86,7 +86,8 @@ public static class LaunchArguments
         {
             IsDemoUser = o.DemoMode,
             HasCustomResolution = true,
-            HasQuickPlaysSupport = false,
+            // Modern versions expose --quickPlayMultiplayer through a feature-gated argument.
+            HasQuickPlaysSupport = o.ServerAddress is not null,
             QuickPlayMode = o.ServerAddress is null ? QuickPlayMode.None : QuickPlayMode.Multiplayer
         };
 
@@ -135,6 +136,20 @@ public static class LaunchArguments
             game.Add(o.Height.ToString());
         }
         if (o.Fullscreen) game.Add("--fullscreen");
+
+        // Direct connect. 1.20+ uses quickPlayMultiplayer via the feature rule above; older
+        // versions still accept --server/--port, so add them only when the version has no quick-play.
+        if (o.ServerAddress is not null)
+        {
+            var hasQuickPlay = game.Any(a => a.Contains("quickPlayMultiplayer", StringComparison.OrdinalIgnoreCase));
+            if (!hasQuickPlay)
+            {
+                game.Add("--server");
+                game.Add(o.ServerAddress);
+                game.Add("--port");
+                game.Add((o.ServerPort ?? 25565).ToString());
+            }
+        }
 
         game.AddRange(o.ExtraGameArguments);
 

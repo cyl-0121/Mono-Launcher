@@ -1,0 +1,79 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:GlassCraft.App.Controls"
+             xmlns:vm="using:GlassCraft.App.ViewModels"
+             x:Class="GlassCraft.App.Views.NetworkView">
+  <Grid ColumnDefinitions="*,380" ColumnSpacing="12">
+    <controls:GlassCard Grid.Column="0" CornerRadius="4" Padding="16">
+      <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+          <StackPanel Spacing="2">
+            <TextBlock Text="局域网联机" Classes="h2" />
+            <TextBlock Text="监听 224.0.2.60:4445 的原版 LAN 广播，不发送任何探测包。" Classes="muted" />
+          </StackPanel>
+          <Button Grid.Column="1" Classes="primary" Content="扫描局域网" Command="{Binding ScanCommand}" />
+        </Grid>
+
+        <TextBlock Grid.Row="1" Text="{Binding StatusText}" Classes="muted" TextWrapping="Wrap" />
+
+        <Border Grid.Row="2" Background="#12000000" BorderBrush="#2E2E2E" BorderThickness="1" CornerRadius="3">
+          <ListBox ItemsSource="{Binding Servers}" SelectedItem="{Binding SelectedServer}"
+                   Background="Transparent" BorderThickness="0">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="4">
+                  <StackPanel Spacing="2">
+                    <TextBlock Text="{Binding Motd}" Foreground="#E6E6E6" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Endpoint}" Classes="muted" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Classes="ghost" Content="加入" Padding="12,5"
+                          Command="{Binding $parent[UserControl].((vm:NetworkViewModel)DataContext).JoinCommand}"
+                          CommandParameter="{Binding}" />
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Border>
+
+        <TextBlock Grid.Row="3" Text="提示：对方需要在游戏内「对局域网开放」，并处于同一网络（同一路由器 / 同一虚拟局域网）。"
+                   Classes="muted" TextWrapping="Wrap" />
+      </Grid>
+    </controls:GlassCard>
+
+    <controls:GlassCard Grid.Column="1" CornerRadius="4" Padding="16">
+      <ScrollViewer HorizontalContentAlignment="Stretch">
+        <StackPanel Spacing="10">
+          <TextBlock Text="直接连接" Classes="h2" />
+          <TextBlock Text="使用哪个实例启动" Classes="muted" />
+          <ComboBox Classes="field" ItemsSource="{Binding Instances}" SelectedItem="{Binding SelectedInstance}"
+                    PlaceholderText="选择实例">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <StackPanel>
+                  <TextBlock Text="{Binding Name}" />
+                  <TextBlock Text="{Binding VersionText}" FontSize="10" Foreground="#8A97AD" />
+                </StackPanel>
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+
+          <TextBlock Text="服务器地址" Classes="muted" />
+          <TextBox Classes="field" Text="{Binding ManualAddress}" PlaceholderText="192.168.1.10:25565" />
+          <Button Classes="primary" Content="启动并连接" Command="{Binding JoinManualCommand}" />
+
+          <TextBlock Text="{Binding ErrorText}" Foreground="#FF7A7A" FontSize="12" TextWrapping="Wrap" />
+
+          <Border Background="#12000000" BorderBrush="#2E2E2E" BorderThickness="1" CornerRadius="3" Padding="12">
+            <StackPanel Spacing="6">
+              <TextBlock Text="公网联机" Foreground="#E6E6E6" FontWeight="SemiBold" FontSize="13" />
+              <TextBlock Text="当前版本支持「局域网发现 + 直连」。跨公网联机需要中继/端口映射服务，本版本尚未实现，暂不提供一键开服。"
+                         Classes="muted" TextWrapping="Wrap" />
+              <TextBlock Text="若已有公网服务器或已做端口映射，直接在上方填地址即可连接。"
+                         Classes="muted" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </ScrollViewer>
+    </controls:GlassCard>
+  </Grid>
+</UserControl>

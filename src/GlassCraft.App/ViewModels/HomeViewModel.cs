@@ -31,6 +31,9 @@ public sealed partial class InstanceItem : ObservableObject
 
 public sealed partial class HomeViewModel : ObservableObject
 {
+    private readonly InstancesViewModel _instances;
+    private readonly Action<string> _navigate;
+
     public ObservableCollection<AccountItem> Accounts { get; } = new();
     public ObservableCollection<InstanceItem> Instances { get; } = new();
     public ObservableCollection<JavaRuntime> JavaRuntimes { get; } = new();
@@ -43,11 +46,14 @@ public sealed partial class HomeViewModel : ObservableObject
     [ObservableProperty] private string _status = "";
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private InstanceItem? _selectedInstance;
+    [ObservableProperty] private string _launchHint = "选择一个实例后点「启动游戏」";
 
     public string AppVersion => "0.9.0";
 
-    public HomeViewModel()
+    public HomeViewModel(InstancesViewModel instances, Action<string> navigate)
     {
+        _instances = instances;
+        _navigate = navigate;
         DataDirectory = AppServices.Paths.Root;
         ReloadAccounts();
         ReloadInstances();
@@ -64,11 +70,29 @@ public sealed partial class HomeViewModel : ObservableObject
 
     public void ReloadInstances()
     {
+        _instances.Refresh();
         Instances.Clear();
-        foreach (var rec in AppServices.Instances.List())
-            Instances.Add(new InstanceItem { Record = rec });
+        foreach (var item in _instances.Instances)
+            Instances.Add(new InstanceItem { Record = item.Record });
         SelectedInstance = Instances.FirstOrDefault();
         InstanceSummary = Instances.Count == 0 ? "还没有实例" : $"{Instances.Count} 个实例";
+        OnPropertyChanged(nameof(HasInstances));
+    }
+
+    public bool HasInstances => Instances.Count > 0;
+
+    [RelayCommand]
+    private async Task LaunchAsync()
+    {
+        if (SelectedInstance is null)
+        {
+            LaunchHint = "还没有实例，请先去「下载」安装版本，再在「版本列表」里创建实例";
+            return;
+        }
+        LaunchHint = "正在启动…";
+        _navigate("instances");
+        await _instances.LaunchWithServerAsync(SelectedInstance, null, null);
+        LaunchHint = "已发送启动请求，可在「版本列表」查看日志";
     }
 
     [RelayCommand]

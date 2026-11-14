@@ -160,7 +160,16 @@ public sealed partial class InstancesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task LaunchAsync()
+    private Task LaunchAsync() => LaunchCoreAsync(null, null);
+
+    /// <summary>Starts an instance and optionally connects straight to a server.</summary>
+    public async Task LaunchWithServerAsync(InstanceItem item, string? host, int? port)
+    {
+        SelectedInstance = item;
+        await LaunchCoreAsync(host, port);
+    }
+
+    private async Task LaunchCoreAsync(string? serverHost, int? serverPort)
     {
         if (SelectedInstance is null)
         {
@@ -225,6 +234,8 @@ public sealed partial class InstancesViewModel : ObservableObject
                 MaxMemoryMb = rec.Launch.MaxMemoryMb > 0 ? rec.Launch.MaxMemoryMb : AppServices.Settings.Current.MaxMemoryMb,
                 Width = rec.Launch.Width > 0 ? rec.Launch.Width : 1280,
                 Height = rec.Launch.Height > 0 ? rec.Launch.Height : 720,
+                ServerAddress = serverHost,
+                ServerPort = serverPort,
                 ExtraJvmArguments = rec.Launch.ExtraJvmArguments,
                 ExtraGameArguments = rec.Launch.ExtraGameArguments
             };

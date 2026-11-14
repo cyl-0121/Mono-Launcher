@@ -22,10 +22,10 @@ public static class PerformanceState
 
     public static string TierDisplay => Tier switch
     {
-        GlassTier.HighPerformance => "高性能（完整玻璃管线）",
-        GlassTier.Balanced => "均衡（模糊 + 色调 + 边缘高光）",
-        GlassTier.LowPower => "低功耗（静态半透明）",
-        GlassTier.Off => "关闭（纯色）",
+        GlassTier.HighPerformance => "完整（阴影 + 高光）",
+        GlassTier.Balanced => "标准",
+        GlassTier.LowPower => "简洁",
+        GlassTier.Off => "关闭",
         _ => Tier.ToString()
     };
 

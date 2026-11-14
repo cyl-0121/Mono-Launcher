@@ -13,6 +13,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         ["versions"] = ("游戏下载", "官方版本清单与安装"),
         ["instances"] = ("实例管理", "独立目录 / 启动 / 日志"),
         ["mods"] = ("Mod 管理", "扫描 / 启停 / Modrinth"),
+        ["network"] = ("联机", "局域网发现 / 直连"),
         ["downloads"] = ("下载管理", "速度 / 队列 / 进度"),
         ["logs"] = ("日志", "结构化诊断"),
         ["agent"] = ("AI Agent", "多提供商 / 工具调用"),
@@ -32,17 +33,19 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public VersionsViewModel Versions { get; }
     public InstancesViewModel Instances { get; }
     public ModsViewModel Mods { get; }
+    public NetworkViewModel Network { get; }
     public DownloadsViewModel Downloads { get; }
     public LogsViewModel Logs { get; }
     public SettingsViewModel Settings { get; }
 
     public MainWindowViewModel()
     {
-        Home = new HomeViewModel();
+        Instances = new InstancesViewModel();
+        Home = new HomeViewModel(Instances, page => Navigate(page));
         Agent = new AgentViewModel();
         Versions = new VersionsViewModel();
-        Instances = new InstancesViewModel();
         Mods = new ModsViewModel();
+        Network = new NetworkViewModel(Instances, page => Navigate(page));
         Downloads = new DownloadsViewModel();
         Logs = new LogsViewModel();
         Settings = new SettingsViewModel();
@@ -52,9 +55,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
         Home.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(HomeViewModel.SelectedAccount))
-                ActiveProfileText = Home.SelectedAccount?.Name ?? "未登录";
+                ActiveProfileText = Home.SelectedAccount is null ? "未登录" : $"账户：{Home.SelectedAccount.Name}";
         };
-        ActiveProfileText = Home.SelectedAccount?.Name ?? "未登录";
+        ActiveProfileText = Home.SelectedAccount is null ? "未登录" : $"账户：{Home.SelectedAccount.Name}";
 
         Navigate("home");
     }
@@ -78,6 +81,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
             "versions" => Versions,
             "instances" => Instances,
             "mods" => Mods,
+            "network" => Network,
             "downloads" => Downloads,
             "logs" => Logs,
             "agent" => Agent,
@@ -88,6 +92,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         if (page == "versions") Versions.EnsureLoaded();
         if (page == "instances") Instances.Refresh();
         if (page == "mods") Mods.RefreshAll();
+        if (page == "network") Network.RefreshInstances();
         if (page == "logs") Logs.Reload();
     }
 

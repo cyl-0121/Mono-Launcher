@@ -48,6 +48,14 @@ public partial class MainWindow : Window
         {
             bar.PointerPressed += (_, args) =>
             {
+                // Ignore clicks that land on the window buttons.
+                if (args.Source is Control control && control.FindAncestorOfType<Button>() is not null)
+                    return;
+                if (args.ClickCount == 2)
+                {
+                    ToggleMaximize();
+                    return;
+                }
                 if (args.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
                     BeginMoveDrag(args);
             };
@@ -83,6 +91,7 @@ public partial class MainWindow : Window
                 }
             }, TimeSpan.FromSeconds(1.5));
         }
+
         UpdateNavHighlight();
     }
 
@@ -94,8 +103,8 @@ public partial class MainWindow : Window
         var scale = screen.Scaling <= 0 ? 1.0 : screen.Scaling;
         var usableW = screen.WorkingArea.Width / scale;
         var usableH = screen.WorkingArea.Height / scale;
-        Width = Math.Min(Width, Math.Max(940, usableW - 60));
-        Height = Math.Min(Height, Math.Max(560, usableH - 60));
+        Width = Math.Min(Width, Math.Max(920, usableW - 40));
+        Height = Math.Min(Height, Math.Max(540, usableH - 40));
     }
 
     private void UpdateNavHighlight()
@@ -106,6 +115,7 @@ public partial class MainWindow : Window
             ["versions"] = "NavVersions",
             ["instances"] = "NavInstances",
             ["mods"] = "NavMods",
+            ["network"] = "NavNetwork",
             ["downloads"] = "NavDownloads",
             ["logs"] = "NavLogs",
             ["agent"] = "NavAgent",
@@ -120,6 +130,13 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ToggleMaximize()
+    {
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        if (this.FindControl<Button>("MaxButton") is { } max)
+            max.Content = WindowState == WindowState.Maximized ? "❐" : "□";
+    }
+
     private void OnClosed(object? sender, EventArgs e) => _uiTimer?.Stop();
 
     public void RefreshGlass()
@@ -129,6 +146,8 @@ public partial class MainWindow : Window
     }
 
     private void OnMinimizeClick(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+
+    private void OnMaximizeClick(object? sender, RoutedEventArgs e) => ToggleMaximize();
 
     private void OnCloseClick(object? sender, RoutedEventArgs e) => Close();
 }
