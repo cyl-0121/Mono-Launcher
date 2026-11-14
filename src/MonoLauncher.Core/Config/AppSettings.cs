@@ -33,7 +33,7 @@ public sealed class AppSettings
 
     // Updates / announcement
     /// <summary>GitHub "owner/repo" used for the update announcement. Empty disables fetching.</summary>
-    public string UpdateRepository { get; set; } = "";
+    public string UpdateRepository { get; set; } = "cyl-0121/Mono-Launcher";
     public bool CheckUpdateOnStartup { get; set; } = true;
 
     // AI
