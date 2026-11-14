@@ -14,3 +14,8 @@ TestResults/
 src/MonoLauncher.App/Assets/Fonts/
 # The download site keeps the installer here; do not commit binaries
 website/downloads/
+# Local publisher settings (server address, username); never commit
+scripts/publish-site.config.json
+# Credentials must never enter the repo
+*.credential
+.git-credentials
