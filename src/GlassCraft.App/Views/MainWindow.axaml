@@ -11,7 +11,24 @@
         SystemDecorations="None"
         Background="#000000"
         FontFamily="avares://GlassCraft/Assets/Fonts#SF Pro Display, Microsoft YaHei UI, Segoe UI">
+  <Window.Resources>
+    <SolidColorBrush x:Key="ComboBoxBackground" Color="#0A0A0A" />
+    <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="#141414" />
+    <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="#1A1A1A" />
+    <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#2E2E2E" />
+    <SolidColorBrush x:Key="ComboBoxForeground" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="#0A0A0A" />
+    <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush" Color="#2E2E2E" />
+    <SolidColorBrush x:Key="ComboBoxDropDownGlyphForeground" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ComboBoxDropDownForeground" Color="#FFFFFF" />
+  </Window.Resources>
   <Window.Styles>
+    <!-- SF Pro has a tall ascent, which makes single-line text look pushed up inside
+         buttons/labels. Tighten the line box inside buttons only. -->
+    <Style Selector="Button TextBlock">
+      <Setter Property="LineHeight" Value="17" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
     <Style Selector="TextBlock.h1">
       <Setter Property="FontSize" Value="24" />
       <Setter Property="FontWeight" Value="Bold" />
@@ -138,14 +155,58 @@
       <Setter Property="BorderBrush" Value="#2E2E2E" />
       <Setter Property="CornerRadius" Value="6" />
       <Setter Property="MinHeight" Value="32" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid Background="Transparent">
+            <Border Name="Bg" Background="#0A0A0A" BorderBrush="#2E2E2E" BorderThickness="1"
+                    CornerRadius="6" />
+            <ContentPresenter Content="{TemplateBinding SelectionBoxItem}"
+                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                              Margin="10,0,28,0" VerticalAlignment="Center" />
+            <TextBlock Text="▾" Foreground="#FFFFFF" FontSize="11" HorizontalAlignment="Right"
+                       VerticalAlignment="Center" Margin="0,0,11,0" />
+            <Popup Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}"
+                   Placement="Bottom" VerticalOffset="2"
+                   MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}">
+              <Border Background="#0A0A0A" BorderBrush="#2E2E2E" BorderThickness="1" CornerRadius="6"
+                      MaxHeight="280" Padding="4">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                  <ItemsPresenter />
+                </ScrollViewer>
+              </Border>
+            </Popup>
+          </Grid>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="ComboBox /template/ Border#Background">
+      <Setter Property="Background" Value="#0A0A0A" />
+      <Setter Property="BorderBrush" Value="#2E2E2E" />
+    </Style>
+    <Style Selector="ComboBox /template/ ContentPresenter">
+      <Setter Property="Background" Value="#0A0A0A" />
+      <Setter Property="Foreground" Value="#FFFFFF" />
+    </Style>
+    <Style Selector="ComboBox /template/ ToggleButton">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ComboBox /template/ TextBlock">
+      <Setter Property="Foreground" Value="#FFFFFF" />
+    </Style>
+    <Style Selector="ComboBox /template/ Path">
+      <Setter Property="Fill" Value="#FFFFFF" />
+    </Style>
+    <Style Selector="ComboBoxItem">
+      <Setter Property="Background" Value="#0A0A0A" />
+      <Setter Property="Foreground" Value="#FFFFFF" />
+      <Setter Property="Padding" Value="10,6" />
+    </Style>
+    <Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1A1A1A" />
     </Style>
     <Style Selector="ListBox">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
-    </Style>
-    <Style Selector="ListBoxItem">
-      <Setter Property="Padding" Value="6,4" />
-      <Setter Property="CornerRadius" Value="6" />
     </Style>
     <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
       <Setter Property="Background" Value="#1A1A1A" />

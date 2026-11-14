@@ -1,0 +1,72 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="GlassCraft.App.Views.MicrosoftLoginWindow"
+        Title="Microsoft 登录"
+        Width="560" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        SystemDecorations="BorderOnly"
+        Background="#000000"
+        FontFamily="Microsoft YaHei UI, Segoe UI">
+  <Window.Styles>
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="Foreground" Value="#000000" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="18,0" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#E0E0E0" />
+    </Style>
+    <Style Selector="Button.ghost">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#3A3A3A" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="16,0" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="56,Auto,Auto" Background="#000000">
+    <Border Grid.Row="0" BorderBrush="#1F1F1F" BorderThickness="0,0,0,1">
+      <StackPanel Orientation="Horizontal" Spacing="10" Margin="20,0" VerticalAlignment="Center">
+        <TextBlock Text="Microsoft 登录" FontSize="16" FontWeight="SemiBold" Foreground="#FFFFFF" />
+        <TextBlock Text="正版账户" FontSize="11" Foreground="#8A8A8A" VerticalAlignment="Center" />
+      </StackPanel>
+    </Border>
+
+    <StackPanel Grid.Row="1" Margin="22,18,22,0" Spacing="12">
+      <TextBlock x:Name="HintText" TextWrapping="Wrap" FontSize="12" LineHeight="20" Foreground="#B0B0B0"
+                 Text="正在向 Microsoft 申请设备代码…" />
+
+      <Border Background="#0A0A0A" BorderBrush="#262626" BorderThickness="1" CornerRadius="8" Padding="16">
+        <StackPanel Spacing="8" HorizontalAlignment="Center">
+          <TextBlock Text="登录代码" FontSize="11" Foreground="#8A8A8A" HorizontalAlignment="Center" />
+          <SelectableTextBlock x:Name="CodeText" Text="——————" FontSize="30" FontWeight="SemiBold"
+                               Foreground="#FFFFFF" HorizontalAlignment="Center" />
+          <TextBlock x:Name="UriText" Text="https://microsoft.com/link" FontSize="12" Foreground="#8A8A8A"
+                     HorizontalAlignment="Center" />
+        </StackPanel>
+      </Border>
+
+      <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+        <Button x:Name="OpenButton" Classes="primary" Content="打开浏览器并登录" Height="38" Click="OnOpen" />
+        <Button x:Name="CopyButton" Classes="ghost" Content="已选中可直接 Ctrl+C" Height="38" Click="OnCopy" />
+      </StackPanel>
+
+      <TextBlock x:Name="StatusText" Text="" FontSize="11" Foreground="#7A7A7A" TextWrapping="Wrap" />
+    </StackPanel>
+
+    <Grid Grid.Row="2" Margin="22,16,22,18" ColumnDefinitions="*,Auto">
+      <TextBlock Text="登录凭据仅保存在本机（DPAPI 加密）" FontSize="10" Foreground="#6A6A6A"
+                 VerticalAlignment="Center" />
+      <Button Grid.Column="1" Name="CancelButton" Classes="ghost" Content="取消" Height="38"
+              MinWidth="96" Click="OnCancel" />
+    </Grid>
+  </Grid>
+</Window>

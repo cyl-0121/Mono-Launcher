@@ -9,11 +9,22 @@ using GlassCraft.Core.Versions;
 
 namespace GlassCraft.App.ViewModels;
 
+public enum VersionCategory { Release, Snapshot, AprilFools, Old, All }
+
+public sealed partial class CategoryTab : ObservableObject
+{
+    public required VersionCategory Category { get; init; }
+    public required string Title { get; init; }
+    [ObservableProperty] private int _count;
+    [ObservableProperty] private bool _isActive;
+}
+
 public sealed partial class VersionRow : ObservableObject
 {
     public required VersionSummary Summary { get; init; }
     public string Id => Summary.Id;
-    public string TypeText => Summary.Type switch
+    public bool IsAprilFools => VersionCategories.IsAprilFools(Summary.Id);
+    public string TypeText => IsAprilFools ? "愚人节版" : Summary.Type switch
     {
         "release" => "正式版",
         "snapshot" => "快照",
@@ -28,22 +39,35 @@ public sealed partial class VersionRow : ObservableObject
     public string JavaText => Summary.JavaVersion is { } j ? $"Java {j.MajorVersion}+" : "";
     [ObservableProperty] private bool _isInstalled;
 
-    public string TypeBadge => Summary.Type switch
+    public string TypeBadge => IsAprilFools ? "#E0A030" : Summary.Type switch
     {
-        "release" => "#3D6BFF",
-        "snapshot" => "#8B5CF6",
-        _ => "#64748B"
+        "release" => "#FFFFFF",
+        "snapshot" => "#8A8A8A",
+        _ => "#5A5A5A"
     };
+}
+
+public static class VersionCategories
+{
+    // Known April Fools snapshots (Mojang does not flag them separately in the manifest).
+    private static readonly HashSet<string> Known = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "15w14a", "1.RV-Pre1", "3D Shareware v1.34", "20w14infinite",
+        "22w13oneBlockAtATime", "23w13a_or_b", "24w14potato", "25w14craftmine"
+    };
+
+    public static bool IsAprilFools(string id) => Known.Contains(id);
 }
 
 public sealed partial class VersionsViewModel : ObservableObject
 {
-    private int _filterIndex;
+    private VersionCategory _category = VersionCategory.Release;
     private bool _loaded;
 
     public ObservableCollection<VersionRow> AllVersions { get; } = new();
     public ObservableCollection<VersionRow> Versions { get; } = new();
-    public ObservableCollection<string> LoaderKinds { get; } = new() { "原版", "NeoForge", "Fabric", "Quilt", "Forge" };
+    public ObservableCollection<CategoryTab> Categories { get; } = new();
+    public ObservableCollection<string> LoaderKinds { get; } = new() { "原版", "Fabric", "Quilt", "NeoForge", "Forge" };
     public ObservableCollection<string> LoaderVersions { get; } = new();
 
     [ObservableProperty] private string _searchText = "";
@@ -54,6 +78,8 @@ public sealed partial class VersionsViewModel : ObservableObject
     [ObservableProperty] private string? _errorText;
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private bool _isInstalling;
+    [ObservableProperty] private string _categoryTitle = "正式版";
+    [ObservableProperty] private string _listSummary = "";
 
     public DownloadCenter Downloads => AppServices.Downloads;
 
@@ -62,6 +88,11 @@ public sealed partial class VersionsViewModel : ObservableObject
 
     public VersionsViewModel()
     {
+        Categories.Add(new CategoryTab { Category = VersionCategory.Release, Title = "正式版", IsActive = true });
+        Categories.Add(new CategoryTab { Category = VersionCategory.Snapshot, Title = "测试版" });
+        Categories.Add(new CategoryTab { Category = VersionCategory.AprilFools, Title = "愚人节版" });
+        Categories.Add(new CategoryTab { Category = VersionCategory.Old, Title = "远古版" });
+        Categories.Add(new CategoryTab { Category = VersionCategory.All, Title = "全部" });
         _ = LoadManifestAsync();
     }
 
@@ -83,6 +114,8 @@ public sealed partial class VersionsViewModel : ObservableObject
             AllVersions.Clear();
             foreach (var v in manifest.Versions)
                 AllVersions.Add(new VersionRow { Summary = v, IsInstalled = IsInstalled(v.Id) });
+
+            RefreshCounts();
             ApplyFilter();
             _loaded = true;
             StatusText = $"共 {manifest.Versions.Count} 个版本 · 最新正式版 {LatestRelease}";
@@ -100,48 +133,68 @@ public sealed partial class VersionsViewModel : ObservableObject
         }
     }
 
+    private void RefreshCounts()
+    {
+        foreach (var tab in Categories)
+        {
+            tab.Count = AllVersions.Count(v => IsInCategory(v, tab.Category));
+        }
+    }
+
+    private static bool IsInCategory(VersionRow v, VersionCategory category) => category switch
+    {
+        VersionCategory.Release => v.Summary.Type == "release" && !v.IsAprilFools,
+        VersionCategory.Snapshot => v.Summary.Type == "snapshot" && !v.IsAprilFools,
+        VersionCategory.AprilFools => v.IsAprilFools,
+        VersionCategory.Old => v.Summary.Type is "old_beta" or "old_alpha",
+        _ => true
+    };
+
     private static bool IsInstalled(string id) =>
         File.Exists(AppServices.Paths.VersionJson(id)) ||
         File.Exists(Path.Combine(AppServices.Paths.VersionDir(id), "installed.json"));
 
     private void ApplyFilter()
     {
-        var query = AllVersions.AsEnumerable();
-        query = _filterIndex switch
-        {
-            1 => query.Where(v => v.Summary.Type == "release"),
-            2 => query.Where(v => v.Summary.Type == "snapshot"),
-            3 => query.Where(v => v.Summary.Type is "old_beta" or "old_alpha"),
-            _ => query
-        };
+        var query = AllVersions.Where(v => IsInCategory(v, _category));
         if (!string.IsNullOrWhiteSpace(SearchText))
         {
             var q = SearchText.Trim();
             query = query.Where(v => v.Id.Contains(q, StringComparison.OrdinalIgnoreCase));
         }
         Versions.Clear();
-        foreach (var v in query.Take(400)) Versions.Add(v);
-        // Default to the newest release so "install" works without an extra click.
-        SelectedVersion ??= Versions.FirstOrDefault(v => v.Summary.Type == "release") ?? Versions.FirstOrDefault();
+        foreach (var v in query.Take(500)) Versions.Add(v);
+        SelectedVersion = Versions.FirstOrDefault(v => v.Id == LatestRelease)
+                          ?? Versions.FirstOrDefault();
+        ListSummary = $"{Versions.Count} 个版本";
+        CategoryTitle = Categories.FirstOrDefault(c => c.Category == _category)?.Title ?? "全部";
+    }
+
+    [RelayCommand]
+    private void SelectCategory(CategoryTab? tab)
+    {
+        if (tab is null || tab.Category == _category) return;
+        _category = tab.Category;
+        foreach (var c in Categories) c.IsActive = c.Category == _category;
+        ApplyFilter();
     }
 
     partial void OnSearchTextChanged(string value) => ApplyFilter();
 
-    public void SetFilter(int index)
-    {
-        _filterIndex = index;
-        ApplyFilter();
-    }
-
     partial void OnSelectedVersionChanged(VersionRow? value)
     {
         InstallCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(SelectedVersionTitle));
+        OnPropertyChanged(nameof(SelectedVersionMeta));
         if (value is null) return;
         StatusText = $"{value.Id} · {value.TypeText}" + (string.IsNullOrEmpty(value.JavaText) ? "" : $" · {value.JavaText}");
-        OnPropertyChanged(nameof(SelectedVersionTitle));
     }
 
     public string SelectedVersionTitle => SelectedVersion?.Id ?? "选择一个版本";
+    public string SelectedVersionMeta => SelectedVersion is null
+        ? ""
+        : $"{SelectedVersion.TypeText} · {SelectedVersion.ReleaseDate}" +
+          (string.IsNullOrEmpty(SelectedVersion.JavaText) ? "" : $" · {SelectedVersion.JavaText}");
 
     [RelayCommand]
     private async Task RefreshAsync() => await LoadManifestAsync(force: true);
@@ -264,7 +317,7 @@ public sealed partial class VersionsViewModel : ObservableObject
         {
             StatusText = $"获取 {SelectedLoaderKind} 版本列表…";
             var list = await AppServices.Loaders.GetLoaderVersionsAsync(key, SelectedVersion.Id);
-            foreach (var v in list.Take(60)) LoaderVersions.Add(v);
+            foreach (var v in list.Take(80)) LoaderVersions.Add(v);
             SelectedLoaderVersion = "最新";
             StatusText = list.Count == 0
                 ? $"{SelectedLoaderKind} 没有适用于 {SelectedVersion.Id} 的版本"

@@ -173,6 +173,26 @@ public sealed partial class HomeViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task LoginMicrosoftAsync()
+    {
+        try
+        {
+            var account = await Dialogs.ShowMicrosoftLoginAsync();
+            if (account is null) return;
+            AppServices.Accounts.Upsert(account);
+            ReloadAccounts();
+            SelectedAccount = Accounts.FirstOrDefault(a => a.Account.Id == account.Id) ?? SelectedAccount;
+            Status = $"已登录正版账户 {account.Name}";
+            AppServices.Log.Info("auth", $"Microsoft 登录成功：{account.Name}");
+        }
+        catch (Exception ex)
+        {
+            Status = "登录失败：" + ex.Message;
+            AppServices.Log.Error("auth", "Microsoft 登录异常", ex);
+        }
+    }
+
+    [RelayCommand]
     private async Task ScanJavaAsync()
     {
         if (IsBusy) return;

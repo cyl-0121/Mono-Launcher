@@ -4,12 +4,22 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Layout;
 using Avalonia.Media;
 using GlassCraft.Agent;
+using GlassCraft.Core.Auth;
 
 namespace GlassCraft.App.Services;
 
 /// <summary>Native tool-approval dialog. High-risk tools never run without an explicit click.</summary>
 public static class Dialogs
 {
+    /// <summary>Shows the Microsoft device-code login dialog; returns the account on success.</summary>
+    public static async Task<MinecraftAccount?> ShowMicrosoftLoginAsync()
+    {
+        var owner = (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+        if (owner is null) return null;
+        var window = new Views.MicrosoftLoginWindow();
+        await window.ShowDialog(owner);
+        return window.Account;
+    }
     public static async Task<bool> ConfirmToolAsync(ToolCallRequest request)
     {
         var window = (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
