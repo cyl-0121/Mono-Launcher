@@ -136,6 +136,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             s.DownloadSiteUrl = DownloadSiteUrl.Trim();
         });
         AppServices.Updates.Repository = UpdateRepository.Trim();
+        AppServices.Updates.DownloadSiteUrl = DownloadSiteUrl.Trim();
         AppServices.ApplySettings();
         StatusText = "设置已保存";
     }

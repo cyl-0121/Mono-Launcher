@@ -58,7 +58,7 @@ public sealed partial class HomeViewModel : ObservableObject
     [ObservableProperty] private string _updateUrl = "";
     [ObservableProperty] private bool _isCheckingUpdate;
 
-    public string AppVersion => "0.9.1";
+    public string AppVersion => "1.0.0";
 
     public HomeViewModel(InstancesViewModel instances, Action<string> navigate)
     {
@@ -100,8 +100,9 @@ public sealed partial class HomeViewModel : ObservableObject
             UpdateAvailable = info.IsNewer;
             UpdateTag = info.Tag;
             UpdateUrl = info.HtmlUrl;
+            UpdatePackageUrl = info.DownloadUrl;
             UpdateStatus = info.IsNewer ? $"发现新版本 {info.Tag}" : "已是最新版本";
-            AppServices.Log.Info("update", $"最新版本 {info.Tag}，是否更新={info.IsNewer}");
+            AppServices.Log.Info("update", $"最新版本 {info.Tag}（来源 {info.Source}），是否更新={info.IsNewer}");
         }
         catch (Exception ex)
         {
@@ -119,6 +120,7 @@ public sealed partial class HomeViewModel : ObservableObject
     public string UpdateButtonText => string.IsNullOrWhiteSpace(UpdateTag) ? "下载并更新" : $"更新到 v{UpdateTag.TrimStart('v', 'V')}";
 
     [ObservableProperty] private bool _isUpdating;
+    [ObservableProperty] private string? _updatePackageUrl;
     [ObservableProperty] private double _updateProgress;
 
     partial void OnUpdateTagChanged(string value) => OnPropertyChanged(nameof(UpdateButtonText));
@@ -135,10 +137,13 @@ public sealed partial class HomeViewModel : ObservableObject
         UpdateProgress = 0;
         try
         {
-            var url = AppUpdater.BuildPackageUrl(
-                AppServices.Settings.Current.DownloadSiteUrl,
-                AppServices.Settings.Current.UpdateRepository,
-                UpdateTag);
+            // Prefer the package URL reported by the mirror; fall back to building one.
+            var url = !string.IsNullOrWhiteSpace(UpdatePackageUrl)
+                ? UpdatePackageUrl!
+                : AppUpdater.BuildPackageUrl(
+                    AppServices.Settings.Current.DownloadSiteUrl,
+                    AppServices.Settings.Current.UpdateRepository,
+                    UpdateTag);
             AppServices.Log.Info("update", $"开始下载更新包 {url}");
 
             var progress = new Progress<(double Fraction, string Stage)>(p =>

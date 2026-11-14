@@ -1,14 +1,20 @@
 {
     "latest":  {
-                   "version":  "0.9.1",
+                   "version":  "1.0.0",
                    "date":  "2026-11-14",
                    "size":  "68.3 MB",
-                   "sha256":  "89DC839FBC5EDA01D4779B75F796FE5FFB9C1BD4ABDA07E019BCCC7B469D20DF",
+                   "sha256":  "B69BDFDD319D20A6822F13EE6799E16427915692D7C42C415B59EDF6FDA6E73B",
                    "download":  "https://ada1f3c4ba9a13ac3.app.workbuddy.host/downloads/MonoLauncher-win-x64.zip?sharecode=2TEW6KGZWT",
-                   "github":  "https://github.com/cyl-0121/Mono-Launcher/releases/download/v0.9.1/MonoLauncher-win-x64.zip",
-                   "notes":  "新增\n- 应用内自动更新：检测到新版本后直接下载并替换自身，更新前自动备份为 MonoLauncher.exe.bak，失败自动回滚\n- 全新应用图标（黑色圆角方块 + 白色播放键）\n- 新增纯静态下载站（website/）：自动跟随 GitHub 最新 Release，支持 ?v= 参数检查更新\n- 站点发布页 admin.html：填版本号、更新说明、选择安装包即可生成 releases.json\n- 每日可用性检查：GitHub Actions 每天检查下载链接和站点，异常自动开 issue\n\n改进\n- 更新检查改读 Release 的 Atom feed，不再受 GitHub API 60 次/小时限额影响\n- 镜像站安装包不可用时，下载按钮自动回退到 GitHub 直链\n- 默认下载站地址指向国内镜像，开箱即用\n\n修复\n- 登录窗口设备码不显示\n- 登录代码增加有效期倒计时与「换一个代码」按钮\n- Win11 最小化后窗口位置和尺寸可能错乱\n- 顶栏按钮与登录页文字垂直居中偏上"
+                   "github":  "https://github.com/cyl-0121/Mono-Launcher/releases/download/v1.0.0/MonoLauncher-win-x64.zip",
+                   "notes":  "正式版 1.0.0\n\n更新渠道\n- 更新检查与下载默认走国内镜像站，GitHub 改为镜像不可用时的备用渠道\n- 启动器优先读取镜像站的 releases.json，异常或断网时回退 GitHub Release 与本地缓存\n\n自动更新\n- 应用内更新：检测到新版本后下载并替换自身，更新前备份为 MonoLauncher.exe.bak，失败自动回滚\n- 镜像给出的下载地址会被直接采用，避免绕路\n\n界面\n- 全新应用图标（黑色圆角方块 + 白色播放键）\n- 顶栏按钮、登录页文字垂直居中修正\n- Win11 最小化后窗口位置与尺寸修正\n\n其他\n- 登录窗口设备码不显示的修复，新增有效期倒计时与「换一个代码」\n- 新增纯静态下载站与发布页 admin.html\n- 每日可用性检查：GitHub Actions 每天探测站点与下载链接"
                },
     "history":  [
+                    {
+                        "version":  "1.0.0",
+                        "date":  "2026-11-14",
+                        "size":  "68.3 MB",
+                        "download":  "https://ada1f3c4ba9a13ac3.app.workbuddy.host/downloads/MonoLauncher-win-x64.zip?sharecode=2TEW6KGZWT"
+                    },
                     {
                         "version":  "0.9.1",
                         "date":  "2026-11-14",

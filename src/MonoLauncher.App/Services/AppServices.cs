@@ -79,7 +79,8 @@ public static class AppServices
         Updates = new UpdateService(Http, Paths)
         {
             Repository = Settings.Current.UpdateRepository,
-            CurrentVersion = "0.9.1"
+            CurrentVersion = "1.0.0",
+            DownloadSiteUrl = Settings.Current.DownloadSiteUrl
         };
         Tools = new LauncherTools(
             Paths, Instances, Versions, Loaders, Modrinth, Launch, Java, Accounts,

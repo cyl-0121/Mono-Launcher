@@ -12,6 +12,13 @@ public sealed class UpdateInfo
     public string Name { get; init; } = "";
     public string Body { get; init; } = "";
     public string HtmlUrl { get; init; } = "";
+
+    /// <summary>Direct package URL. When the mirror reports it, the updater downloads from there.</summary>
+    public string? DownloadUrl { get; init; }
+
+    /// <summary>Where this info came from: mirror / github / cache.</summary>
+    public string Source { get; init; } = "";
+
     public DateTimeOffset PublishedAt { get; init; }
     public bool IsNewer { get; init; }
 }
@@ -39,7 +46,11 @@ public sealed class UpdateService
     }
 
     public string? Repository { get; set; }
-    public string CurrentVersion { get; set; } = "0.9.0";
+    public string CurrentVersion { get; set; } = "1.0.0";
+
+    /// <summary>Mirror site (may carry a share code). Checked first; GitHub is the fallback.</summary>
+    public string? DownloadSiteUrl { get; set; }
+
     public string? LastError { get; private set; }
 
     private string CacheFile => Path.Combine(_paths.CacheDir, "update-cache.json");
@@ -47,13 +58,91 @@ public sealed class UpdateService
 
     public async Task<UpdateInfo?> CheckAsync(CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(Repo)) return LoadCache();
+        if (string.IsNullOrWhiteSpace(Repo) && string.IsNullOrWhiteSpace(DownloadSiteUrl))
+            return LoadCache();
         LastError = null;
 
-        var atom = await TryAtomAsync(ct).ConfigureAwait(false);
-        if (atom is not null) return atom;
+        // 1) Mirror site first: it is the primary channel and works from mainland China.
+        var mirror = await TryMirrorAsync(ct).ConfigureAwait(false);
+        if (mirror is not null) return mirror;
 
-        return await TryApiAsync(ct).ConfigureAwait(false);
+        // 2) GitHub Atom feed (no token, no quota).
+        if (!string.IsNullOrWhiteSpace(Repo))
+        {
+            var atom = await TryAtomAsync(ct).ConfigureAwait(false);
+            if (atom is not null) return atom;
+
+            // 3) GitHub REST as the last network attempt.
+            var api = await TryApiAsync(ct).ConfigureAwait(false);
+            if (api is not null) return api;
+        }
+
+        return LoadCache();
+    }
+
+    /// <summary>Reads {mirror}/releases.json (shared query string is preserved).</summary>
+    private async Task<UpdateInfo?> TryMirrorAsync(CancellationToken ct)
+    {
+        var site = (DownloadSiteUrl ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(site)) return null;
+        try
+        {
+            var jsonUrl = BuildMirrorUrl("releases.json", site);
+            if (jsonUrl is null) return null;
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, jsonUrl);
+            request.Headers.TryAddWithoutValidation("User-Agent", "MonoLauncher/1.0");
+            request.Headers.TryAddWithoutValidation("Accept", "application/json");
+            using var response = await _http.SendAsync(request, ct).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                LastError = $"镜像站 HTTP {(int)response.StatusCode}";
+                return null;
+            }
+
+            var text = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+            using var doc = JsonDocument.Parse(text);
+            if (!doc.RootElement.TryGetProperty("latest", out var latest)) return null;
+
+            string? Get(string name) =>
+                latest.TryGetProperty(name, out var value) ? value.GetString() : null;
+
+            var version = (Get("version") ?? "").Trim().TrimStart('v', 'V');
+            if (string.IsNullOrWhiteSpace(version)) return null;
+
+            var download = Get("download");
+            var downloadUrl = string.IsNullOrWhiteSpace(download)
+                ? null
+                : (Uri.TryCreate(download, UriKind.Absolute, out var abs) ? abs.ToString() : BuildMirrorUrl(download, site));
+
+            var dateText = Get("date");
+            return await SaveAndBuildAsync(new UpdateInfo
+            {
+                Tag = "v" + version,
+                Name = "MonoLauncher v" + version,
+                Body = Get("notes") ?? "",
+                HtmlUrl = site,
+                DownloadUrl = downloadUrl,
+                Source = "mirror",
+                PublishedAt = DateTimeOffset.TryParse(dateText, out var dt) ? dt : DateTimeOffset.Now,
+                IsNewer = IsNewerVersion(version, CurrentVersion)
+            }, ct).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            LastError = "镜像站检查失败：" + ex.Message;
+            return null;
+        }
+    }
+
+    /// <summary>Joins a relative path onto the mirror URL, keeping its query (share code).</summary>
+    private static string? BuildMirrorUrl(string relative, string site)
+    {
+        if (!Uri.TryCreate(site, UriKind.Absolute, out var uri)) return null;
+        var basePart = uri.GetLeftPart(UriPartial.Path).TrimEnd('/');
+        if (basePart.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
+            basePart = basePart[..basePart.LastIndexOf('/')];
+        return $"{basePart}/{relative.TrimStart('/')}{uri.Query}";
     }
 
     /// <summary>Reads https://github.com/{repo}/releases.atom — no token, no quota.</summary>
