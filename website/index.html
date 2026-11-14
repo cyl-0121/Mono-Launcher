@@ -291,6 +291,8 @@
   function render(data) {
     const latest = data && data.latest;
     if (!latest) throw new Error('releases.json 缺少 latest 字段');
+    const tipEl = $('downloadTip');
+    if (tipEl) { tipEl.style.display = 'none'; tipEl.textContent = ''; }
 
     $('verShort').textContent = latest.version || '—';
     $('metaVersion').textContent = 'v' + (latest.version || '—');
@@ -344,10 +346,58 @@
     }
   }
 
+  // 自动跟随 GitHub 最新 Release：站长发了 Release，本页无需改 releases.json
+  const GH_REPO = 'cyl-0121/Mono-Launcher';
+
+  async function syncFromGithub() {
+    try {
+      const r = await fetch('https://api.github.com/repos/' + GH_REPO + '/releases/latest', {
+        headers: { Accept: 'application/vnd.github+json' },
+        cache: 'no-store',
+      });
+      // 403 = 未登录限额用完，静默保持本地数据
+      if (!r.ok) return;
+      const rel = await r.json();
+      const tag = String(rel.tag_name || '').replace(/^v/i, '');
+      if (!tag) return;
+
+      const localVersion = latestData?.latest?.version || '0.0.0';
+      if (compare(tag, localVersion) <= 0) return; // 本地已经是最新
+
+      latestData.latest = {
+        version: tag,
+        date: (rel.published_at || '').slice(0, 10),
+        size: latestData.latest.size || '—',
+        sha256: '',
+        download: latestData.latest.download, // 仍指向本站镜像；文件缺失时页面会自动回退 GitHub
+        github:
+          (rel.assets && rel.assets[0] && rel.assets[0].browser_download_url) ||
+          rel.html_url ||
+          latestData.latest.github,
+        notes: (rel.body || '').trim() || '（该版本没有填写更新说明）',
+      };
+
+      render(latestData);
+      setState($('relState'), 'GitHub 有新版本', 'new');
+      const tip = $('downloadTip');
+      if (tip) {
+        tip.style.display = '';
+        tip.textContent =
+          '本站镜像可能还没同步。若下载失败，页面会自动改用 GitHub 下载。';
+      }
+    } catch (e) {
+      // 断网 / 限流：保留本地 releases.json 的数据即可
+    }
+  }
+
   let latestData = null;
   fetch('releases.json', { cache: 'no-store' })
     .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then((data) => { latestData = data; render(data); })
+    .then((data) => {
+      latestData = data;
+      render(data);
+      syncFromGithub();
+    })
     .catch((err) => {
       $('relNotes').textContent = '无法读取 releases.json（' + err.message + '）。请确认该文件与 index.html 在同一目录。';
       $('relVersion').textContent = '加载失败';

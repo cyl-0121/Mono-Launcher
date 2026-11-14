@@ -108,7 +108,19 @@ chmod -R 755 /var/www/monolauncher
 
 ## 五、以后发新版怎么改
 
-只需要改 `releases.json`，**不用动 `index.html`**。
+### 方式 A：什么都不用做（推荐）
+
+页面会自动去 GitHub 的 `releases/latest` 查询最新版本：
+
+- 你在 GitHub 发一个新 Release，**网站下次被打开时会自动显示新版本号、日期和更新说明**
+- 如果本站 `downloads/` 里还没有对应的 zip，下载按钮会自动回退到 GitHub 直链
+- GitHub API 没登录时限额 60 次/小时；超额或断网时，页面安静地用本地 `releases.json` 的数据，不会报错
+
+所以日常发版只需要：**在 GitHub 发 Release**。
+
+想同时让本站也托管 zip（下载更快），就把新 zip 传进 `downloads/`，然后按下面方式 B 更新 JSON。
+
+### 方式 B：手动更新 `releases.json`（想用本站镜像时）
 
 1. 新 zip 上传到 `downloads/`
 2. 算一下 SHA256（可选，但建议）：
@@ -139,7 +151,7 @@ chmod -R 755 /var/www/monolauncher
 
 4. 保存，刷新页面即可（`releases.json` 用 `no-store` 拉取，不会被浏览器缓存）。
 
-> 也可以不手动改：在本地仓库跑 `scripts/publish-site.ps1`（图形界面），选 zip、填版本号和说明，它会自动生成 JSON 并通过 scp 上传。
+> 本地仓库里的 `scripts/publish-site.ps1` 也能帮忙：选 zip、填版本号，它自动算 SHA256 并生成 `releases.json`（支持 FTP / SFTP 上传，也可以只生成文件手动上传）。
 
 ---
 
