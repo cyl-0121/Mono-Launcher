@@ -12,3 +12,5 @@ TestResults/
 *.DotSettings.user
 # Apple SF Pro fonts are not distributed with the repository (license restriction)
 src/MonoLauncher.App/Assets/Fonts/
+# The download site keeps the installer here; do not commit binaries
+website/downloads/

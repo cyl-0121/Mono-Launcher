@@ -36,6 +36,9 @@ public sealed class AppSettings
     public string UpdateRepository { get; set; } = "cyl-0121/Mono-Launcher";
     public bool CheckUpdateOnStartup { get; set; } = true;
 
+    /// <summary>Optional mirror site (e.g. https://launcher.example.com). Opened instead of GitHub when set.</summary>
+    public string DownloadSiteUrl { get; set; } = "";
+
     // AI
     public string DefaultProviderId { get; set; } = "deepseek";
     public string? DefaultModel { get; set; }

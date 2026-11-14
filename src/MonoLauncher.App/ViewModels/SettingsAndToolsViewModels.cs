@@ -96,6 +96,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _isScanning;
     [ObservableProperty] private string _dataDirectory = "";
     [ObservableProperty] private string _updateRepository = "";
+    [ObservableProperty] private string _downloadSiteUrl = "";
 
     public SettingsViewModel()
     {
@@ -111,6 +112,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         AutoDowngrade = s.AutoDowngrade;
         AiStreamFlushMs = s.AiStreamFlushMs;
         UpdateRepository = s.UpdateRepository;
+        DownloadSiteUrl = s.DownloadSiteUrl;
         DataDirectory = AppServices.Paths.Root;
         foreach (var rt in AppServices.Java.Cached) JavaRuntimes.Add(rt);
     }
@@ -131,6 +133,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             s.AutoDowngrade = AutoDowngrade;
             s.AiStreamFlushMs = Math.Clamp(AiStreamFlushMs, 10, 500);
             s.UpdateRepository = UpdateRepository.Trim();
+            s.DownloadSiteUrl = DownloadSiteUrl.Trim();
         });
         AppServices.Updates.Repository = UpdateRepository.Trim();
         AppServices.ApplySettings();

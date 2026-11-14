@@ -78,8 +78,12 @@
           <TextBlock Text="更新与公告" Classes="h2" />
           <TextBlock Text="填写 GitHub 仓库（owner/repo），启动时会自动拉取最新 Release 显示在首页「Today」下方。"
                      Classes="muted" TextWrapping="Wrap" />
-          <TextBox Classes="field" Text="{Binding UpdateRepository}" PlaceholderText="例如：yourname/MonoLauncher" />
-          <TextBlock Text="留空则不检查更新。更新检查只读取公开的 Release 信息，不上传任何数据。"
+          <TextBox Classes="field" Text="{Binding UpdateRepository}" PlaceholderText="例如：cyl-0121/Mono-Launcher" />
+          <TextBlock Text="下载站地址（可选）" Classes="muted" />
+          <TextBox Classes="field" Text="{Binding DownloadSiteUrl}" PlaceholderText="例如：https://launcher.example.com" />
+          <TextBlock Text="填了它之后，首页「查看新版本」会打开你的下载站，而不是 GitHub。留空则用 GitHub 页面。"
+                     Classes="muted" TextWrapping="Wrap" />
+          <TextBlock Text="更新检查只读取公开的 Release 信息，不上传任何数据。"
                      Classes="muted" TextWrapping="Wrap" />
         </StackPanel>
       </controls:GlassCard>

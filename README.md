@@ -96,8 +96,23 @@ MonoLauncher/
 │  ├─ MonoLauncher.App/      Avalonia 界面（MVVM + 自绘控件）
 │  └─ MonoLauncher.Cli/      命令行：list / install / launch / java / nettest / terracotta …
 ├─ tests/MonoLauncher.Tests/ xUnit 单元测试
-└─ docs/                     使用指南、界面说明、性能档位、测试记录、许可调研
+├─ docs/                     使用指南、界面说明、性能档位、测试记录、许可调研
+└─ website/                  可选：纯静态下载站（国内加速用，见其 README）
 ```
+
+### 国内下载站（可选）
+
+GitHub 在国内访问可能很慢。`website/` 目录是一个纯静态下载页，把整个目录丢到任意静态服务器即可：
+
+```
+website/
+├─ index.html      页面（无外部依赖）
+├─ releases.json   版本数据，发新版只改这个文件
+├─ icon.svg
+└─ downloads/      放 MonoLauncher-win-x64.zip
+```
+
+启动器「设置 → 下载站地址」填上站点地址后，首页「查看新版本」会直接跳到你的站，而不是 GitHub。详情见 `website/README.md`。
 
 ---
 

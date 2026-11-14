@@ -125,10 +125,12 @@ public sealed partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private void OpenUpdate()
     {
-        if (string.IsNullOrWhiteSpace(UpdateUrl)) return;
+        var site = AppServices.Settings.Current.DownloadSiteUrl;
+        var target = string.IsNullOrWhiteSpace(site) ? UpdateUrl : site.Trim();
+        if (string.IsNullOrWhiteSpace(target)) return;
         try
         {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(UpdateUrl)
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(target)
             {
                 UseShellExecute = true
             });
