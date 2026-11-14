@@ -31,6 +31,8 @@ public static class WindowSizing
     {
         try
         {
+            // SizeToContent windows size themselves; forcing a size would fight the layout.
+            if (window.SizeToContent != SizeToContent.Manual) return;
             var handle = window.TryGetPlatformHandle();
             if (handle is null) return;
             var scale = window.RenderScaling;

@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="GlassCraft.App.Views.AgreementWindow"
         Title="用户协议与免责声明"
-        Width="720" Height="620"
+        Width="720" SizeToContent="Height" MaxHeight="720"
         WindowStartupLocation="CenterScreen"
         CanResize="False"
         SystemDecorations="BorderOnly"
@@ -46,13 +46,16 @@
 
     <!-- Actions (docked bottom, always visible) -->
     <Border DockPanel.Dock="Bottom" Background="#000000" BorderBrush="#1F1F1F" BorderThickness="0,1,0,0"
-            Padding="18,12">
-      <Grid ColumnDefinitions="*,Auto,Auto">
-        <TextBlock Text="v1.0 · 首次启动需确认" Foreground="#7A7A7A" FontSize="11" VerticalAlignment="Center" />
+            Padding="18,10">
+      <Grid ColumnDefinitions="*,Auto,Auto" VerticalAlignment="Center">
+        <TextBlock Text="v1.0 · 首次启动需确认" Foreground="#7A7A7A" FontSize="11"
+                   VerticalAlignment="Center" />
         <Button Grid.Column="1" Name="DeclineButton" Classes="ghost" Content="不同意并退出"
-                Height="42" Margin="0,0,10,0" Click="OnDecline" />
+                Height="46" MinWidth="136" Margin="0,0,10,0"
+                HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="OnDecline" />
         <Button Grid.Column="2" Name="AcceptButton" Classes="primary" Content="同意并继续"
-                Height="42" Click="OnAccept" />
+                Height="46" MinWidth="136"
+                HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="OnAccept" />
       </Grid>
     </Border>
 
