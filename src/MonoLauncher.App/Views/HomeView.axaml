@@ -65,8 +65,11 @@
                    FontFamily="Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI" />
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
           <TextBlock Text="{Binding UpdateStatus}" Classes="muted" VerticalAlignment="Center" />
-          <Button Classes="ghost" Content="检查更新" Command="{Binding CheckUpdateCommand}" />
-          <Button Classes="primary" Content="查看新版本" IsVisible="{Binding UpdateAvailable}"
+          <Button Classes="ghost" Content="检查更新" Command="{Binding CheckUpdateCommand}"
+                  IsVisible="{Binding !IsUpdating}" />
+          <Button Classes="primary" Content="{Binding UpdateButtonText}" IsVisible="{Binding UpdateAvailable}"
+                  Command="{Binding UpdateAppCommand}" />
+          <Button Classes="ghost" Content="发布页" IsVisible="{Binding UpdateAvailable}"
                   Command="{Binding OpenUpdateCommand}" />
         </StackPanel>
       </Grid>

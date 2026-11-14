@@ -33,6 +33,12 @@ internal static class Program
             App.AgreementScreenshot = true;
         if (args.Contains("--screenshot-login"))
             App.LoginScreenshot = true;
+        var updateTestIndex = Array.IndexOf(args, "--update-test");
+        if (updateTestIndex >= 0 && updateTestIndex + 1 < args.Length)
+        {
+            App.UpdateTestUrl = args[updateTestIndex + 1];
+            App.UpdateTestApply = args.Contains("--update-test-apply");
+        }
 
         try
         {

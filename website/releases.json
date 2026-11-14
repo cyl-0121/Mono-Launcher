@@ -3,7 +3,7 @@
     "version": "0.9.0",
     "date": "2026-11-14",
     "size": "68.3 MB",
-    "sha256": "DCADD77132F5E9C414AABBE86FE321620BC50D140E8B0D6F6C6CC510C6A10571",
+    "sha256": "B8410F11D77316097D22BEF2885FBAB1AD489099CA71D53E9E5A433141AF893C",
     "download": "downloads/MonoLauncher-win-x64.zip",
     "github": "https://github.com/cyl-0121/Mono-Launcher/releases/download/v0.9.0/MonoLauncher-win-x64.zip",
     "notes": "首个公开版本。\n\n- 版本分类下载（正式版 / 测试版 / 愚人节版 / 远古版）\n- 两步式安装：选版本 → 选加载器（Fabric / Quilt / NeoForge / Forge）\n- 实例隔离、Modrinth 搜索安装、导入现有实例\n- 陶瓦联机（Terracotta）、局域网扫描、手动直连\n- 微软正版登录（设备码）\n- AI Agent：Semantic Kernel 多提供商 + 本地 GGUF\n\n下载：MonoLauncher-win-x64.zip（约 68 MB，自包含，无需安装 .NET）"

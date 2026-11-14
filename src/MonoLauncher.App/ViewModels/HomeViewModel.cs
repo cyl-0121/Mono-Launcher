@@ -116,6 +116,59 @@ public sealed partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private Task CheckUpdateAsync() => LoadUpdateAsync();
 
+    public string UpdateButtonText => string.IsNullOrWhiteSpace(UpdateTag) ? "下载并更新" : $"更新到 v{UpdateTag.TrimStart('v', 'V')}";
+
+    [ObservableProperty] private bool _isUpdating;
+    [ObservableProperty] private double _updateProgress;
+
+    partial void OnUpdateTagChanged(string value) => OnPropertyChanged(nameof(UpdateButtonText));
+    partial void OnIsUpdatingChanged(bool value) => UpdateAppCommand.NotifyCanExecuteChanged();
+
+    private bool CanUpdateApp() => !IsUpdating && UpdateAvailable && !string.IsNullOrWhiteSpace(UpdateTag);
+
+    /// <summary>Downloads the new build, swaps the exe and restarts the app.</summary>
+    [RelayCommand(CanExecute = nameof(CanUpdateApp))]
+    private async Task UpdateAppAsync()
+    {
+        if (string.IsNullOrWhiteSpace(UpdateTag)) return;
+        IsUpdating = true;
+        UpdateProgress = 0;
+        try
+        {
+            var url = AppUpdater.BuildPackageUrl(
+                AppServices.Settings.Current.DownloadSiteUrl,
+                AppServices.Settings.Current.UpdateRepository,
+                UpdateTag);
+            AppServices.Log.Info("update", $"开始下载更新包 {url}");
+
+            var progress = new Progress<(double Fraction, string Stage)>(p =>
+            {
+                UpdateProgress = p.Fraction;
+                UpdateStatus = p.Stage;
+            });
+
+            var (ok, message) = await AppUpdater.DownloadAndInstallAsync(url, progress, CancellationToken.None);
+            UpdateStatus = message;
+            AppServices.Log.Info("update", $"更新结果：ok={ok} {message}");
+
+            if (ok)
+            {
+                await Task.Delay(900);
+                (Avalonia.Application.Current?.ApplicationLifetime
+                    as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime)?.Shutdown();
+            }
+        }
+        catch (Exception ex)
+        {
+            UpdateStatus = "更新失败：" + ex.Message;
+            AppServices.Log.Error("update", "自动更新失败", ex);
+        }
+        finally
+        {
+            IsUpdating = false;
+        }
+    }
+
     [RelayCommand]
     private void GoDownload() => _navigate("versions");
 

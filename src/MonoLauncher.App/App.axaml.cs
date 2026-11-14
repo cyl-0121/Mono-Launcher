@@ -18,6 +18,8 @@ public partial class App : Application
     public static string? LaunchInstanceId { get; set; }
     public static bool AgreementScreenshot { get; set; }
     public static bool LoginScreenshot { get; set; }
+    public static string? UpdateTestUrl { get; set; }
+    public static bool UpdateTestApply { get; set; }
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -37,6 +39,44 @@ public partial class App : Application
                 }
                 catch { }
                 throw;
+            }
+
+            // Headless self-test for the updater: download + extract, but never swap the exe.
+            if (!string.IsNullOrWhiteSpace(UpdateTestUrl))
+            {
+                try { File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "update-test-start.log"), "entered"); } catch { }
+            }
+            if (!string.IsNullOrWhiteSpace(UpdateTestUrl))
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var progress = new Progress<(double Fraction, string Stage)>(p =>
+                        {
+                            if ((int)(p.Fraction * 100) % 20 == 0) Console.WriteLine($"[{p.Fraction:P0}] {p.Stage}");
+                        });
+                        var (ok, message) = await Services.AppUpdater.DownloadAndInstallAsync(
+                            UpdateTestUrl, progress, CancellationToken.None, install: UpdateTestApply);
+                        Console.WriteLine($"update-test ok={ok} :: {message}");
+                        File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "update-test.log"),
+                            $"ok={ok}\n{message}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("update-test FAILED: " + ex);
+                        try
+                        {
+                            File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "update-test.log"),
+                                "FAILED: " + ex);
+                        }
+                        catch { }
+                    }
+                    finally
+                    {
+                        (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown();
+                    }
+                });
             }
 
             AppDomain.CurrentDomain.UnhandledException += (_, e) =>
