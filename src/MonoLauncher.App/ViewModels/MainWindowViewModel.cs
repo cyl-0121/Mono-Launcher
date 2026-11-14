@@ -30,6 +30,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private bool _isForcedUpdate;
     [ObservableProperty] private string _forcedUpdateText = "";
     [ObservableProperty] private string _forcedUpdateButtonText = "立即更新";
+    [ObservableProperty] private string _forcedUpdateStatus = "";
+    [ObservableProperty] private double _forcedUpdateProgress;
+    [ObservableProperty] private bool _forcedUpdateBusy;
 
     public HomeViewModel Home { get; }
     public AgentViewModel Agent { get; }
@@ -63,6 +66,12 @@ public sealed partial class MainWindowViewModel : ObservableObject
                 IsForcedUpdate = Home.IsForcedUpdate;
             if (e.PropertyName is nameof(HomeViewModel.ForcedUpdateText) or nameof(HomeViewModel.IsForcedUpdate))
                 ForcedUpdateText = Home.ForcedUpdateText;
+            if (e.PropertyName == nameof(HomeViewModel.UpdateStatus))
+                ForcedUpdateStatus = Home.UpdateStatus;
+            if (e.PropertyName == nameof(HomeViewModel.UpdateProgress))
+                ForcedUpdateProgress = Home.UpdateProgress;
+            if (e.PropertyName == nameof(HomeViewModel.IsUpdating))
+                ForcedUpdateBusy = Home.IsUpdating;
             if (e.PropertyName == nameof(HomeViewModel.UpdateButtonText))
                 ForcedUpdateButtonText = Home.UpdateButtonText;
         };
