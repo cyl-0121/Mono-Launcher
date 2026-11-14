@@ -87,8 +87,29 @@ async Task<int> RunAsync(string[] args)
             }
             return 0;
         }
-        case "terracotta":
+        case "auth-test":
         {
+            var auth = new MicrosoftAuthService(http);
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            try
+            {
+                var code = await auth.StartDeviceCodeAsync();
+                sw.Stop();
+                Console.WriteLine($"{sw.ElapsedMilliseconds} ms");
+                Console.WriteLine($"user_code={code.UserCode}");
+                Console.WriteLine($"device_code={(code.DeviceCode.Length > 20 ? code.DeviceCode[..20] + "…" : code.DeviceCode)}");
+                Console.WriteLine($"uri={code.VerificationUri}");
+                Console.WriteLine($"interval={code.Interval} expires={code.ExpiresIn}");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                Console.WriteLine($"{sw.ElapsedMilliseconds} ms FAILED: {ex.GetType().Name}: {ex.Message}");
+                return 1;
+            }
+        }
+        case "terracotta":        {
             var tc = new TerracottaService(paths, http);
             Console.WriteLine($"binary: {tc.BinaryPath}");
             var progress = new Progress<string>(s => Console.WriteLine("  " + s));

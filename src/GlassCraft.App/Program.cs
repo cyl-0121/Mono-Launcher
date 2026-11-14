@@ -31,6 +31,8 @@ internal static class Program
             App.LaunchInstanceId = args[launchIndex + 1];
         if (args.Contains("--screenshot-agreement"))
             App.AgreementScreenshot = true;
+        if (args.Contains("--screenshot-login"))
+            App.LoginScreenshot = true;
 
         try
         {

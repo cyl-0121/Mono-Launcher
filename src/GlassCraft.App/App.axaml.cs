@@ -17,6 +17,7 @@ public partial class App : Application
     public static string? AgentStartupMessage { get; set; }
     public static string? LaunchInstanceId { get; set; }
     public static bool AgreementScreenshot { get; set; }
+    public static bool LoginScreenshot { get; set; }
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -83,11 +84,22 @@ public partial class App : Application
                     desktop.Shutdown();
                 }, TimeSpan.FromSeconds(1.2));
             }
+            else if (!string.IsNullOrWhiteSpace(ScreenshotPath) && LoginScreenshot)
+            {
+                var login = new Views.MicrosoftLoginWindow();
+                login.Show();
+                DispatcherTimer.RunOnce(() =>
+                {
+                    login.RenderSnapshot(ScreenshotPath!);
+                    AppServices.Log.Info("ui", "登录窗口截图已保存");
+                    desktop.Shutdown();
+                }, TimeSpan.FromSeconds(5));
+            }
 
             if (!string.IsNullOrWhiteSpace(StartupPage) && desktop.MainWindow.DataContext is ViewModels.MainWindowViewModel vm)
                 vm.NavigateCommand.Execute(StartupPage);
 
-            if (!string.IsNullOrWhiteSpace(ScreenshotPath))
+            if (!string.IsNullOrWhiteSpace(ScreenshotPath) && !AgreementScreenshot && !LoginScreenshot)
             {
                 var window = desktop.MainWindow;
                 DispatcherTimer.RunOnce(() =>
