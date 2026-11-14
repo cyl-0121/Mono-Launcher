@@ -8,7 +8,7 @@
 
 | 项 | 状态 | 证据 |
 |---|---|---|
-| Avalonia 12 + .NET 10 项目骨架 | 完成 | `src/GlassCraft.App` 编译通过并运行 |
+| Avalonia 12 + .NET 10 项目骨架 | 完成 | `src/MonoLauncher.App` 编译通过并运行 |
 | Semantic Kernel 引入 | 完成 | `IChatCompletionService` 抽象 + `Kernel`/`KernelFunction` 工具机制 |
 | LLamaSharp 引入 | 完成 | `LocalLlamaService`（GGUF 加载、GPU 层数、上下文、流式推理封装），本机无 GGUF 模型，未做实际推理验证 |
 | 原生 Liquid Glass 卡片 | 完成 | `GlassCard` + `GlassBackdrop`，Skia 自绘，无 WebView |

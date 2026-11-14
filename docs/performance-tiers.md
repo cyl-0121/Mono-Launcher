@@ -1,6 +1,6 @@
 # 性能档位对照
 
-GlassCraft 的性能设置是全局策略，同时影响**渲染**与**AI/下载**：
+MonoLauncher 的性能设置是全局策略，同时影响**渲染**与**AI/下载**：
 
 - 视觉档位：高性能 / 均衡 / 低功耗 / 关闭
 - 动画与指针光照开关
@@ -9,7 +9,7 @@ GlassCraft 的性能设置是全局策略，同时影响**渲染**与**AI/下载
 - AI 流式刷新间隔
 - 本地模型 GPU 层数 / 上下文 / 线程 / 批大小
 
-设置保存在 `%APPDATA%\GlassCraft\config\settings.json`，与实例配置分离；除渲染管线重建外无需重启。
+设置保存在 `%APPDATA%\MonoLauncher\config\settings.json`，与实例配置分离；除渲染管线重建外无需重启。
 
 ---
 

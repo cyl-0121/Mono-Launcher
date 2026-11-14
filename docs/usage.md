@@ -4,10 +4,10 @@
 
 两种方式任选：
 
-1. **直接运行单文件版**：双击 `publish/win-x64/GlassCraft.exe`（无需安装 .NET）。
-2. **从压缩包**：解压 `publish/GlassCraft-win-x64.zip`，双击里面的 `GlassCraft.exe`。
+1. **直接运行单文件版**：双击 `publish/win-x64/MonoLauncher.exe`（无需安装 .NET）。
+2. **从压缩包**：解压 `publish/MonoLauncher-win-x64.zip`，双击里面的 `MonoLauncher.exe`。
 
-首次启动会在 `%APPDATA%\GlassCraft` 创建数据目录。界面为简体中文、暗色主题。
+首次启动会在 `%APPDATA%\MonoLauncher` 创建数据目录。界面为简体中文、暗色主题。
 
 > 如果 Windows 安全软件（如火绒）弹窗询问是否允许联网，请选择允许，否则版本清单和下载会失败。
 
@@ -89,7 +89,7 @@
 
 **创建房间：**
 
-1. 点「**启动陶瓦**」——首次会下载约 8 MB 的组件到 `%APPDATA%\GlassCraft\data\tools\terracotta`。
+1. 点「**启动陶瓦**」——首次会下载约 8 MB 的组件到 `%APPDATA%\MonoLauncher\data\tools\terracotta`。
 2. 进游戏存档，按 Esc →「对局域网开放」。
 3. 回到启动器点「**创建房间**」，等待状态变成「房间已就绪」。
 4. 把**房间码**发给好友。
@@ -144,8 +144,8 @@ Agent 能调用真实工具：列实例、查状态、安装版本、启动实�
 ## 八、日志与排错
 
 - 「**日志**」页显示结构化日志（时间 / 级别 / 分类 / 内容），可复制最近 200 条。
-- 游戏日志在 `%APPDATA%\GlassCraft\logs\game-*.log`。
-- 应用日志在 `%APPDATA%\GlassCraft\logs\app-*.log`。
+- 游戏日志在 `%APPDATA%\MonoLauncher\logs\game-*.log`。
+- 应用日志在 `%APPDATA%\MonoLauncher\logs\app-*.log`。
 - 崩溃报告在实例目录的 `minecraft/crash-reports/`。
 
 常见问题：
@@ -162,7 +162,7 @@ Agent 能调用真实工具：列实例、查状态、安装版本、启动实�
 
 ## 九、数据目录与卸载
 
-所有数据都在 `%APPDATA%\GlassCraft`：
+所有数据都在 `%APPDATA%\MonoLauncher`：
 
 ```
 config/     设置、DPAPI 加密的账户与 API Key
@@ -170,6 +170,6 @@ data/       版本、库、资源、实例、下载缓存
 logs/       日志
 ```
 
-卸载：删除 `publish` 目录即可；如需彻底清理，再删除 `%APPDATA%\GlassCraft`（**会删除存档，请先备份**）。
+卸载：删除 `publish` 目录即可；如需彻底清理，再删除 `%APPDATA%\MonoLauncher`（**会删除存档，请先备份**）。
 
 实例不会自动删除：删除实例时移入 `data/trash/`，可手动恢复。

@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MonoLauncher.Core/MonoLauncher.Core.csproj" />
+    <Project Path="src/MonoLauncher.Agent/MonoLauncher.Agent.csproj" />
+    <Project Path="src/MonoLauncher.App/MonoLauncher.App.csproj" />
+    <Project Path="src/MonoLauncher.Cli/MonoLauncher.Cli.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MonoLauncher.Tests/MonoLauncher.Tests.csproj" />
+  </Folder>
+</Solution>

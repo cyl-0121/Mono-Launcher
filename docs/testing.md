@@ -9,7 +9,7 @@
 ## 单元测试（已执行，全部通过）
 
 ```
-dotnet test tests/GlassCraft.Tests/GlassCraft.Tests.csproj
+dotnet test tests/MonoLauncher.Tests/MonoLauncher.Tests.csproj
 通过: 24，失败: 0，跳过: 0
 ```
 
@@ -32,19 +32,19 @@ dotnet test tests/GlassCraft.Tests/GlassCraft.Tests.csproj
 
 ### 1. 原版 1.21.1 安装
 
-- 命令：`GlassCraft.Cli install 1.21.1`
+- 命令：`MonoLauncher.Cli install 1.21.1`
 - 结果：73 个核心文件 + 4036 个资源对象全部下载并通过 SHA-1 校验
 - 首次运行因单个大文件 60 秒总超时失败；修复为「超时只作用于响应头 + 失败二次重试」后完整通过
 - 断点续传验证：中断后重跑，2.8 秒补齐剩余 187 个文件
 
 ### 2. 原版 1.21.1 启动
 
-- 命令：`GlassCraft.Cli launch 1.21.1 Player`
+- 命令：`MonoLauncher.Cli launch 1.21.1 Player`
 - 结果：Java 21 启动，日志出现 `Setting user: Player`、`LWJGL version 3.3.3+5`、`OpenAL initialized`，游戏窗口标题 `Minecraft 1.21.1`，主菜单截图 `docs/minecraft-window.png`
 
 ### 3. NeoForge 21.1.1 安装
 
-- 命令：`GlassCraft.Cli install 1.21.1 --loader neoforge`
+- 命令：`MonoLauncher.Cli install 1.21.1 --loader neoforge`
 - 过程：
   - 官方 `maven.neoforged.net` 不可达 → 自动回退到 BMCLAPI 获取版本列表
   - 官方安装器下载成功，但内部 JSON 的 Maven URL 不可达 → 代码原地重写为 BMCLAPI 镜像
@@ -54,25 +54,25 @@ dotnet test tests/GlassCraft.Tests/GlassCraft.Tests.csproj
 
 ### 4. NeoForge 启动
 
-- 命令：`GlassCraft.Cli launch neoforge-21.1.1 Player`
+- 命令：`MonoLauncher.Cli launch neoforge-21.1.1 Player`
 - 首次失败：`Modules minecraft and _1._21._1 export package ...`（classpath 同时含原版 jar 与 patched client）
 - 修复：检测 `BootstrapLauncher` 主类，classpath 不再加入原版 jar
 - 结果：窗口标题 `Minecraft NeoForge* 1.21.1`，主菜单截图 `docs/neoforge-running.png`
 
 ### 5. UI 内启动实例
 
-- 命令：`GlassCraft.exe --launch-instance inst-neoforge-1211 --screenshot docs/ui-launch-neoforge.png`
+- 命令：`MonoLauncher.exe --launch-instance inst-neoforge-1211 --screenshot docs/ui-launch-neoforge.png`
 - 结果：实例页显示「运行中 (pid 15232)」，游戏日志实时滚动，截图 `docs/ui-launch-neoforge.png`
 
 ### 6. 实例导入
 
 - 扫描本机 `%APPDATA%\.minecraft` → 识别为「原版 .minecraft」
-- `GlassCraft.Cli import .minecraft` → 创建独立实例，源目录未修改
+- `MonoLauncher.Cli import .minecraft` → 创建独立实例，源目录未修改
 - 结果：`已导入 .minecraft，存档 0，Mod 0`（源目录本身为空）
 
 ### 7. Agent 工具
 
-- `GlassCraft.Cli tools` 直接调用工具实现：
+- `MonoLauncher.Cli tools` 直接调用工具实现：
   - `list_instances` 返回两个实例的真实 JSON
   - `list_installed_versions` 返回 `1.21.1`、`neoforge-21.1.1`
   - `search_modrinth("jei","1.21.1","neoforge")` 返回 JEI 等 8 个真实项目（JEI 8548 万下载）
@@ -86,8 +86,8 @@ dotnet test tests/GlassCraft.Tests/GlassCraft.Tests.csproj
 ### 9. 发布产物
 
 - `dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true`
-- 产物：`publish/win-x64/GlassCraft.exe`，60.9 MB，单文件
-- 运行验证：`GlassCraft.exe --page home --screenshot` 输出 `docs/published-home.png`（44 FPS）
+- 产物：`publish/win-x64/MonoLauncher.exe`，60.9 MB，单文件
+- 运行验证：`MonoLauncher.exe --page home --screenshot` 输出 `docs/published-home.png`（44 FPS）
 
 ---
 

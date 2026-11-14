@@ -1,0 +1,135 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:MonoLauncher.App.Controls"
+             xmlns:vm="using:MonoLauncher.App.ViewModels"
+             x:Class="MonoLauncher.App.Views.VersionsView">
+  <UserControl.Styles>
+    <Style Selector="Button.tab">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#B0B0B0" />
+      <Setter Property="BorderBrush" Value="#2E2E2E" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="16" />
+      <Setter Property="Padding" Value="14,6" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Margin" Value="0,0,6,6" />
+    </Style>
+    <Style Selector="Button.tab:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1A1A1A" />
+      <Setter Property="TextBlock.Foreground" Value="#FFFFFF" />
+    </Style>
+    <Style Selector="Button.tab.active /template/ ContentPresenter">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="TextBlock.Foreground" Value="#000000" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid ColumnDefinitions="*,390" ColumnSpacing="12">
+    <!-- Left: categories + list -->
+    <controls:GlassCard Grid.Column="0" CornerRadius="8" Padding="16">
+      <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10">
+        <!-- Category tabs -->
+        <ItemsControl Grid.Row="0" ItemsSource="{Binding Categories}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Button Classes="tab" Classes.active="{Binding IsActive}"
+                      Command="{Binding $parent[UserControl].DataContext.SelectCategoryCommand}"
+                      CommandParameter="{Binding}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <TextBlock Text="{Binding Title}" />
+                  <TextBlock Text="{Binding Count}" Opacity="0.6" />
+                </StackPanel>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Search -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+          <TextBox Grid.Column="0" Classes="field" PlaceholderText="搜索版本，例如 1.21.1" Text="{Binding SearchText}" />
+          <Button Grid.Column="1" Classes="ghost" Content="刷新清单" Command="{Binding RefreshCommand}" />
+        </Grid>
+
+        <!-- Version list -->
+        <ListBox Grid.Row="2" ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}"
+                 Background="Transparent" BorderThickness="0">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Margin="2">
+                <Border Grid.Column="0" Width="3" Height="30" CornerRadius="2" Background="{Binding TypeBadge}" />
+                <StackPanel Grid.Column="1" Spacing="1">
+                  <TextBlock Text="{Binding Id}" Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding ReleaseDate}" Classes="muted" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding JavaText}" Classes="muted" />
+                  <Border Background="#141414" BorderBrush="#2A2A2A" BorderThickness="1" CornerRadius="6"
+                          Padding="6,2">
+                    <TextBlock Text="{Binding TypeText}" FontSize="11" Foreground="#B0B0B0" />
+                  </Border>
+                  <TextBlock Text="已安装" FontSize="11" Foreground="#FFFFFF" IsVisible="{Binding IsInstalled}" />
+                </StackPanel>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Grid Grid.Row="3" ColumnDefinitions="*,Auto">
+          <TextBlock Text="{Binding StatusText}" Classes="muted" TextWrapping="Wrap" />
+          <TextBlock Grid.Column="1" Text="{Binding ListSummary}" Classes="muted" />
+        </Grid>
+      </Grid>
+    </controls:GlassCard>
+
+    <!-- Right: install -->
+    <controls:GlassCard Grid.Column="1" CornerRadius="8" Padding="18">
+      <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" RowSpacing="8">
+        <StackPanel Grid.Row="0" Spacing="2">
+          <TextBlock Text="安装所选版本" FontSize="12" Foreground="#8A8A8A" />
+          <TextBlock Text="{Binding SelectedVersionTitle}" FontSize="24" FontWeight="Bold" Foreground="#FFFFFF" />
+          <TextBlock Text="{Binding SelectedVersionMeta}" Classes="muted" />
+        </StackPanel>
+
+        <Border Grid.Row="1" Height="1" Background="#1F1F1F" Margin="0,6" />
+
+        <StackPanel Grid.Row="2" Spacing="6">
+          <TextBlock Text="第 1 步 · 选择加载器" Classes="muted" />
+          <ComboBox Classes="field" ItemsSource="{Binding LoaderKinds}" SelectedItem="{Binding SelectedLoaderKind}" />
+          <ComboBox Classes="field" ItemsSource="{Binding LoaderVersions}"
+                    SelectedItem="{Binding SelectedLoaderVersion}"
+                    IsVisible="{Binding ShowLoaderVersionPicker}"
+                    PlaceholderText="加载器版本（默认最新）" />
+          <TextBlock Text="原版：只安装 Mojang 官方文件；Fabric/Quilt/NeoForge/Forge：在官方版本之上再装加载器。"
+                     Classes="muted" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <Border Grid.Row="3" Height="1" Background="#1F1F1F" Margin="0,6" />
+
+        <StackPanel Grid.Row="4" Spacing="8">
+          <TextBlock Text="第 2 步 · 下载并安装" Classes="muted" />
+          <Button Classes="primary" Content="下载并安装" Height="40" HorizontalAlignment="Stretch"
+                  Command="{Binding InstallCommand}" />
+          <Border Background="#111111" BorderBrush="#262626" BorderThickness="1" CornerRadius="6" Padding="12"
+                  IsVisible="{Binding Downloads.IsActive}">
+            <StackPanel Spacing="6">
+              <TextBlock Text="{Binding Downloads.Stage}" Foreground="#FFFFFF" FontSize="12" />
+              <ProgressBar Value="{Binding Downloads.Fraction}" Maximum="1" Height="6" />
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{Binding Downloads.BytesText}" Classes="muted" />
+                <TextBlock Grid.Column="1" Text="{Binding Downloads.SpeedText}" Classes="muted" />
+              </Grid>
+              <TextBlock Text="{Binding Downloads.Detail}" Classes="muted" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <TextBlock Grid.Row="5" Text="{Binding ErrorText}" Foreground="#D93B3B" FontSize="12" TextWrapping="Wrap" />
+      </Grid>
+    </controls:GlassCard>
+  </Grid>
+</UserControl>

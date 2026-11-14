@@ -1,7 +1,7 @@
 # 参考仓库许可证调研
 
 调研日期：2026-11-13
-项目：GlassCraft（Minecraft 启动器，Avalonia 12.1.6 + .NET 10，含 AI Agent 面板）
+项目：MonoLauncher（Minecraft 启动器，Avalonia 12.1.6 + .NET 10，含 AI Agent 面板）
 方法：逐个仓库用 `web_fetch` 读取 LICENSE 原文，优先 `raw.githubusercontent.com`，分支先 `main` 后 `master`；未取到原文的条目均已注明原因，不做条款臆测。
 
 ## 0. 原文获取情况（先说结论）
@@ -25,7 +25,7 @@
 
 ## 结论速览
 
-| 仓库 | 许可证（SPDX） | 复制代码？ | 对 GlassCraft 的结论 |
+| 仓库 | 许可证（SPDX） | 复制代码？ | 对 MonoLauncher 的结论 |
 |---|---|---|---|
 | PCL2（Meloong-Git/PCL） | 非 SPDX：自定义《PCL 分发有限许可》+《合理使用指南》 | ❌ 不可 | **仅可参考设计，不得复制代码**；重度使用会被要求改名、开源、蓝色主色相、购买劝导 |
 | HMCL（HMCL-dev/HMCL） | GPL-3.0 + GPLv3 §7 附加条款 | ❌ 不可 | 强 copyleft，**复制即传染**；只读设计参考 |
@@ -48,7 +48,7 @@
   - **轻度使用**（仅参考极小部分内容，或制作的软件与 PCL 实质功能无重叠）：需 ① 适当署名；② 不得与 PCL 混淆或暗示关联（禁用 `Potato Craft Launcher`、`PCL 手机版` 等名称）。
   - **重度使用**（基于仓库修改；或较大程度参考以重新实现 PCL 实质功能，例如启动/下载 Java 版 MC、下载管理 Mod）：① 明确声明为第三方独立二次创作；② 名称必须 **以 `Plain Craft Launcher (PCL)` 开头**并加第三方后缀；③ 关于页首位署名龙腾猫跃 + 赞助链接、**公开源代码**、继续使用该文件作指南；④ 若含 MC 启动功能，须实现与 `McLaunchPrecheck` 一致（或更激进）的正版购买劝导；⑤ Windows 上不得出现类似 PCL 赞助解锁的功能/表现，例如**界面主色相必须为蓝色**。
   - 无商业使用限制条文，但"保留全部权利"意味着默认无授权；上述条件实际等价于 **copyleft + 品牌条款 + 产品行为条款**。
-- **对本项目**：GlassCraft 必然要实现"启动 MC、下载、Mod 管理"，属于其定义的重度使用；接受条款等于放弃自主许可、强制开源、强制蓝色主色相并复刻购买劝导，与项目定位冲突。**结论：可参考设计（信息架构、安装流程、错误提示文案思路），不得复制任何代码、资源、文案，不得使用 PCL 名称或近似命名。**
+- **对本项目**：MonoLauncher 必然要实现"启动 MC、下载、Mod 管理"，属于其定义的重度使用；接受条款等于放弃自主许可、强制开源、强制蓝色主色相并复刻购买劝导，与项目定位冲突。**结论：可参考设计（信息架构、安装流程、错误提示文案思路），不得复制任何代码、资源、文案，不得使用 PCL 名称或近似命名。**
 
 ### 2. HMCL — HMCL-dev/HMCL
 
@@ -59,7 +59,7 @@
   - 附加条款 1（依 §7(c)）：分发修改版时，必须以合理方式**更改软件名称或版本号**以区别于原版。
   - 附加条款 2（依 §7(b)）：**不得移除软件中展示的版权声明**。
   - 无商业使用禁止——GPL 允许收费分发，但衍生必须开源。
-- **对本品**：任何源码级复制、翻译式改写（即便换成 C#）都可能被认定为衍生作品，导致 GlassCraft 整体须以 GPLv3 开源。**结论：只读设计参考，禁止复制/移植代码；不得引入其 jar/二进制资源。若未来确需 GPL 组件，须走进程隔离（独立可执行、命令行/HTTP 通信）并单独评估。**
+- **对本品**：任何源码级复制、翻译式改写（即便换成 C#）都可能被认定为衍生作品，导致 MonoLauncher 整体须以 GPLv3 开源。**结论：只读设计参考，禁止复制/移植代码；不得引入其 jar/二进制资源。若未来确需 GPL 组件，须走进程隔离（独立可执行、命令行/HTTP 通信）并单独评估。**
 
 ### 3. Prism Launcher — PrismLauncher/PrismLauncher
 
@@ -80,8 +80,8 @@
 - **原文获取**：给定 `BangBang93/BMCLAPI` 的 raw 与 GitHub API **均为 404，该仓库不存在**；BMCLAPI 是镜像**服务**（`bmclapi2.bangbang93.com`），其开源部分是服务端实现 `bangbang93/openbmclapi`，`master/LICENSE` HTTP 200。
 - **许可证类型**：**MIT**，`Copyright (c) 2019 bangbang93`。
 - **关键条款**：同标准 MIT，保留版权与许可声明即可；无 copyleft、无商业限制。
-- **重要区分**：MIT 覆盖的是**服务端代码**；GlassCraft 作为客户端**调用 BMCLAPI 镜像**属于使用第三方服务，授权来自服务方的公开使用规范（通常要求设置可识别的 User-Agent、遵守限速、不得滥用/盗链、必要时申请白名单），不是 MIT 授予的权利。
-- **对本品**：代码层面可复用（如需自建镜像或参考其缓存/回源策略），保留声明；**服务接入层面**应遵守 BMCLAPI 公开条款，默认 UA 标注 `GlassCraft/<version>`、支持失败回退官方源、不并发轰炸。**不要把"MIT"误读为"可以无限量免费拉取镜像流量"。**
+- **重要区分**：MIT 覆盖的是**服务端代码**；MonoLauncher 作为客户端**调用 BMCLAPI 镜像**属于使用第三方服务，授权来自服务方的公开使用规范（通常要求设置可识别的 User-Agent、遵守限速、不得滥用/盗链、必要时申请白名单），不是 MIT 授予的权利。
+- **对本品**：代码层面可复用（如需自建镜像或参考其缓存/回源策略），保留声明；**服务接入层面**应遵守 BMCLAPI 公开条款，默认 UA 标注 `MonoLauncher/<version>`、支持失败回退官方源、不并发轰炸。**不要把"MIT"误读为"可以无限量免费拉取镜像流量"。**
 
 ### 6. microsoft/semantic-kernel
 
@@ -111,7 +111,7 @@
 - **许可证类型**：**MIT**，`Copyright (c) 2026 Fluid.Avalonia contributors`（NuGet 页亦标 MIT）。**与已知事实（MIT）一致**。
 - **关键条款**：标准 MIT；README 声明其 Fluent 2 token 与 WinUI 资源结构**移植自 MIT 的 microsoft-ui-xaml 与 WinUI 3 Gallery**，内置强调色预设来自 MIT 的 Open Color——即它的 MIT 是干净的，但再分发时也应保留这些上游署名。
 - **技术边界（已核实）**：它是**主题库**（Fluent 2 tokens 覆盖 FluentTheme），背景能力靠 `FluidWindow.TransparencyEnabled` 走平台原生（Windows Mica、macOS vibrancy、KDE KWin blur），**其他平台退化为不透明**；本身依赖 Avalonia ≥ 12.1.5。它并不提供一个跨平台的软件渲染玻璃着色器（那部分在配套的 `Fluid.Avalonia.Acrylic`）。
-- **对本品**：**可选用但不引入**。GlassCraft 已有自绘 `GlassCard`/`GlassBackdrop`，若整体换成 Fluid 主题会与现有设计语言打架，且其玻璃依赖原生合成、在无合成器的环境退化。**结论：借鉴其 token 分层与"原生优先、软件兜底"的降级策略；不添加包依赖。**
+- **对本品**：**可选用但不引入**。MonoLauncher 已有自绘 `GlassCard`/`GlassBackdrop`，若整体换成 Fluid 主题会与现有设计语言打架，且其玻璃依赖原生合成、在无合成器的环境退化。**结论：借鉴其 token 分层与"原生优先、软件兜底"的降级策略；不添加包依赖。**
 
 ### 10. CompositionMaterial.Avalonia — HelloWRC/CompositionMaterial.Avalonia
 
@@ -157,7 +157,7 @@
 
 ## 第三方依赖清单
 
-依据 `GlassCraft/Directory.Packages.props`（集中包版本管理）与各上游许可原文。标注"未逐一下载原文"的条目，结论来自 NuGet 元数据与上游仓库公开声明，**引入前建议在 CI 中再核一次**。
+依据 `MonoLauncher/Directory.Packages.props`（集中包版本管理）与各上游许可原文。标注"未逐一下载原文"的条目，结论来自 NuGet 元数据与上游仓库公开声明，**引入前建议在 CI 中再核一次**。
 
 ### 运行时依赖
 

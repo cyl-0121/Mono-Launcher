@@ -6,9 +6,9 @@
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <NoWarn>$(NoWarn);CA1416;NU1903;NU1902;CS8618</NoWarn>
     <Version>0.9.0</Version>
-    <Company>GlassCraft</Company>
-    <Product>GlassCraft Launcher</Product>
-    <Copyright>GlassCraft contributors. Original code licensed under MIT.</Copyright>
+    <Company>MonoLauncher</Company>
+    <Product>MonoLauncher Launcher</Product>
+    <Copyright>MonoLauncher contributors. Original code licensed under MIT.</Copyright>
     <Deterministic>true</Deterministic>
     <DebugType>embedded</DebugType>
     <InvariantGlobalization>false</InvariantGlobalization>

@@ -1,5 +1,5 @@
 {
-  "$comment": "GlassCraft agent provider examples. Copy the fields you need into %APPDATA%\\GlassCraft\\config\\agent.json. Never put real API keys in this file; keys belong in the DPAPI store.",
+  "$comment": "MonoLauncher agent provider examples. Copy the fields you need into %APPDATA%\\MonoLauncher\\config\\agent.json. Never put real API keys in this file; keys belong in the DPAPI store.",
   "providers": [
     {
       "ProviderId": "openai",

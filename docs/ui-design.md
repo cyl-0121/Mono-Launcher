@@ -11,7 +11,7 @@
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│ GlassCraft  v0.9   ▶启动  ⬇下载  ▦版本  ◈Mod  ◎联机  ▤日志 ✦AI ⚙设置   — □ ✕ │  48px 黑色顶栏
+│ MonoLauncher  v0.9   ▶启动  ⬇下载  ▦版本  ◈Mod  ◎联机  ▤日志 ✦AI ⚙设置   — □ ✕ │  48px 黑色顶栏
 ├──────────────────────────────────────────────────────────┤
 │                                                          │
 │   ┌──────────────┐    Today                [检查更新]      │
@@ -48,10 +48,10 @@
 
 ## 字体
 
-- 全局：**SF Pro Display**（从 [SFWindows](https://github.com/bradleyhodges/SFWindows) 获取的 Apple 字体），中文回退 `Microsoft YaHei UI`。
-- 首页右上角 "Today" 为 SF Pro Display SemiBold 34px。
+- 全局：**Segoe UI Variable Text**，回退 `Segoe UI` → `Microsoft YaHei UI`（Windows 11 系统自带，零依赖）。
+- 首页右上角 "Today" 使用同一字体 SemiBold 34px。
 
-> ⚠️ 许可提醒：SF Pro 的 Apple 许可仅允许在 Apple 平台使用。本项目将其用于 Windows 仅作**本地测试**，未随仓库分发字体文件；若要公开发布，请替换为 [Inter](https://rsms.me/inter/)（SIL OFL）等开源字体。
+> 说明：开发期曾用 Apple SF Pro Display，因其许可仅限 Apple 平台，发布版已改为系统字体。想自定义字体时，改 `MainWindow.axaml` 与 `HomeView.axaml` 里的 `FontFamily` 即可（如放到 `Assets/Fonts` 用 `avares://MonoLauncher/Assets/Fonts#字体名`）。
 
 ## 页面
 

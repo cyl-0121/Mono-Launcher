@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:MonoLauncher.App.Controls"
+             x:Class="MonoLauncher.App.Views.LogsView">
+  <Grid RowDefinitions="Auto,*" RowSpacing="14">
+    <controls:GlassCard Grid.Row="0" CornerRadius="18" TintOpacity="0.30" Padding="18">
+      <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
+        <StackPanel Spacing="4">
+          <TextBlock Text="结构化日志" Classes="h1" FontSize="22" />
+          <TextBlock Text="{Binding LogFilePath}" Classes="muted" TextTrimming="CharacterEllipsis" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="ghost" Content="刷新" Command="{Binding RefreshCommand}" />
+        <Button Grid.Column="2" Classes="ghost" Content="复制最近 200 条" Command="{Binding CopySelectedCommand}" />
+        <Button Grid.Column="3" Classes="ghost" Content="日志目录" Command="{Binding OpenFolderCommand}" />
+      </Grid>
+    </controls:GlassCard>
+
+    <controls:GlassCard Grid.Row="1" CornerRadius="18" TintOpacity="0.24" Padding="10">
+      <ListBox ItemsSource="{Binding Entries}" Background="Transparent" BorderThickness="0"
+               FontFamily="Cascadia Mono, Consolas, monospace" FontSize="11">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Grid ColumnDefinitions="70,52,90,*" ColumnSpacing="6">
+              <TextBlock Grid.Column="0" Text="{Binding Time, StringFormat='{}{0:HH:mm:ss}'}" Foreground="#8A8A8A" />
+              <TextBlock Grid.Column="1" Text="{Binding Level}" Foreground="#8AB4FF" />
+              <TextBlock Grid.Column="2" Text="{Binding Category}" Foreground="#B48CFF" />
+              <TextBlock Grid.Column="3" Text="{Binding Message}" Foreground="#B0B0B0" TextWrapping="NoWrap" />
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </controls:GlassCard>
+  </Grid>
+</UserControl>

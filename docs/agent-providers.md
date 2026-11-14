@@ -1,11 +1,11 @@
 # Agent 提供商配置
 
-GlassCraft 的 Agent 支持两种协议：
+MonoLauncher 的 Agent 支持两种协议：
 
 - **OpenAI 兼容**（`/chat/completions`，支持流式 SSE 与工具调用）
 - **Anthropic Messages**（原生协议）
 
-所有提供商的 API Key 通过 Windows DPAPI 加密存储在 `%APPDATA%\GlassCraft\config\secrets.bin`，**不会**写入配置文件、日志或崩溃报告。
+所有提供商的 API Key 通过 Windows DPAPI 加密存储在 `%APPDATA%\MonoLauncher\config\secrets.bin`，**不会**写入配置文件、日志或崩溃报告。
 
 ---
 
@@ -39,7 +39,7 @@ GlassCraft 的 Agent 支持两种协议：
 3. **API Key**：可留空（某些本地服务不需要）
 4. **额外请求头**：部分服务要求 `X-Api-Version` 等，可在配置文件中添加
 
-或直接编辑 `%APPDATA%\GlassCraft\config\agent.json`：
+或直接编辑 `%APPDATA%\MonoLauncher\config\agent.json`：
 
 ```json
 {
@@ -70,7 +70,7 @@ GlassCraft 的 Agent 支持两种协议：
 
 本地推理不经过 HTTP，直接加载 GGUF：
 
-- 模型放到 `%APPDATA%\GlassCraft\data\models\*.gguf`
+- 模型放到 `%APPDATA%\MonoLauncher\data\models\*.gguf`
 - 在设置中配置 GPU 层数、上下文长度、线程数、批大小
 - 加载在后台线程进行，UI 显示状态，不阻塞启动
 

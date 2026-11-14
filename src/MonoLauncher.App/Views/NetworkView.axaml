@@ -1,0 +1,139 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:MonoLauncher.App.Controls"
+             xmlns:vm="using:MonoLauncher.App.ViewModels"
+             x:Class="MonoLauncher.App.Views.NetworkView">
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch">
+    <Grid RowDefinitions="Auto,Auto" RowSpacing="12" Margin="0,0,8,8">
+
+      <!-- Terracotta -->
+      <controls:GlassCard Grid.Row="0" CornerRadius="8" Padding="20">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="10">
+          <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <TextBlock Text="陶瓦联机" FontSize="18" FontWeight="SemiBold" Foreground="#FFFFFF" />
+              <Border Background="#141414" BorderBrush="#2A2A2A" BorderThickness="1" CornerRadius="10"
+                      Padding="10,3" VerticalAlignment="Center">
+                <TextBlock Text="{Binding TcStateText}" FontSize="11" Foreground="#B0B0B0" />
+              </Border>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+              <Button Classes="primary" Content="启动陶瓦" Command="{Binding StartTerracottaCommand}" />
+              <Button Classes="ghost" Content="停止" Command="{Binding StopTerracottaCommand}" />
+            </StackPanel>
+          </Grid>
+
+          <TextBlock Grid.Row="1" Text="{Binding TcHint}" Classes="muted" TextWrapping="Wrap" />
+
+          <!-- Room code -->
+          <Border Grid.Row="2" Background="#111111" BorderBrush="#2A2A2A" BorderThickness="1" CornerRadius="6"
+                  Padding="14,10" IsVisible="{Binding TcInRoom}">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+              <TextBlock Text="房间码" FontSize="12" Foreground="#8A8A8A" VerticalAlignment="Center" />
+              <SelectableTextBlock Grid.Column="1" Text="{Binding TcRoom}" FontSize="20" FontWeight="SemiBold"
+                                   Foreground="#FFFFFF" VerticalAlignment="Center" />
+              <Button Grid.Column="2" Classes="ghost" Content="用当前实例直连"
+                      Command="{Binding JoinDirectCommand}"
+                      IsVisible="{Binding TcHasUrl}" />
+            </Grid>
+          </Border>
+
+          <!-- Controls -->
+          <Grid Grid.Row="3" ColumnDefinitions="Auto,140,Auto,190,Auto,Auto" ColumnSpacing="8">
+            <TextBlock Text="玩家名" FontSize="12" Foreground="#8A8A8A" VerticalAlignment="Center" />
+            <TextBox Grid.Column="1" Classes="field" Text="{Binding TcPlayerName}" />
+            <Button Grid.Column="2" Classes="primary" Content="创建房间" Command="{Binding CreateRoomCommand}" />
+            <TextBox Grid.Column="3" Classes="field" Text="{Binding TcJoinCode}" PlaceholderText="输入房间码加入" />
+            <Button Grid.Column="4" Classes="ghost" Content="加入房间" Command="{Binding JoinRoomCommand}" />
+            <Button Grid.Column="5" Classes="ghost" Content="返回待机" Command="{Binding ResetRoomCommand}" />
+          </Grid>
+
+          <!-- Players + credit -->
+          <Grid Grid.Row="4" ColumnDefinitions="*,Auto">
+            <ItemsControl ItemsSource="{Binding TcProfiles}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border Background="#141414" BorderBrush="#2A2A2A" BorderThickness="1" CornerRadius="10"
+                          Padding="10,4" Margin="0,0,6,6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <TextBlock Text="{Binding Name}" FontSize="12" Foreground="#FFFFFF" />
+                      <TextBlock Text="{Binding KindText}" FontSize="10" Foreground="#8A8A8A" />
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Grid.Column="1" FontSize="10" Foreground="#6A6A6A" VerticalAlignment="Bottom"
+                       Text="联机由 Terracotta 提供 · AGPL-3.0 · github.com/burningtnt/Terracotta" />
+          </Grid>
+        </Grid>
+      </controls:GlassCard>
+
+      <!-- LAN + direct -->
+      <Grid Grid.Row="1" ColumnDefinitions="*,380" ColumnSpacing="12">
+        <controls:GlassCard Grid.Column="0" CornerRadius="8" Padding="16">
+          <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+              <StackPanel Spacing="2">
+                <TextBlock Text="局域网扫描" Classes="h2" />
+                <TextBlock Text="监听 224.0.2.60:4445 的原版 LAN 广播，只读不探测。" Classes="muted" />
+              </StackPanel>
+              <Button Grid.Column="1" Classes="ghost" Content="扫描" Command="{Binding ScanCommand}" />
+            </Grid>
+
+            <TextBlock Grid.Row="1" Text="{Binding StatusText}" Classes="muted" TextWrapping="Wrap" />
+
+            <Border Grid.Row="2" Background="#0A0A0A" BorderBrush="#262626" BorderThickness="1" CornerRadius="6">
+              <ListBox ItemsSource="{Binding Servers}" SelectedItem="{Binding SelectedServer}"
+                       Background="Transparent" BorderThickness="0">
+                <ListBox.ItemTemplate>
+                  <DataTemplate>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="4">
+                      <StackPanel Spacing="2">
+                        <TextBlock Text="{Binding Motd}" Foreground="#FFFFFF" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding Endpoint}" Classes="muted" />
+                      </StackPanel>
+                      <Button Grid.Column="1" Classes="ghost" Content="加入" Padding="12,5"
+                              Command="{Binding $parent[UserControl].((vm:NetworkViewModel)DataContext).JoinCommand}"
+                              CommandParameter="{Binding}" />
+                    </Grid>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </Border>
+
+            <TextBlock Grid.Row="3" Text="同一路由器 / 同一虚拟局域网下才能发现。跨网络请用上方陶瓦联机。"
+                       Classes="muted" TextWrapping="Wrap" />
+          </Grid>
+        </controls:GlassCard>
+
+        <controls:GlassCard Grid.Column="1" CornerRadius="8" Padding="16">
+          <StackPanel Spacing="10">
+            <TextBlock Text="直接连接" Classes="h2" />
+            <TextBlock Text="使用哪个实例启动" Classes="muted" />
+            <ComboBox Classes="field" ItemsSource="{Binding Instances}" SelectedItem="{Binding SelectedInstance}"
+                      PlaceholderText="选择实例">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel>
+                    <TextBlock Text="{Binding Name}" />
+                    <TextBlock Text="{Binding VersionText}" FontSize="10" Foreground="#8A8A8A" />
+                  </StackPanel>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Text="服务器地址" Classes="muted" />
+            <TextBox Classes="field" Text="{Binding ManualAddress}" PlaceholderText="192.168.1.10:25565" />
+            <Button Classes="primary" Content="启动并连接" Command="{Binding JoinManualCommand}" />
+            <TextBlock Text="{Binding ErrorText}" Foreground="#D93B3B" FontSize="12" TextWrapping="Wrap" />
+          </StackPanel>
+        </controls:GlassCard>
+      </Grid>
+    </Grid>
+  </ScrollViewer>
+</UserControl>

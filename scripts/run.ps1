@@ -1,7 +1,7 @@
-﻿#requires -Version 5.1
+#requires -Version 5.1
 <#
 .SYNOPSIS
-  以开发模式运行 GlassCraft。
+  以开发模式运行 MonoLauncher。
 
 .DESCRIPTION
   使用 dotnet run 启动 Avalonia 应用。可选参数会透传给应用：
@@ -26,7 +26,7 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
-$args = @('run', '--project', 'src/GlassCraft.App/GlassCraft.App.csproj', '--')
+$args = @('run', '--project', 'src/MonoLauncher.App/MonoLauncher.App.csproj', '--')
 if ($Page) { $args += @('--page', $Page) }
 if ($Screenshot) { $args += @('--screenshot', $Screenshot) }
 if ($AgentMessage) { $args += @('--agent-message', $AgentMessage) }
