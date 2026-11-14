@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MonoLauncher · 发布页</title>
+<style>
+  :root {
+    --bg:#000; --card:#0d0d0d; --card2:#111; --line:#262626; --line2:#333;
+    --text:#fff; --muted:#8a8a8a; --dim:#5f5f5f; --ok:#9be3b0; --warn:#ffcf6b; --err:#ff8b8b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}
+  body{font-family:"Segoe UI Variable Text","Segoe UI","Microsoft YaHei UI",system-ui,sans-serif;line-height:1.6}
+  .wrap{max-width:860px;margin:0 auto;padding:28px 24px 60px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
+  .brand img{width:26px;height:26px;border-radius:7px}
+  a{color:var(--text)}
+  .back{color:var(--muted);text-decoration:none;font-size:13px}
+  .back:hover{color:var(--text)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px}
+  h1{font-size:26px;margin:0 0 8px;letter-spacing:-.5px}
+  h2{font-size:15px;margin:0 0 12px}
+  p.sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+  label{display:block;font-size:12px;color:var(--muted);margin:14px 0 6px}
+  input[type=text],textarea{
+    width:100%;background:#0a0a0a;border:1px solid var(--line2);color:var(--text);
+    border-radius:9px;padding:11px 13px;font-size:13px;outline:none;font-family:inherit;
+  }
+  input[type=text]:focus,textarea:focus{border-color:#666}
+  textarea{min-height:130px;resize:vertical}
+  input[type=file]{width:100%;color:var(--muted);font-size:12px;padding:8px 0}
+  button{
+    border:0;border-radius:9px;padding:12px 22px;font-size:14px;font-weight:600;cursor:pointer;
+    font-family:inherit;
+  }
+  .primary{background:#fff;color:#000}
+  .primary:hover{background:#e2e2e2}
+  .primary:disabled{opacity:.45;cursor:not-allowed}
+  .ghost{background:transparent;color:var(--text);border:1px solid var(--line2)}
+  .ghost:hover{background:#161616}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:18px}
+  .hint{font-size:12px;color:var(--dim);margin-top:8px}
+  #status{font-size:13px;margin-top:14px}
+  #status.ok{color:var(--ok)} #status.warn{color:var(--warn)} #status.err{color:var(--err)}
+  .steps{counter-reset:s;list-style:none;padding:0;margin:0}
+  .steps li{counter-increment:s;position:relative;padding-left:34px;margin:10px 0;color:#c9c9c9;font-size:13px}
+  .steps li::before{
+    content:counter(s);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;
+    background:#1d1d1d;border:1px solid var(--line2);color:#fff;font-size:11px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  code{background:#1a1a1a;border-radius:4px;padding:1px 6px;font-size:12px;color:#e8e8e8}
+  .warnbox{background:#1a1508;border:1px solid #4a3a15;border-radius:10px;padding:14px;font-size:12.5px;color:var(--warn)}
+  .fileinfo{font-size:12px;color:var(--muted);margin-top:8px}
+  details{margin-top:14px}
+  summary{cursor:pointer;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <img src="icon.svg" alt="" onerror="this.style.display='none'" />
+      MonoLauncher <span style="color:var(--dim);font-weight:500;font-size:11px">发布页</span>
+    </div>
+    <a class="back" href="index.html">← 返回下载页</a>
+  </header>
+
+  <h1>发布新版本</h1>
+  <p class="sub">在这儿填版本号和更新说明、选安装包，页面会生成新的 <code>releases.json</code> 供你上传。</p>
+
+  <div class="warnbox">
+    说明：这个页面是纯静态的，没有后端，<b>不能直接把 68 MB 的安装包传到服务器</b>。
+    它的作用是帮你把版本号、日期、更新说明、SHA256 全部算好并生成 <code>releases.json</code>，
+    然后你把两个文件上传到站点即可。
+  </div>
+
+  <div class="card">
+    <h2>1. 填写版本信息</h2>
+
+    <label>版本号（不带 v）</label>
+    <input id="ver" type="text" placeholder="0.9.1" autocomplete="off" />
+
+    <label>更新说明（会原样显示在下载页和启动器里，可以多行）</label>
+    <textarea id="notes" placeholder="本次更新：&#10;- 修复 xxx&#10;- 新增 xxx"></textarea>
+
+    <label>安装包 zip</label>
+    <input id="file" type="file" accept=".zip" />
+    <div class="fileinfo" id="fileinfo"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. 生成 releases.json</h2>
+    <div class="row">
+      <button class="primary" id="gen" disabled>生成并下载 releases.json</button>
+      <button class="ghost" id="copy" disabled>复制 JSON</button>
+    </div>
+    <div id="status"></div>
+
+    <details>
+      <summary>预览生成的 JSON</summary>
+      <pre id="preview" style="background:#0a0a0a;border:1px solid var(--line);border-radius:9px;padding:14px;overflow:auto;max-height:320px;font-size:12px;color:#c9c9c9"></pre>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>3. 上传到服务器</h2>
+    <ol class="steps">
+      <li>把安装包放进站点的 <code>downloads/</code> 目录（文件名保持和下方一致）</li>
+      <li>把刚下载的 <code>releases.json</code> 覆盖站点根目录的同名文件</li>
+      <li>刷新下载页，确认版本号和更新说明已更新</li>
+      <li>如果站点启用了自动跟随 GitHub，还需要在 GitHub 发一个同名 tag 的 Release</li>
+    </ol>
+    <div class="fileinfo" id="targets"></div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const REPO = 'cyl-0121/Mono-Launcher';
+
+  let fileInfo = null; // { name, sizeText, sha256 }
+
+  function fmtSize(bytes) {
+    if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+    if (bytes >= 1024) return Math.round(bytes / 1024) + ' KB';
+    return bytes + ' B';
+  }
+
+  function setStatus(text, cls) {
+    const el = $('status');
+    el.textContent = text || '';
+    el.className = cls || '';
+  }
+
+  async function sha256(file) {
+    const buf = await file.arrayBuffer();
+    const digest = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+      .toUpperCase();
+  }
+
+  $('file').addEventListener('change', async () => {
+    const f = $('file').files[0];
+    $('gen').disabled = true;
+    $('copy').disabled = true;
+    fileInfo = null;
+    if (!f) { $('fileinfo').textContent = ''; return; }
+    $('fileinfo').textContent = `已选择：${f.name}（${fmtSize(f.size)}），正在计算 SHA256…`;
+    try {
+      const hash = await sha256(f);
+      fileInfo = { name: f.name, sizeText: fmtSize(f.size), sha256: hash };
+      $('fileinfo').textContent = `${f.name} · ${fmtSize(f.size)} · SHA256 ${hash.slice(0, 16)}…`;
+      $('gen').disabled = false;
+      $('copy').disabled = false;
+      if (/\d+\.\d+\.\d+/.test(f.name) && !$('ver').value) {
+        $('ver').value = f.name.match(/(\d+\.\d+\.\d+)/)[1];
+      }
+    } catch (e) {
+      $('fileinfo').textContent = '计算 SHA256 失败：' + e.message;
+    }
+  });
+
+  function buildJson() {
+    const ver = $('ver').value.trim().replace(/^v/i, '');
+    if (!ver) throw new Error('请填写版本号');
+    if (!fileInfo) throw new Error('请选择安装包 zip');
+
+    const today = new Date();
+    const date = today.getFullYear() + '-' +
+      String(today.getMonth() + 1).padStart(2, '0') + '-' +
+      String(today.getDate()).padStart(2, '0');
+
+    return {
+      latest: {
+        version: ver,
+        date: date,
+        size: fileInfo.sizeText,
+        sha256: fileInfo.sha256,
+        download: 'downloads/' + fileInfo.name,
+        github: `https://github.com/${REPO}/releases/download/v${ver}/MonoLauncher-win-x64.zip`,
+        notes: $('notes').value.trim(),
+      },
+      history: [
+        { version: ver, date: date, size: fileInfo.sizeText, download: 'downloads/' + fileInfo.name },
+      ],
+    };
+  }
+
+  function refreshPreview() {
+    try {
+      const doc = buildJson();
+      $('preview').textContent = JSON.stringify(doc, null, 2);
+      $('targets').textContent =
+        `需要上传：downloads/${fileInfo.name}（${fileInfo.sizeText}）  +  releases.json`;
+    } catch (e) {
+      $('preview').textContent = '（填完上面的信息后这里会显示 JSON）';
+      $('targets').textContent = '';
+    }
+  }
+
+  ['ver', 'notes'].forEach((id) => $(id).addEventListener('input', refreshPreview));
+
+  $('gen').addEventListener('click', () => {
+    try {
+      const doc = buildJson();
+      const json = JSON.stringify(doc, null, 2);
+      $('preview').textContent = json;
+      const blob = new Blob([json], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'releases.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      setStatus('已生成 releases.json。把它和 zip 一起上传到站点即可。', 'ok');
+      refreshPreview();
+    } catch (e) {
+      setStatus(e.message, 'err');
+    }
+  });
+
+  $('copy').addEventListener('click', async () => {
+    try {
+      const json = JSON.stringify(buildJson(), null, 2);
+      await navigator.clipboard.writeText(json);
+      setStatus('JSON 已复制到剪贴板。', 'ok');
+    } catch (e) {
+      setStatus('复制失败：' + e.message, 'err');
+    }
+  });
+})();
+</script>
+</body>
+</html>
