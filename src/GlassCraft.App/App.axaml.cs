@@ -53,6 +53,25 @@ public partial class App : Application
             desktop.MainWindow = new Views.MainWindow();
             desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
+            // Terms of use: block the UI until the user agrees, unless this is an automated run.
+            if (string.IsNullOrWhiteSpace(ScreenshotPath) && !Views.ConsentStore.IsAccepted())
+            {
+                var main = desktop.MainWindow;
+                main.Opened += (_, _) =>
+                {
+                    DispatcherTimer.RunOnce(async () =>
+                    {
+                        var agreement = new Views.AgreementWindow();
+                        await agreement.ShowDialog(main);
+                        if (!agreement.Accepted)
+                        {
+                            AppServices.Log.Info("app", "用户拒绝了用户协议，退出");
+                            desktop.Shutdown();
+                        }
+                    }, TimeSpan.FromMilliseconds(200));
+                };
+            }
+
             if (!string.IsNullOrWhiteSpace(StartupPage) && desktop.MainWindow.DataContext is ViewModels.MainWindowViewModel vm)
                 vm.NavigateCommand.Execute(StartupPage);
 

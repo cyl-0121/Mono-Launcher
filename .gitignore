@@ -10,3 +10,5 @@ TestResults/
 !docs/*.log
 .idea/
 *.DotSettings.user
+# Apple SF Pro fonts are not distributed with the repository (license restriction)
+src/GlassCraft.App/Assets/Fonts/

@@ -31,6 +31,11 @@ public sealed class AppSettings
     public int AutoDowngradeFpsThreshold { get; set; } = 32;
     public double UiScale { get; set; } = 1.0;
 
+    // Updates / announcement
+    /// <summary>GitHub "owner/repo" used for the update announcement. Empty disables fetching.</summary>
+    public string UpdateRepository { get; set; } = "";
+    public bool CheckUpdateOnStartup { get; set; } = true;
+
     // AI
     public string DefaultProviderId { get; set; } = "deepseek";
     public string? DefaultModel { get; set; }

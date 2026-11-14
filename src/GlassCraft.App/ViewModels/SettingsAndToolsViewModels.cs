@@ -95,6 +95,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _statusText = "";
     [ObservableProperty] private bool _isScanning;
     [ObservableProperty] private string _dataDirectory = "";
+    [ObservableProperty] private string _updateRepository = "";
 
     public SettingsViewModel()
     {
@@ -109,6 +110,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         PointerLighting = s.PointerLighting;
         AutoDowngrade = s.AutoDowngrade;
         AiStreamFlushMs = s.AiStreamFlushMs;
+        UpdateRepository = s.UpdateRepository;
         DataDirectory = AppServices.Paths.Root;
         foreach (var rt in AppServices.Java.Cached) JavaRuntimes.Add(rt);
     }
@@ -128,7 +130,9 @@ public sealed partial class SettingsViewModel : ObservableObject
             s.PointerLighting = PointerLighting;
             s.AutoDowngrade = AutoDowngrade;
             s.AiStreamFlushMs = Math.Clamp(AiStreamFlushMs, 10, 500);
+            s.UpdateRepository = UpdateRepository.Trim();
         });
+        AppServices.Updates.Repository = UpdateRepository.Trim();
         AppServices.ApplySettings();
         StatusText = "设置已保存";
     }

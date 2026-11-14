@@ -13,6 +13,7 @@ using GlassCraft.Core.Loaders;
 using GlassCraft.Core.Logging;
 using GlassCraft.Core.Mods;
 using GlassCraft.Core.Security;
+using GlassCraft.Core.Update;
 using GlassCraft.Core.Versions;
 
 namespace GlassCraft.App.Services;
@@ -34,6 +35,7 @@ public static class AppServices
     public static LaunchService Launch { get; private set; } = null!;
     public static LoaderService Loaders { get; private set; } = null!;
     public static ModrinthService Modrinth { get; private set; } = null!;
+    public static UpdateService Updates { get; private set; } = null!;
     public static LauncherTools Tools { get; private set; } = null!;
     public static AgentProviderFactory Providers { get; private set; } = null!;
     public static LocalLlamaService LocalAi { get; private set; } = null!;
@@ -74,6 +76,11 @@ public static class AppServices
         Launch = new LaunchService(Paths);
         Loaders = new LoaderService(Http, Paths, Versions);
         Modrinth = new ModrinthService(Http);
+        Updates = new UpdateService(Http, Paths)
+        {
+            Repository = Settings.Current.UpdateRepository,
+            CurrentVersion = "0.9.0"
+        };
         Tools = new LauncherTools(
             Paths, Instances, Versions, Loaders, Modrinth, Launch, Java, Accounts,
             new DownloadCenterBridge(

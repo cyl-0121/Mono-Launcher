@@ -16,14 +16,14 @@
 
         <TextBlock Grid.Row="1" Text="{Binding StatusText}" Classes="muted" TextWrapping="Wrap" />
 
-        <Border Grid.Row="2" Background="#12000000" BorderBrush="#2E2E2E" BorderThickness="1" CornerRadius="3">
+        <Border Grid.Row="2" Background="#12000000" BorderBrush="#F2F2F2" BorderThickness="1" CornerRadius="3">
           <ListBox ItemsSource="{Binding Servers}" SelectedItem="{Binding SelectedServer}"
                    Background="Transparent" BorderThickness="0">
             <ListBox.ItemTemplate>
               <DataTemplate>
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="4">
                   <StackPanel Spacing="2">
-                    <TextBlock Text="{Binding Motd}" Foreground="#E6E6E6" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Motd}" Foreground="#111111" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding Endpoint}" Classes="muted" />
                   </StackPanel>
                   <Button Grid.Column="1" Classes="ghost" Content="加入" Padding="12,5"
@@ -51,7 +51,7 @@
               <DataTemplate>
                 <StackPanel>
                   <TextBlock Text="{Binding Name}" />
-                  <TextBlock Text="{Binding VersionText}" FontSize="10" Foreground="#8A97AD" />
+                  <TextBlock Text="{Binding VersionText}" FontSize="10" Foreground="#888888" />
                 </StackPanel>
               </DataTemplate>
             </ComboBox.ItemTemplate>
@@ -61,11 +61,11 @@
           <TextBox Classes="field" Text="{Binding ManualAddress}" PlaceholderText="192.168.1.10:25565" />
           <Button Classes="primary" Content="启动并连接" Command="{Binding JoinManualCommand}" />
 
-          <TextBlock Text="{Binding ErrorText}" Foreground="#FF7A7A" FontSize="12" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding ErrorText}" Foreground="#C62828" FontSize="12" TextWrapping="Wrap" />
 
-          <Border Background="#12000000" BorderBrush="#2E2E2E" BorderThickness="1" CornerRadius="3" Padding="12">
+          <Border Background="#12000000" BorderBrush="#F2F2F2" BorderThickness="1" CornerRadius="3" Padding="12">
             <StackPanel Spacing="6">
-              <TextBlock Text="公网联机" Foreground="#E6E6E6" FontWeight="SemiBold" FontSize="13" />
+              <TextBlock Text="公网联机" Foreground="#111111" FontWeight="SemiBold" FontSize="13" />
               <TextBlock Text="当前版本支持「局域网发现 + 直连」。跨公网联机需要中继/端口映射服务，本版本尚未实现，暂不提供一键开服。"
                          Classes="muted" TextWrapping="Wrap" />
               <TextBlock Text="若已有公网服务器或已做端口映射，直接在上方填地址即可连接。"

@@ -1,6 +1,6 @@
 # GlassCraft
 
-一个面向 Windows 11 的 Minecraft: Java Edition 启动器。界面是 Minecraft 风格的扁平深色设计（自绘标题栏、草绿主色、像素网格背景），原生 **Avalonia 12 + Skia** 渲染；内置基于 **Semantic Kernel** 的多提供商 AI Agent 与 **LLamaSharp** 本地推理。
+一个面向 Windows 11 的 Minecraft: Java Edition 启动器。界面参照 PCL2 的**顶部导航栏**结构，黑白极简主题（自绘标题栏、SF Pro 字体、无边框窗口），原生 **Avalonia 12 + Skia** 渲染；内置基于 **Semantic Kernel** 的多提供商 AI Agent 与 **LLamaSharp** 本地推理。
 
 没有 WebView，没有 HTML/CSS。
 
@@ -78,11 +78,13 @@
 - 失败信息可定位（URL、状态码、重试次数）
 
 ### P4 界面
-- 页面：主页（快速启动）/ 下载 / 版本列表 / Mod / 联机 / 下载管理 / 日志 / AI 助手 / 设置
-- Minecraft 风格：深灰石质背景 + 像素网格、草绿主色、方块图标、像素化按钮
+- 页面：启动（首页）/ 下载 / 版本 / Mod / 联机 / 日志 / AI / 设置
+- 参照 PCL2 的顶部导航栏；黑白极简主题（黑色顶栏、白色卡片、灰色背景）
+- 首页：左侧账户/实例/启动按钮，右侧 Today + 更新公告（GitHub Release 自动拉取）
 - 无边框窗口 + 自绘标题栏（拖动 / 双击最大化 / 最小化 / 最大化 / 关闭）
 - 最大化不覆盖任务栏；DPI 自适应
-- 界面效果四档：完整（阴影+高光）/ 标准 / 简洁 / 关闭（即时生效）
+- 界面效果四档：完整 / 标准 / 简洁 / 关闭（即时生效）
+- 首次启动显示《用户协议与免责声明》，拒绝则退出
 
 ### P5 AI Agent
 - Semantic Kernel 抽象（自实现 OpenAI 兼容 + Anthropic 连接器）
@@ -220,7 +222,9 @@ GlassCraft/
 5. 微软登录未验证（无账户），代码基于公开协议实现。
 6. 公网联机（中继）未实现。
 7. Mod 页面只支持单个 Mod 安装，整合包未实现。
-8. 单文件发布体积较大（含 LLamaSharp CPU 后端）。
+8. 单文件发布体积较大（含 LLamaSharp CPU 后端与 SF Pro 字体）。
+9. **字体许可**：SF Pro 为 Apple 字体，其许可仅允许 Apple 平台使用。仓库未提交字体文件（`Assets/Fonts` 被 .gitignore 忽略），本地构建需自行放置；公开发布请替换为 Inter 等开源字体。
+10. 更新公告需要 GitHub 网络可达；国内网络可能失败，失败时显示缓存。
 
 ---
 

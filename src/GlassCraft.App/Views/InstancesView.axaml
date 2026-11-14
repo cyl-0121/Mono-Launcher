@@ -24,14 +24,14 @@
                  Background="Transparent" BorderThickness="0">
           <ListBox.ItemTemplate>
             <DataTemplate>
-              <Border CornerRadius="10" Padding="10" Background="#0DFFFFFF" Margin="0,2">
+              <Border CornerRadius="10" Padding="10" Background="#F8FAFD" Margin="0,2">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                   <Border Width="38" Height="38" CornerRadius="10" Background="#2E4F8BFF">
-                    <TextBlock Text="▦" Foreground="#BFD3FF" FontSize="17"
+                    <TextBlock Text="▦" Foreground="#111111" FontSize="17"
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                   </Border>
                   <StackPanel Grid.Column="1" Spacing="2">
-                    <TextBlock Text="{Binding Name}" Foreground="#E8EFFF" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Name}" Foreground="#111111" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding VersionText}" Classes="muted" />
                     <TextBlock Text="{Binding LastPlayedText}" Classes="muted" />
                   </StackPanel>
@@ -46,7 +46,7 @@
           <Button Classes="ghost" Content="移入回收站" Command="{Binding DeleteCommand}" />
         </StackPanel>
 
-        <Border Grid.Row="4" Background="#0AFFFFFF" CornerRadius="10" Padding="10">
+        <Border Grid.Row="4" Background="#F8FAFD" CornerRadius="10" Padding="10">
           <StackPanel Spacing="6">
             <Grid ColumnDefinitions="*,Auto">
               <TextBlock Text="导入现有实例" Classes="muted" VerticalAlignment="Center" />
@@ -58,7 +58,7 @@
               <ListBox.ItemTemplate>
                 <DataTemplate>
                   <StackPanel Spacing="1">
-                    <TextBlock Text="{Binding Name}" Foreground="#E8EFFF" FontSize="12" />
+                    <TextBlock Text="{Binding Name}" Foreground="#111111" FontSize="12" />
                     <TextBlock Text="{Binding SourceText}" Classes="muted" />
                   </StackPanel>
                 </DataTemplate>
@@ -82,9 +82,9 @@
             <Button Classes="primary" Content="启动" Command="{Binding LaunchCommand}" />
             <Button Classes="ghost" Content="结束进程" Command="{Binding KillCommand}" />
           </StackPanel>
-          <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding GameState}" Foreground="#9EB0C9"
+          <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding GameState}" Foreground="#888888"
                      FontSize="13" Margin="0,12,0,0" />
-          <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding ErrorText}" Foreground="#FF8A8A"
+          <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding ErrorText}" Foreground="#C62828"
                      FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0" />
         </Grid>
       </controls:GlassCard>
@@ -98,7 +98,7 @@
           </Grid>
           <TextBox Grid.Row="1" Text="{Binding GameLog}" IsReadOnly="True" AcceptsReturn="True"
                    TextWrapping="NoWrap" FontFamily="Cascadia Mono, Consolas, monospace" FontSize="11"
-                   Background="#0A000000" Foreground="#B9C7DD" CornerRadius="8" />
+                   Background="#0A000000" Foreground="#555555" CornerRadius="8" />
         </Grid>
       </controls:GlassCard>
     </Grid>

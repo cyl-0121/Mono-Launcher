@@ -17,8 +17,8 @@
                         IsVisible="{Binding Downloads.IsActive}">
       <StackPanel Spacing="8">
         <Grid ColumnDefinitions="*,Auto">
-          <TextBlock Text="{Binding Downloads.Stage}" Foreground="#E8EFFF" FontWeight="SemiBold" />
-          <TextBlock Grid.Column="1" Text="{Binding Downloads.SpeedText}" Foreground="#9EB0C9" />
+          <TextBlock Text="{Binding Downloads.Stage}" Foreground="#111111" FontWeight="SemiBold" />
+          <TextBlock Grid.Column="1" Text="{Binding Downloads.SpeedText}" Foreground="#888888" />
         </Grid>
         <ProgressBar Value="{Binding Downloads.Fraction}" Maximum="1" Height="8" />
         <Grid ColumnDefinitions="*,Auto">

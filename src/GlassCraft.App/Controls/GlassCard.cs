@@ -5,20 +5,20 @@ using GlassCraft.App.Services;
 
 namespace GlassCraft.App.Controls;
 
-/// <summary>
-/// Flat Minecraft-style card: dark panel, 1px border, subtle top highlight and bottom shadow.
-/// The previous liquid-glass pipeline was removed on request.
-/// </summary>
+/// <summary>Flat white card with a light border, matching the PCL-style light theme.</summary>
 public class GlassCard : Decorator
 {
     public static readonly StyledProperty<double> CornerRadiusProperty =
-        AvaloniaProperty.Register<GlassCard, double>(nameof(CornerRadius), 4);
+        AvaloniaProperty.Register<GlassCard, double>(nameof(CornerRadius), 8);
 
     public static readonly StyledProperty<double> TintOpacityProperty =
-        AvaloniaProperty.Register<GlassCard, double>(nameof(TintOpacity), 0.94);
+        AvaloniaProperty.Register<GlassCard, double>(nameof(TintOpacity), 1.0);
 
     public static readonly StyledProperty<Color> TintColorProperty =
-        AvaloniaProperty.Register<GlassCard, Color>(nameof(TintColor), Color.FromArgb(255, 34, 34, 34));
+        AvaloniaProperty.Register<GlassCard, Color>(nameof(TintColor), Color.FromArgb(255, 255, 255, 255));
+
+    public static readonly StyledProperty<Color> BorderColorProperty =
+        AvaloniaProperty.Register<GlassCard, Color>(nameof(BorderColor), Color.FromArgb(255, 227, 234, 243));
 
     public static readonly StyledProperty<bool> ElevatedProperty =
         AvaloniaProperty.Register<GlassCard, bool>(nameof(Elevated), true);
@@ -29,6 +29,7 @@ public class GlassCard : Decorator
     public double CornerRadius { get => GetValue(CornerRadiusProperty); set => SetValue(CornerRadiusProperty, value); }
     public double TintOpacity { get => GetValue(TintOpacityProperty); set => SetValue(TintOpacityProperty, value); }
     public Color TintColor { get => GetValue(TintColorProperty); set => SetValue(TintColorProperty, value); }
+    public Color BorderColor { get => GetValue(BorderColorProperty); set => SetValue(BorderColorProperty, value); }
     public bool Elevated { get => GetValue(ElevatedProperty); set => SetValue(ElevatedProperty, value); }
     public Thickness Padding { get => GetValue(PaddingProperty); set => SetValue(PaddingProperty, value); }
 
@@ -72,19 +73,10 @@ public class GlassCard : Decorator
         var radius = CornerRadius;
         context.DrawRectangle(new SolidColorBrush(TintColor, TintOpacity), null, new RoundedRect(rect, radius));
 
-        var border = new Pen(new SolidColorBrush(Color.FromArgb(255, 58, 58, 58)), 1);
-        context.DrawRectangle(null, border, new RoundedRect(new Rect(0, 0, size.Width - 1, size.Height - 1), radius));
-
-        if (tier == GlassTier.HighPerformance)
+        if (tier != GlassTier.LowPower)
         {
-            var highlight = new Pen(new SolidColorBrush(Color.FromArgb(30, 255, 255, 255)), 1);
-            context.DrawLine(highlight, new Point(radius + 1, 1), new Point(size.Width - radius - 1, 1));
-        }
-        if (tier is GlassTier.HighPerformance or GlassTier.Balanced)
-        {
-            var shadow = new Pen(new SolidColorBrush(Color.FromArgb(80, 0, 0, 0)), 1);
-            context.DrawLine(shadow, new Point(radius + 1, size.Height - 1.5),
-                new Point(size.Width - radius - 1, size.Height - 1.5));
+            var border = new Pen(new SolidColorBrush(BorderColor), 1);
+            context.DrawRectangle(null, border, new RoundedRect(new Rect(0.5, 0.5, size.Width - 1, size.Height - 1), radius));
         }
     }
 }

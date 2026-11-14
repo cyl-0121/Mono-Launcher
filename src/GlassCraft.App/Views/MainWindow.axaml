@@ -9,115 +9,113 @@
         Width="1120" Height="700" MinWidth="940" MinHeight="560"
         WindowStartupLocation="CenterScreen"
         SystemDecorations="None"
-        Background="#1B1B1B"
-        FontFamily="Microsoft YaHei UI, Segoe UI">
+        Background="#F7F7F7"
+        FontFamily="avares://GlassCraft/Assets/Fonts#SF Pro Display, Microsoft YaHei UI, Segoe UI">
   <Window.Styles>
     <Style Selector="TextBlock.h1">
       <Setter Property="FontSize" Value="24" />
       <Setter Property="FontWeight" Value="Bold" />
-      <Setter Property="Foreground" Value="#F2F2F2" />
+      <Setter Property="Foreground" Value="#111111" />
     </Style>
     <Style Selector="TextBlock.h2">
       <Setter Property="FontSize" Value="15" />
       <Setter Property="FontWeight" Value="SemiBold" />
-      <Setter Property="Foreground" Value="#EAEAEA" />
+      <Setter Property="Foreground" Value="#111111" />
     </Style>
     <Style Selector="TextBlock.muted">
-      <Setter Property="Foreground" Value="#8E8E8E" />
+      <Setter Property="Foreground" Value="#888888" />
       <Setter Property="FontSize" Value="12" />
     </Style>
 
-    <!-- Navigation -->
+    <!-- Top navigation -->
     <Style Selector="Button.nav">
-      <Setter Property="HorizontalAlignment" Value="Stretch" />
-      <Setter Property="HorizontalContentAlignment" Value="Left" />
-      <Setter Property="Height" Value="38" />
-      <Setter Property="Margin" Value="0,1" />
+      <Setter Property="Height" Value="34" />
+      <Setter Property="Margin" Value="3,0" />
       <Setter Property="Padding" Value="14,0" />
-      <Setter Property="CornerRadius" Value="3" />
+      <Setter Property="CornerRadius" Value="17" />
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
-      <Setter Property="Foreground" Value="#C8C8C8" />
+      <Setter Property="Foreground" Value="#FFFFFF" />
       <Setter Property="FontSize" Value="13" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
     <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="#242424" />
-      <Setter Property="TextBlock.Foreground" Value="#FFFFFF" />
+      <Setter Property="Background" Value="#1FFFFFFF" />
     </Style>
     <Style Selector="Button.nav.active /template/ ContentPresenter">
-      <Setter Property="Background" Value="#2A2A2A" />
-      <Setter Property="TextBlock.Foreground" Value="#8CD867" />
+      <Setter Property="Background" Value="#33FFFFFF" />
+      <Setter Property="TextBlock.Foreground" Value="#FFFFFF" />
     </Style>
 
-    <!-- Buttons -->
-    <Style Selector="Button.primary">
-      <Setter Property="Background" Value="#3C8527" />
-      <Setter Property="Foreground" Value="White" />
-      <Setter Property="BorderBrush" Value="#2A5C1B" />
-      <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="CornerRadius" Value="3" />
-      <Setter Property="Padding" Value="16,8" />
-      <Setter Property="FontWeight" Value="SemiBold" />
-      <Setter Property="FontSize" Value="13" />
-    </Style>
-    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="#4A9E32" />
-    </Style>
-    <Style Selector="Button.primary:pressed /template/ ContentPresenter">
-      <Setter Property="Background" Value="#2F6B1E" />
-    </Style>
-    <Style Selector="Button.ghost">
-      <Setter Property="Background" Value="#2E2E2E" />
-      <Setter Property="Foreground" Value="#DADADA" />
-      <Setter Property="BorderBrush" Value="#3F3F3F" />
-      <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="CornerRadius" Value="3" />
-      <Setter Property="Padding" Value="12,7" />
-      <Setter Property="FontSize" Value="12" />
-    </Style>
-    <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="#3A3A3A" />
-    </Style>
-
-    <!-- Window chrome buttons -->
+    <!-- Window chrome -->
     <Style Selector="Button.chrome">
-      <Setter Property="Width" Value="38" />
-      <Setter Property="Height" Value="30" />
+      <Setter Property="Width" Value="44" />
+      <Setter Property="Height" Value="48" />
       <Setter Property="Background" Value="Transparent" />
-      <Setter Property="Foreground" Value="#B0B0B0" />
+      <Setter Property="Foreground" Value="#D0D0D0" />
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="CornerRadius" Value="0" />
       <Setter Property="FontSize" Value="13" />
       <Setter Property="Padding" Value="0" />
     </Style>
     <Style Selector="Button.chrome:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="#2A2A2A" />
+      <Setter Property="Background" Value="#22FFFFFF" />
       <Setter Property="TextBlock.Foreground" Value="#FFFFFF" />
     </Style>
     <Style Selector="Button.chrome.close:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="#C42B1C" />
+      <Setter Property="Background" Value="#C62828" />
       <Setter Property="TextBlock.Foreground" Value="#FFFFFF" />
     </Style>
 
-    <!-- Messages -->
+    <!-- Buttons -->
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#111111" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="16,8" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#2B2B2B" />
+    </Style>
+    <Style Selector="Button.primary:pressed /template/ ContentPresenter">
+      <Setter Property="Background" Value="#000000" />
+    </Style>
+    <Style Selector="Button.ghost">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="Foreground" Value="#111111" />
+      <Setter Property="BorderBrush" Value="#CCCCCC" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="12,7" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#F2F8FF" />
+      <Setter Property="BorderBrush" Value="#111111" />
+    </Style>
+
+    <!-- Chat -->
     <Style Selector="Border.msg">
-      <Setter Property="CornerRadius" Value="3" />
-      <Setter Property="Padding" Value="10,8" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="12,9" />
       <Setter Property="Margin" Value="0,3" />
       <Setter Property="MaxWidth" Value="720" />
       <Setter Property="HorizontalAlignment" Value="Left" />
-      <Setter Property="Background" Value="#242424" />
-      <Setter Property="BorderBrush" Value="#333333" />
+      <Setter Property="Background" Value="#F2F2F2" />
+      <Setter Property="BorderBrush" Value="#E5E5E5" />
       <Setter Property="BorderThickness" Value="1" />
     </Style>
     <Style Selector="Border.msg.user">
       <Setter Property="HorizontalAlignment" Value="Right" />
-      <Setter Property="Background" Value="#1F3A1A" />
-      <Setter Property="BorderBrush" Value="#3C8527" />
+      <Setter Property="Background" Value="#F2F2F2" />
+      <Setter Property="BorderBrush" Value="#D5D5D5" />
     </Style>
     <Style Selector="Border.msg.tool">
-      <Setter Property="Background" Value="#2E2A16" />
-      <Setter Property="BorderBrush" Value="#6B5A1E" />
+      <Setter Property="Background" Value="#F5F5F5" />
+      <Setter Property="BorderBrush" Value="#DDDDDD" />
     </Style>
     <Style Selector="Border.msg.system">
       <Setter Property="Background" Value="Transparent" />
@@ -125,20 +123,20 @@
     </Style>
 
     <Style Selector="TextBox.field">
-      <Setter Property="Background" Value="#1E1E1E" />
-      <Setter Property="Foreground" Value="#E6E6E6" />
-      <Setter Property="BorderBrush" Value="#3A3A3A" />
+      <Setter Property="Background" Value="#F7F7F7" />
+      <Setter Property="Foreground" Value="#111111" />
+      <Setter Property="BorderBrush" Value="#D5D5D5" />
       <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="CornerRadius" Value="3" />
+      <Setter Property="CornerRadius" Value="6" />
       <Setter Property="Padding" Value="8,6" />
       <Setter Property="FontSize" Value="13" />
       <Setter Property="MinHeight" Value="32" />
     </Style>
     <Style Selector="ComboBox.field">
-      <Setter Property="Background" Value="#1E1E1E" />
-      <Setter Property="Foreground" Value="#E6E6E6" />
-      <Setter Property="BorderBrush" Value="#3A3A3A" />
-      <Setter Property="CornerRadius" Value="3" />
+      <Setter Property="Background" Value="#F7F7F7" />
+      <Setter Property="Foreground" Value="#111111" />
+      <Setter Property="BorderBrush" Value="#D5D5D5" />
+      <Setter Property="CornerRadius" Value="6" />
       <Setter Property="MinHeight" Value="32" />
     </Style>
     <Style Selector="ListBox">
@@ -147,104 +145,118 @@
     </Style>
     <Style Selector="ListBoxItem">
       <Setter Property="Padding" Value="6,4" />
-      <Setter Property="CornerRadius" Value="3" />
+      <Setter Property="CornerRadius" Value="6" />
     </Style>
     <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-      <Setter Property="Background" Value="#2A3A22" />
+      <Setter Property="Background" Value="#F2F2F2" />
     </Style>
   </Window.Styles>
 
-  <Grid RowDefinitions="34,*">
-    <!-- Custom title bar -->
-    <Grid Grid.Row="0" Name="TitleBar" Background="#141414" ColumnDefinitions="Auto,*,Auto">
-      <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" Margin="10,0,0,0" VerticalAlignment="Center">
-        <Border Width="20" Height="20" Background="#7A5532" BorderBrush="#2A1B0E" BorderThickness="1">
-          <Border Height="7" VerticalAlignment="Top" Background="#5E9C3D" BorderBrush="#2F4A1E" BorderThickness="0,0,0,1" />
-        </Border>
-        <TextBlock Text="GlassCraft" FontSize="12" Foreground="#C8C8C8" VerticalAlignment="Center" />
-        <TextBlock Text="v0.9" FontSize="11" Foreground="#666666" VerticalAlignment="Center" />
-      </StackPanel>
+  <Grid RowDefinitions="48,*">
+    <!-- Top bar: brand + navigation, PCL-style -->
+    <Grid Grid.Row="0" Name="TitleBar" Background="#111111">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" Margin="18,0,0,0"
+                    VerticalAlignment="Center">
+          <TextBlock Text="GlassCraft" FontSize="19" FontWeight="Bold" Foreground="#FFFFFF" />
+          <TextBlock Text="v0.9" FontSize="11" Foreground="#9A9A9A" VerticalAlignment="Center" />
+        </StackPanel>
 
-      <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
-        <Button Classes="chrome" Content="—" Click="OnMinimizeClick" />
-        <Button Classes="chrome" Name="MaxButton" Content="□" Click="OnMaximizeClick" />
-        <Button Classes="chrome close" Content="✕" Click="OnCloseClick" />
-      </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Spacing="0">
+          <Button Classes="nav" Name="NavHome" Command="{Binding NavigateCommand}" CommandParameter="home">
+            <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+              <TextBlock Text="▶" FontSize="12" VerticalAlignment="Center" />
+              <TextBlock Text="启动" FontSize="13" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="nav" Name="NavVersions" Command="{Binding NavigateCommand}" CommandParameter="versions">
+            <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+              <TextBlock Text="⬇" FontSize="12" VerticalAlignment="Center" />
+              <TextBlock Text="下载" FontSize="13" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="nav" Name="NavInstances" Command="{Binding NavigateCommand}" CommandParameter="instances">
+            <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+              <TextBlock Text="▦" FontSize="12" VerticalAlignment="Center" />
+              <TextBlock Text="版本" FontSize="13" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="nav" Name="NavMods" Command="{Binding NavigateCommand}" CommandParameter="mods">
+            <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+              <TextBlock Text="◈" FontSize="12" VerticalAlignment="Center" />
+              <TextBlock Text="Mod" FontSize="13" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="nav" Name="NavNetwork" Command="{Binding NavigateCommand}" CommandParameter="network">
+            <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+              <TextBlock Text="◎" FontSize="12" VerticalAlignment="Center" />
+              <TextBlock Text="联机" FontSize="13" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="nav" Name="NavLogs" Command="{Binding NavigateCommand}" CommandParameter="logs">
+            <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+              <TextBlock Text="▤" FontSize="12" VerticalAlignment="Center" />
+              <TextBlock Text="日志" FontSize="13" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="nav" Name="NavAgent" Command="{Binding NavigateCommand}" CommandParameter="agent">
+            <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+              <TextBlock Text="✦" FontSize="12" VerticalAlignment="Center" />
+              <TextBlock Text="AI" FontSize="13" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="nav" Name="NavSettings" Command="{Binding NavigateCommand}" CommandParameter="settings">
+            <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+              <TextBlock Text="⚙" FontSize="12" VerticalAlignment="Center" />
+              <TextBlock Text="设置" FontSize="13" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+
+        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
+          <Button Classes="chrome" Content="—" Click="OnMinimizeClick" />
+          <Button Classes="chrome" Name="MaxButton" Content="□" Click="OnMaximizeClick" />
+          <Button Classes="chrome close" Content="✕" Click="OnCloseClick" />
+        </StackPanel>
+      </Grid>
     </Grid>
 
-    <!-- Body -->
-    <Grid Grid.Row="1" ColumnDefinitions="188,*">
-      <!-- Navigation -->
-      <Border Grid.Column="0" Background="#181818" BorderBrush="#2A2A2A" BorderThickness="0,0,1,0">
-        <DockPanel Margin="8,10,8,8">
-          <StackPanel DockPanel.Dock="Bottom" Spacing="4" Margin="6,0,6,4">
-            <TextBlock Text="{Binding TierText}" Classes="muted" FontSize="10" TextWrapping="Wrap" />
-            <TextBlock Text="{Binding FpsText}" Classes="muted" FontSize="10" />
-          </StackPanel>
-
-          <StackPanel>
-            <Button Classes="nav" Name="NavHome" Content="🏠  主页" Command="{Binding NavigateCommand}" CommandParameter="home" />
-            <Button Classes="nav" Name="NavVersions" Content="⬇  下载" Command="{Binding NavigateCommand}" CommandParameter="versions" />
-            <Button Classes="nav" Name="NavInstances" Content="▦  版本列表" Command="{Binding NavigateCommand}" CommandParameter="instances" />
-            <Button Classes="nav" Name="NavMods" Content="🧩  Mod" Command="{Binding NavigateCommand}" CommandParameter="mods" />
-            <Button Classes="nav" Name="NavNetwork" Content="🌐  联机" Command="{Binding NavigateCommand}" CommandParameter="network" />
-            <Button Classes="nav" Name="NavDownloads" Content="⇩  下载管理" Command="{Binding NavigateCommand}" CommandParameter="downloads" />
-            <Button Classes="nav" Name="NavLogs" Content="📄  日志" Command="{Binding NavigateCommand}" CommandParameter="logs" />
-            <Button Classes="nav" Name="NavAgent" Content="✦  AI 助手" Command="{Binding NavigateCommand}" CommandParameter="agent" />
-            <Button Classes="nav" Name="NavSettings" Content="⚙  设置" Command="{Binding NavigateCommand}" CommandParameter="settings" />
-          </StackPanel>
-        </DockPanel>
-      </Border>
-
-      <!-- Content -->
-      <Grid Grid.Column="1" RowDefinitions="Auto,*">
-        <Grid Grid.Row="0" Height="44" Margin="16,0,16,0" ColumnDefinitions="*,Auto">
-          <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-            <TextBlock Text="{Binding CurrentPageTitle}" FontSize="14" FontWeight="SemiBold" Foreground="#EAEAEA" />
-            <TextBlock Text="{Binding CurrentPageSubtitle}" FontSize="11" Foreground="#6E6E6E" VerticalAlignment="Center" />
-          </StackPanel>
-          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-            <Border Background="#222222" BorderBrush="#333333" BorderThickness="1" CornerRadius="3" Padding="8,4">
-              <TextBlock Text="{Binding ActiveProfileText}" FontSize="11" Foreground="#B8B8B8" />
-            </Border>
-          </StackPanel>
-        </Grid>
-
-        <Grid Grid.Row="1" Margin="16,0,16,14">
-          <ContentControl Content="{Binding CurrentViewModel}" HorizontalContentAlignment="Stretch"
-                          VerticalContentAlignment="Stretch">
-            <ContentControl.DataTemplates>
-              <DataTemplate DataType="vm:HomeViewModel">
-                <views:HomeView />
-              </DataTemplate>
-              <DataTemplate DataType="vm:AgentViewModel">
-                <views:AgentView />
-              </DataTemplate>
-              <DataTemplate DataType="vm:VersionsViewModel">
-                <views:VersionsView />
-              </DataTemplate>
-              <DataTemplate DataType="vm:InstancesViewModel">
-                <views:InstancesView />
-              </DataTemplate>
-              <DataTemplate DataType="vm:ModsViewModel">
-                <views:ModsView />
-              </DataTemplate>
-              <DataTemplate DataType="vm:NetworkViewModel">
-                <views:NetworkView />
-              </DataTemplate>
-              <DataTemplate DataType="vm:DownloadsViewModel">
-                <views:DownloadsView />
-              </DataTemplate>
-              <DataTemplate DataType="vm:LogsViewModel">
-                <views:LogsView />
-              </DataTemplate>
-              <DataTemplate DataType="vm:SettingsViewModel">
-                <views:SettingsView />
-              </DataTemplate>
-            </ContentControl.DataTemplates>
-          </ContentControl>
-        </Grid>
-      </Grid>
+    <!-- Content -->
+    <Grid Grid.Row="1" Background="#F7F7F7">
+      <controls:AuroraBackground />
+      <ContentControl Content="{Binding CurrentViewModel}" HorizontalContentAlignment="Stretch"
+                      VerticalContentAlignment="Stretch" Margin="16" Background="Transparent">
+        <ContentControl.DataTemplates>
+          <DataTemplate DataType="vm:HomeViewModel">
+            <views:HomeView />
+          </DataTemplate>
+          <DataTemplate DataType="vm:AgentViewModel">
+            <views:AgentView />
+          </DataTemplate>
+          <DataTemplate DataType="vm:VersionsViewModel">
+            <views:VersionsView />
+          </DataTemplate>
+          <DataTemplate DataType="vm:InstancesViewModel">
+            <views:InstancesView />
+          </DataTemplate>
+          <DataTemplate DataType="vm:ModsViewModel">
+            <views:ModsView />
+          </DataTemplate>
+          <DataTemplate DataType="vm:NetworkViewModel">
+            <views:NetworkView />
+          </DataTemplate>
+          <DataTemplate DataType="vm:DownloadsViewModel">
+            <views:DownloadsView />
+          </DataTemplate>
+          <DataTemplate DataType="vm:LogsViewModel">
+            <views:LogsView />
+          </DataTemplate>
+          <DataTemplate DataType="vm:SettingsViewModel">
+            <views:SettingsView />
+          </DataTemplate>
+        </ContentControl.DataTemplates>
+      </ContentControl>
     </Grid>
   </Grid>
 </Window>

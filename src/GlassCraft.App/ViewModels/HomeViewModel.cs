@@ -48,6 +48,16 @@ public sealed partial class HomeViewModel : ObservableObject
     [ObservableProperty] private InstanceItem? _selectedInstance;
     [ObservableProperty] private string _launchHint = "选择一个实例后点「启动游戏」";
 
+    // Announcement / update
+    [ObservableProperty] private string _announcementTitle = "更新公告";
+    [ObservableProperty] private string _announcementBody = "";
+    [ObservableProperty] private string _announcementDate = "";
+    [ObservableProperty] private string _updateStatus = "正在检查更新…";
+    [ObservableProperty] private bool _updateAvailable;
+    [ObservableProperty] private string _updateTag = "";
+    [ObservableProperty] private string _updateUrl = "";
+    [ObservableProperty] private bool _isCheckingUpdate;
+
     public string AppVersion => "0.9.0";
 
     public HomeViewModel(InstancesViewModel instances, Action<string> navigate)
@@ -58,6 +68,73 @@ public sealed partial class HomeViewModel : ObservableObject
         ReloadAccounts();
         ReloadInstances();
         _ = ScanJavaAsync();
+        _ = LoadUpdateAsync();
+    }
+
+    /// <summary>Fetches the latest GitHub release and shows it in the announcement panel.</summary>
+    public async Task LoadUpdateAsync()
+    {
+        if (IsCheckingUpdate) return;
+        IsCheckingUpdate = true;
+        try
+        {
+            UpdateStatus = "正在检查更新…";
+            var info = await AppServices.Updates.CheckAsync();
+            if (info is null)
+            {
+                UpdateStatus = string.IsNullOrWhiteSpace(AppServices.Settings.Current.UpdateRepository)
+                    ? "未配置更新源"
+                    : "更新检查失败";
+                AnnouncementBody = string.IsNullOrWhiteSpace(AppServices.Settings.Current.UpdateRepository)
+                    ? "在「设置」里填写 GitHub 仓库（owner/repo），启动时会自动拉取最新 Release 作为更新公告。"
+                    : "暂时无法连接 GitHub，稍后可点右上角「检查更新」重试。";
+                AnnouncementDate = "";
+                return;
+            }
+
+            AnnouncementTitle = string.IsNullOrWhiteSpace(info.Name) ? $"更新公告 {info.Tag}" : info.Name;
+            AnnouncementBody = string.IsNullOrWhiteSpace(info.Body) ? "（该版本没有填写更新说明）" : info.Body;
+            AnnouncementDate = info.PublishedAt.LocalDateTime.ToString("yyyy-MM-dd HH:mm");
+            UpdateAvailable = info.IsNewer;
+            UpdateTag = info.Tag;
+            UpdateUrl = info.HtmlUrl;
+            UpdateStatus = info.IsNewer ? $"发现新版本 {info.Tag}" : "已是最新版本";
+            AppServices.Log.Info("update", $"最新版本 {info.Tag}，是否更新={info.IsNewer}");
+        }
+        catch (Exception ex)
+        {
+            UpdateStatus = "检查更新失败：" + ex.Message;
+        }
+        finally
+        {
+            IsCheckingUpdate = false;
+        }
+    }
+
+    [RelayCommand]
+    private Task CheckUpdateAsync() => LoadUpdateAsync();
+
+    [RelayCommand]
+    private void GoDownload() => _navigate("versions");
+
+    [RelayCommand]
+    private void GoVersions() => _navigate("instances");
+
+    [RelayCommand]
+    private void OpenUpdate()
+    {
+        if (string.IsNullOrWhiteSpace(UpdateUrl)) return;
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(UpdateUrl)
+            {
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            AppServices.Log.Error("update", "打开更新页面失败", ex);
+        }
     }
 
     public void ReloadAccounts()

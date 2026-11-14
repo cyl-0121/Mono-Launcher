@@ -21,10 +21,10 @@
         <ListBox.ItemTemplate>
           <DataTemplate>
             <Grid ColumnDefinitions="70,52,90,*" ColumnSpacing="6">
-              <TextBlock Grid.Column="0" Text="{Binding Time, StringFormat='{}{0:HH:mm:ss}'}" Foreground="#6E7F99" />
+              <TextBlock Grid.Column="0" Text="{Binding Time, StringFormat='{}{0:HH:mm:ss}'}" Foreground="#888888" />
               <TextBlock Grid.Column="1" Text="{Binding Level}" Foreground="#8AB4FF" />
               <TextBlock Grid.Column="2" Text="{Binding Category}" Foreground="#B48CFF" />
-              <TextBlock Grid.Column="3" Text="{Binding Message}" Foreground="#C7D2E5" TextWrapping="NoWrap" />
+              <TextBlock Grid.Column="3" Text="{Binding Message}" Foreground="#555555" TextWrapping="NoWrap" />
             </Grid>
           </DataTemplate>
         </ListBox.ItemTemplate>

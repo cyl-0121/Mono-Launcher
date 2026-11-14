@@ -18,7 +18,7 @@
         </Grid>
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="14">
           <TextBlock Text="{Binding StatusText}" Classes="muted" />
-          <TextBlock Text="{Binding ErrorText}" Foreground="#FF8A8A" FontSize="12" />
+          <TextBlock Text="{Binding ErrorText}" Foreground="#C62828" FontSize="12" />
         </StackPanel>
         <ListBox Grid.Row="2" ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}"
                  Background="Transparent" BorderThickness="0">
@@ -27,15 +27,15 @@
               <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Margin="2">
                 <Border Grid.Column="0" Width="3" Height="30" CornerRadius="2" Background="{Binding TypeBadge}" />
                 <StackPanel Grid.Column="1" Spacing="1">
-                  <TextBlock Text="{Binding Id}" Foreground="#E8EFFF" FontSize="13" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding Id}" Foreground="#111111" FontSize="13" FontWeight="SemiBold" />
                   <TextBlock Text="{Binding ReleaseDate}" Classes="muted" />
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                   <TextBlock Text="{Binding JavaText}" Classes="muted" />
-                  <Border Background="#14FFFFFF" CornerRadius="6" Padding="6,2">
-                    <TextBlock Text="{Binding TypeText}" FontSize="11" Foreground="#9EB0C9" />
+                  <Border Background="#F2F2F2" CornerRadius="6" Padding="6,2">
+                    <TextBlock Text="{Binding TypeText}" FontSize="11" Foreground="#888888" />
                   </Border>
-                  <TextBlock Text="已安装" FontSize="11" Foreground="#4ADE80" IsVisible="{Binding IsInstalled}" />
+                  <TextBlock Text="已安装" FontSize="11" Foreground="#2E7D32" IsVisible="{Binding IsInstalled}" />
                 </StackPanel>
               </Grid>
             </DataTemplate>
@@ -48,7 +48,7 @@
       <ScrollViewer HorizontalContentAlignment="Stretch">
         <StackPanel Spacing="12">
           <TextBlock Text="安装版本" Classes="h2" />
-          <TextBlock Text="{Binding SelectedVersionTitle}" FontSize="22" FontWeight="SemiBold" Foreground="#F2F6FF" />
+          <TextBlock Text="{Binding SelectedVersionTitle}" FontSize="22" FontWeight="SemiBold" Foreground="#111111" />
           <TextBlock Text="{Binding StatusText}" Classes="muted" TextWrapping="Wrap" />
 
           <TextBlock Text="Mod Loader" Classes="muted" Margin="0,6,0,0" />
@@ -60,9 +60,9 @@
 
           <Button Classes="primary" Content="下载并安装" Command="{Binding InstallCommand}" HorizontalAlignment="Left" />
 
-          <Border Background="#10FFFFFF" CornerRadius="10" Padding="12" IsVisible="{Binding Downloads.IsActive}">
+          <Border Background="#F2F2F2" CornerRadius="10" Padding="12" IsVisible="{Binding Downloads.IsActive}">
             <StackPanel Spacing="6">
-              <TextBlock Text="{Binding Downloads.Stage}" Foreground="#E8EFFF" FontSize="13" />
+              <TextBlock Text="{Binding Downloads.Stage}" Foreground="#111111" FontSize="13" />
               <ProgressBar Value="{Binding Downloads.Fraction}" Maximum="1" Height="6" />
               <Grid ColumnDefinitions="*,Auto">
                 <TextBlock Text="{Binding Downloads.BytesText}" Classes="muted" />
@@ -72,7 +72,7 @@
             </StackPanel>
           </Border>
 
-          <TextBlock Text="{Binding ErrorText}" Foreground="#FF8A8A" FontSize="12" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding ErrorText}" Foreground="#C62828" FontSize="12" TextWrapping="Wrap" />
         </StackPanel>
       </ScrollViewer>
     </controls:GlassCard>
