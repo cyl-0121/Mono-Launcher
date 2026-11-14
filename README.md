@@ -8,7 +8,7 @@
 
 没有 WebView，没有 HTML / CSS，界面全部由 Avalonia 控件与 Skia 自绘。
 
-**当前版本：v0.9.0** · Windows 10/11 x64 · 免安装
+**当前版本：v1.0.1** · Windows 10/11 x64 · 免安装
 
 ---
 
@@ -38,11 +38,27 @@
 
 ### 应用内自动更新
 
-- 启动时自动检查最新版本（读 GitHub Release 的 Atom feed，不受 API 限额影响）
+- 启动时自动检查最新版本：**镜像站的 `releases.json` 优先**，失败回退 GitHub 的 Atom feed（不受 API 限额影响）
 - 首页显示更新公告：版本号、日期、完整更新说明
 - 发现新版本 → 点「更新到 vX」→ **下载 → 替换自身 → 自动重启**，不用手动下载解压
 - 替换前把旧程序备份为 `MonoLauncher.exe.bak`，失败自动回滚并提示
-- 下载源优先用配置的镜像站，失败回退 GitHub
+- 下载地址优先采用镜像站给出的链接，失败回退 GitHub
+
+### 强制更新
+
+当出现必须修复的问题时，发布者可以在 `releases.json` 里加一个字段：
+
+```json
+"latest": { "mandatory": true, ... }
+```
+
+旧版本启动后会看到覆盖内容区的提示遮罩：
+
+- 导航栏禁用，点不动
+- 点「启动游戏」会被拦截并跳回提示
+- 只保留「更新到 vX」和关闭窗口两条出路
+
+更新完成重启后自动解除。平时这个字段保持 `false` 或不写即可。
 
 ### 实例与 Mod
 
@@ -150,7 +166,7 @@ website/
 | AI | Microsoft.SemanticKernel 1.82 |
 | 本地推理 | LLamaSharp 0.30（CPU 后端） |
 | 测试 | xUnit |
-| 字体 | Segoe UI Variable（系统字体，随系统提供） |
+| 字体 | Segoe UI（系统字体，随系统提供） |
 
 ---
 
@@ -199,7 +215,7 @@ website/
 - **Terracotta**：AGPL-3.0-or-later。本仓库**不包含**其二进制，运行时通过 `terracotta --hmcl` 启动官方原版，只调用其本地 HTTP API；界面中标注了版权信息，符合其 AGPL 例外条款
 - **Minecraft**：Mojang Studios 商标。本软件不包含任何游戏本体、资源或账号
 
-> 早期版本使用 Apple SF Pro 字体，因其许可仅限 Apple 平台，现已改为系统字体 Segoe UI Variable。想换字体可改 `MainWindow.axaml` 与 `HomeView.axaml` 里的 `FontFamily`。
+> 早期版本使用 Apple SF Pro 字体，因其许可仅限 Apple 平台，现已改为系统字体 Segoe UI。想换字体可改 `MainWindow.axaml` 与 `HomeView.axaml` 里的 `FontFamily`。
 
 ---
 
