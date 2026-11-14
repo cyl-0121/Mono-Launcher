@@ -197,4 +197,20 @@
 
 ---
 
-**一句话总结**：10 个仓库的许可证原文全部取到（其中 PCL 因文件名为 `LICENCE`、另 4 个因任务 URL 的 owner/仓库名有误而改走真实路径）；PCL 是自定义许可、HMCL 与 Prism 是 GPL-3.0（HMCL 另有两条 §7 附加条款），其余 7 项为 MIT，故结论是"GPL/自定义一律只读参考，MIT 可复用但需保留版权声明"。
+## 8. 运行期集成的外部程序：Terracotta
+
+`docs/usage.md` 的联机功能通过 [burningtnt/Terracotta](https://github.com/burningtnt/Terracotta) 提供。它**不是**编译期依赖，而是运行时下载的独立进程。
+
+| 项 | 内容 |
+|---|---|
+| 许可证 | **AGPL-3.0-or-later**，附例外条款 |
+| 集成方式 | 启动器不打包、不修改其二进制；首次使用时从 GitHub / Gitee 下载官方原版，通过 `terracotta --hmcl <file>` 启动，只调用它的本地 HTTP API（`/state`、`/state/scanning`、`/state/guesting`、`/panic`） |
+| 例外条款 | ① 以打包方式包含**未修改**二进制且不静态/动态链接；② 通过其进程间接口交互，**并在 UI 明显处标注版权** |
+| 本项目做法 | 两者都满足：二进制不随 EXE 分发（运行时下载）、无链接、联机页右下角标注 `联机由 Terracotta 提供 · AGPL-3.0 · github.com/burningtnt/Terracotta` |
+| 义务 | 保留上述标注；不得修改二进制后继续套用例外；不得移除版权信息 |
+
+> 注意：Terracotta 内部使用 EasyTier（Apache-2.0），其网络行为与公共节点由 Terracotta 项目负责，本项目不做担保。
+
+---
+
+**一句话总结**：10 个仓库的许可证原文全部取到（其中 PCL 因文件名为 `LICENCE`、另 4 个因任务 URL 的 owner/仓库名有误而改走真实路径）；PCL 是自定义许可、HMCL 与 Prism 是 GPL-3.0（HMCL 另有两条 §7 附加条款），其余 7 项为 MIT，故结论是"GPL/自定义一律只读参考，MIT 可复用但需保留版权声明"。运行期集成的 Terracotta 为 AGPL-3.0，按例外条款以"未修改二进制 + HTTP API + UI 署名"的方式使用。

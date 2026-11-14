@@ -15,10 +15,10 @@ public class GlassCard : Decorator
         AvaloniaProperty.Register<GlassCard, double>(nameof(TintOpacity), 1.0);
 
     public static readonly StyledProperty<Color> TintColorProperty =
-        AvaloniaProperty.Register<GlassCard, Color>(nameof(TintColor), Color.FromArgb(255, 255, 255, 255));
+        AvaloniaProperty.Register<GlassCard, Color>(nameof(TintColor), Color.FromArgb(255, 13, 13, 13));
 
     public static readonly StyledProperty<Color> BorderColorProperty =
-        AvaloniaProperty.Register<GlassCard, Color>(nameof(BorderColor), Color.FromArgb(255, 227, 234, 243));
+        AvaloniaProperty.Register<GlassCard, Color>(nameof(BorderColor), Color.FromArgb(255, 38, 38, 38));
 
     public static readonly StyledProperty<bool> ElevatedProperty =
         AvaloniaProperty.Register<GlassCard, bool>(nameof(Elevated), true);

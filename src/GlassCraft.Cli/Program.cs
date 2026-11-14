@@ -10,6 +10,7 @@ using GlassCraft.Core.Loaders;
 using GlassCraft.Core.Logging;
 using GlassCraft.Core.Models;
 using GlassCraft.Core.Mods;
+using GlassCraft.Core.Network;
 using GlassCraft.Core.Versions;
 
 Console.OutputEncoding = Encoding.UTF8;
@@ -84,6 +85,27 @@ async Task<int> RunAsync(string[] args)
                         Console.WriteLine($"    inner2: {ex.InnerException.InnerException.Message}");
                 }
             }
+            return 0;
+        }
+        case "terracotta":
+        {
+            var tc = new TerracottaService(paths, http);
+            Console.WriteLine($"binary: {tc.BinaryPath}");
+            var progress = new Progress<string>(s => Console.WriteLine("  " + s));
+            if (!await tc.StartAsync(progress))
+            {
+                Console.WriteLine("启动失败");
+                return 1;
+            }
+            Console.WriteLine($"port: {tc.Port}");
+            Console.WriteLine("meta: " + await tc.GetMetaAsync());
+            var state = await tc.GetStateAsync();
+            Console.WriteLine($"state: {state?.State} / {state?.DisplayText}");
+            await Task.Delay(1000);
+            state = await tc.GetStateAsync();
+            Console.WriteLine($"state(1s): {state?.State}");
+            await tc.ShutdownAsync();
+            Console.WriteLine("已停止");
             return 0;
         }
         case "import-scan":
