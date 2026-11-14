@@ -36,9 +36,16 @@ public partial class MainWindow : Window
         InitializeComponent();
         _vm = new MainWindowViewModel();
         DataContext = _vm;
+        _vm.PropertyChanged += OnViewModelPropertyChanged;
         Opened += OnOpened;
         Closed += OnClosed;
         PropertyChanged += OnWindowPropertyChanged;
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MainWindowViewModel.CurrentViewModel))
+            AnimatePageChange();
     }
 
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
@@ -193,13 +200,49 @@ public partial class MainWindow : Window
             ["agent"] = "NavAgent",
             ["settings"] = "NavSettings"
         };
+        Button? activeButton = null;
         foreach (var (page, name) in map)
         {
             if (this.FindControl<Button>(name) is not { } button) continue;
             var active = page == _vm.CurrentPage;
+            if (active) activeButton = button;
             if (active && !button.Classes.Contains("active")) button.Classes.Add("active");
             if (!active) button.Classes.Remove("active");
         }
+        UpdateNavIndicator(activeButton);
+    }
+
+    /// <summary>Slides the white pill under the active tab.</summary>
+    private void UpdateNavIndicator(Button? target)
+    {
+        var indicator = this.FindControl<Border>("NavIndicator");
+        if (indicator is null) return;
+        if (target is null || target.Bounds.Width <= 0)
+        {
+            indicator.Opacity = 0;
+            return;
+        }
+        indicator.Opacity = 1;
+        indicator.Width = target.Bounds.Width;
+        indicator.Margin = new Thickness(target.Bounds.X, 0, 0, 0);
+    }
+
+    /// <summary>Fades + lifts the page content when the active page changes.</summary>
+    private void AnimatePageChange()
+    {
+        var host = this.FindControl<ContentControl>("PageHost");
+        if (host is null) return;
+        var transitions = host.Transitions;
+        host.Transitions = null;
+        host.Opacity = 0;
+        host.Margin = new Thickness(16, 30, 16, 8);
+        Dispatcher.UIThread.Post(() =>
+        {
+            host.Transitions = transitions;
+            host.Opacity = 1;
+            host.Margin = new Thickness(16, 16, 16, 16);
+            UpdateNavHighlight();
+        }, DispatcherPriority.Render);
     }
 
     private void ToggleMaximize()

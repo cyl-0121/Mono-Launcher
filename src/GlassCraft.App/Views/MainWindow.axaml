@@ -60,7 +60,7 @@
       <Setter Property="Background" Value="#1FFFFFFF" />
     </Style>
     <Style Selector="Button.nav.active /template/ ContentPresenter">
-      <Setter Property="Background" Value="#33FFFFFF" />
+      <Setter Property="Background" Value="Transparent" />
       <Setter Property="TextBlock.Foreground" Value="#FFFFFF" />
     </Style>
 
@@ -225,8 +225,20 @@
           <TextBlock Text="v0.9" FontSize="11" Foreground="#7A7A7A" VerticalAlignment="Center" />
         </StackPanel>
 
-        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center"
-                    VerticalAlignment="Center" Spacing="0">
+        <Grid Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <!-- Sliding selection pill; positions itself from code, animates through Margin -->
+          <Border Name="NavIndicator" Background="#33FFFFFF" CornerRadius="17" Height="34"
+                  Width="76" HorizontalAlignment="Left" VerticalAlignment="Center"
+                  IsHitTestVisible="False">
+            <Border.Transitions>
+              <Transitions>
+                <ThicknessTransition Property="Margin" Duration="0:0:0.26" Easing="CubicEaseOut" />
+                <DoubleTransition Property="Width" Duration="0:0:0.26" Easing="CubicEaseOut" />
+                <DoubleTransition Property="Opacity" Duration="0:0:0.18" />
+              </Transitions>
+            </Border.Transitions>
+          </Border>
+          <StackPanel Name="NavStack" Orientation="Horizontal" Spacing="0">
           <Button Classes="nav" Name="NavHome" Command="{Binding NavigateCommand}" CommandParameter="home">
             <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
               <TextBlock Text="▶" FontSize="12" VerticalAlignment="Center" />
@@ -275,7 +287,8 @@
               <TextBlock Text="设置" FontSize="13" VerticalAlignment="Center" />
             </StackPanel>
           </Button>
-        </StackPanel>
+          </StackPanel>
+        </Grid>
 
         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
           <Button Classes="chrome" Content="—" Click="OnMinimizeClick" />
@@ -288,8 +301,14 @@
 
     <!-- Content -->
     <Grid Grid.Row="1" Background="#000000">
-      <ContentControl Content="{Binding CurrentViewModel}" HorizontalContentAlignment="Stretch"
+      <ContentControl Name="PageHost" Content="{Binding CurrentViewModel}" HorizontalContentAlignment="Stretch"
                       VerticalContentAlignment="Stretch" Margin="16" Background="Transparent">
+        <ContentControl.Transitions>
+          <Transitions>
+            <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseOut" />
+            <ThicknessTransition Property="Margin" Duration="0:0:0.22" Easing="CubicEaseOut" />
+          </Transitions>
+        </ContentControl.Transitions>
         <ContentControl.DataTemplates>
           <DataTemplate DataType="vm:HomeViewModel">
             <views:HomeView />
