@@ -64,9 +64,12 @@
 
       <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
         <Button x:Name="OpenButton" Classes="primary" Content="打开浏览器并登录" Height="38" Click="OnOpen" />
+        <Button x:Name="RefreshButton" Classes="ghost" Content="换一个代码" Height="38" Click="OnRefresh" />
         <Button x:Name="CopyButton" Classes="ghost" Content="已选中可直接 Ctrl+C" Height="38" Click="OnCopy" />
       </StackPanel>
 
+      <TextBlock x:Name="TimingText" Text="" FontSize="11" Foreground="#8A8A8A"
+                 HorizontalAlignment="Center" />
       <TextBlock x:Name="StatusText" Text="" FontSize="11" Foreground="#7A7A7A" TextWrapping="Wrap" />
     </StackPanel>
 

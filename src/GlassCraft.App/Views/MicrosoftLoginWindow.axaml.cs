@@ -9,7 +9,10 @@ namespace GlassCraft.App.Views;
 
 public partial class MicrosoftLoginWindow : Window
 {
-    private readonly CancellationTokenSource _cts = new();
+    private CancellationTokenSource _flowCts = new();
+    private DispatcherTimer? _countdown;
+    private DateTimeOffset _expiresAt;
+    private bool _closed;
     private MsaDeviceCode? _deviceCode;
 
     public MinecraftAccount? Account { get; private set; }
@@ -31,45 +34,51 @@ public partial class MicrosoftLoginWindow : Window
     public MicrosoftLoginWindow()
     {
         InitializeComponent();
-        Opened += async (_, _) => await StartAsync();
-        Closed += (_, _) => _cts.Cancel();
+        Opened += async (_, _) => await StartFlowAsync();
+        Closed += (_, _) =>
+        {
+            _closed = true;
+            _countdown?.Stop();
+            _flowCts.Cancel();
+        };
     }
 
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
     // x:Name fields are not generated for this window (hand-written InitializeComponent),
     // so look the controls up explicitly instead of relying on generated fields.
-    private void SetHint(string text) => this.FindControl<TextBlock>("HintText")?.SetCurrentValue(TextBlock.TextProperty, text);
-    private void SetStatus(string text) => this.FindControl<TextBlock>("StatusText")?.SetCurrentValue(TextBlock.TextProperty, text);
+    private void SetHint(string text) =>
+        this.FindControl<TextBlock>("HintText")?.SetCurrentValue(TextBlock.TextProperty, text);
+    private void SetStatus(string text) =>
+        this.FindControl<TextBlock>("StatusText")?.SetCurrentValue(TextBlock.TextProperty, text);
+    private void SetTiming(string text) =>
+        this.FindControl<TextBlock>("TimingText")?.SetCurrentValue(TextBlock.TextProperty, text);
 
-    private async Task StartAsync()
+    private async Task StartFlowAsync()
     {
+        var token = _flowCts.Token;
         try
         {
             AppServices.Log.Info("auth", "开始申请设备代码");
-            _deviceCode = await AppServices.MsAuth.StartDeviceCodeAsync(_cts.Token);
-            AppServices.Log.Info("auth", $"设备代码已获取 user_code={_deviceCode.UserCode}");
+            SetStatus("正在申请登录代码…");
+            SetTiming("");
+            var code = await AppServices.MsAuth.StartDeviceCodeAsync(token);
+            _deviceCode = code;
+            _expiresAt = DateTimeOffset.Now.AddSeconds(code.ExpiresIn);
+            AppServices.Log.Info("auth", $"设备代码已获取 user_code={code.UserCode}");
 
             var codeBlock = this.FindControl<SelectableTextBlock>("CodeText");
-            if (codeBlock is not null)
-            {
-                codeBlock.Text = _deviceCode.UserCode;
-                AppServices.Log.Info("auth", $"代码写入 UI：{_deviceCode.UserCode}");
-            }
-            else
-            {
-                AppServices.Log.Info("auth", "找不到 CodeText 控件");
-            }
-
+            if (codeBlock is not null) codeBlock.Text = code.UserCode;
             var uriBlock = this.FindControl<TextBlock>("UriText");
-            if (uriBlock is not null) uriBlock.Text = _deviceCode.VerificationUri;
+            if (uriBlock is not null) uriBlock.Text = code.VerificationUri;
 
-            SetHint("1. 点「打开浏览器并登录」，访问下面的地址。\n2. 输入上方的登录代码，用你的 Microsoft 账户登录。\n3. 登录完成后回到这里，会自动继续。");
+            SetHint("1. 点「打开浏览器并登录」，访问下方地址。\n2. 输入上面的代码（区分 0/O、1/I，建议直接复制）。\n3. 登录完成后回到这里，会自动继续。");
             SetStatus("等待你在浏览器中完成登录…");
+            StartCountdown();
 
             try
             {
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(_deviceCode.VerificationUri)
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(code.VerificationUri)
                 {
                     UseShellExecute = true
                 });
@@ -77,30 +86,70 @@ public partial class MicrosoftLoginWindow : Window
             catch { /* user can open manually */ }
 
             var account = await AppServices.MsAuth.PollForAccountAsync(
-                _deviceCode,
+                code,
                 s => Dispatcher.UIThread.Post(() => SetStatus(s)),
-                _cts.Token);
+                token);
 
             Account = account;
             Dispatcher.UIThread.Post(() =>
             {
+                _countdown?.Stop();
+                SetTiming("");
                 SetStatus($"登录成功：{account.Name}");
                 Close();
             });
         }
         catch (OperationCanceledException)
         {
-            Close();
+            // Either the window closed or the user asked for a new code; nothing to report.
+        }
+        catch (AuthException ex) when (ex.Code == "device_code_expired")
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                _countdown?.Stop();
+                SetTiming("");
+                SetStatus("这个代码已过期（15 分钟）。点「换一个代码」重新获取。");
+            });
         }
         catch (Exception ex)
         {
             Dispatcher.UIThread.Post(() =>
             {
+                _countdown?.Stop();
                 SetHint("登录失败");
                 SetStatus(ex.Message);
             });
             AppServices.Log.Error("auth", "Microsoft 登录失败", ex);
         }
+    }
+
+    private void StartCountdown()
+    {
+        _countdown?.Stop();
+        _countdown = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _countdown.Tick += (_, _) =>
+        {
+            var left = _expiresAt - DateTimeOffset.Now;
+            if (left <= TimeSpan.Zero)
+            {
+                SetTiming("代码已过期");
+                _countdown?.Stop();
+                return;
+            }
+            SetTiming($"代码剩余 {left.Minutes:00}:{left.Seconds:00} 有效 · 一个代码只能用一次");
+        };
+        _countdown.Start();
+        var left = _expiresAt - DateTimeOffset.Now;
+        SetTiming($"代码剩余 {left.Minutes:00}:{left.Seconds:00} 有效 · 一个代码只能用一次");
+    }
+
+    private void OnRefresh(object? sender, RoutedEventArgs e)
+    {
+        // Cancel the current poll and request a fresh device code.
+        _flowCts.Cancel();
+        _flowCts = new CancellationTokenSource();
+        _ = StartFlowAsync();
     }
 
     private void OnCopy(object? sender, RoutedEventArgs e)
@@ -129,7 +178,8 @@ public partial class MicrosoftLoginWindow : Window
 
     private void OnCancel(object? sender, RoutedEventArgs e)
     {
-        _cts.Cancel();
+        _closed = true;
+        _flowCts.Cancel();
         Close();
     }
 }

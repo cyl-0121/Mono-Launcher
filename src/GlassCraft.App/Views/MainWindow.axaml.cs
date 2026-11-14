@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -13,9 +14,22 @@ namespace GlassCraft.App.Views;
 
 public partial class MainWindow : Window
 {
+    private const int SwMinimize = 6;
+    private const int DwmwaWindowCornerPreference = 33;
+    private const int DwmwcpRound = 2;
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+
     private readonly MainWindowViewModel _vm;
     private FpsCounter? _fps;
     private DispatcherTimer? _uiTimer;
+    private PixelPoint _restorePosition;
+    private Size _restoreSize;
+    private bool _hasRestoreState;
 
     public MainWindow()
     {
@@ -24,14 +38,71 @@ public partial class MainWindow : Window
         DataContext = _vm;
         Opened += OnOpened;
         Closed += OnClosed;
+        PropertyChanged += OnWindowPropertyChanged;
     }
 
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+
+    private void OnWindowPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property != WindowStateProperty) return;
+        if (WindowState == WindowState.Normal)
+        {
+            // Coming back from minimize/maximize: keep the pre-minimize geometry, so a
+            // borderless window on Win11 does not come back at a wrong size/position.
+            if (_hasRestoreState)
+            {
+                if (Math.Abs(Width - _restoreSize.Width) > 1 || Math.Abs(Height - _restoreSize.Height) > 1)
+                {
+                    Width = _restoreSize.Width;
+                    Height = _restoreSize.Height;
+                }
+                Position = _restorePosition;
+            }
+            else
+            {
+                CaptureRestoreState();
+            }
+        }
+        else if (WindowState == WindowState.Maximized)
+        {
+            if (this.FindControl<Button>("MaxButton") is { } max) max.Content = "❐";
+        }
+        else if (WindowState == WindowState.Minimized && _hasRestoreState == false)
+        {
+            CaptureRestoreState();
+        }
+    }
+
+    private void CaptureRestoreState()
+    {
+        if (WindowState != WindowState.Normal) return;
+        _restorePosition = Position;
+        _restoreSize = new Size(Width, Height);
+        _hasRestoreState = true;
+    }
+
+    private void ApplyWin11Chrome()
+    {
+        try
+        {
+            var handle = TryGetPlatformHandle();
+            if (handle is null) return;
+            var preference = DwmwcpRound;
+            _ = DwmSetWindowAttribute(handle.Handle, DwmwaWindowCornerPreference, ref preference, sizeof(int));
+        }
+        catch
+        {
+            // Older Windows builds do not support the corner attribute; ignore.
+        }
+    }
 
     private void OnOpened(object? sender, EventArgs e)
     {
         FitToScreen();
         WindowSizing.Fix(this);
+        ApplyWin11Chrome();
+        CaptureRestoreState();
         AppServices.Log.Info("layout", $"opened client={ClientSize} scaling={RenderScaling}");
 
         _fps = new FpsCounter(this);
@@ -146,7 +217,21 @@ public partial class MainWindow : Window
             card.InvalidateVisual();
     }
 
-    private void OnMinimizeClick(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+    private void OnMinimizeClick(object? sender, RoutedEventArgs e)
+    {
+        CaptureRestoreState();
+        // Use the native minimize so Windows 11 plays its animation and keeps the
+        // taskbar thumbnail correct for a borderless window.
+        var handle = TryGetPlatformHandle();
+        if (handle is not null)
+        {
+            _ = ShowWindow(handle.Handle, SwMinimize);
+        }
+        else
+        {
+            WindowState = WindowState.Minimized;
+        }
+    }
 
     private void OnMaximizeClick(object? sender, RoutedEventArgs e) => ToggleMaximize();
 
