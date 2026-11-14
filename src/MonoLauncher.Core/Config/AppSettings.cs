@@ -37,7 +37,7 @@ public sealed class AppSettings
     public bool CheckUpdateOnStartup { get; set; } = true;
 
     /// <summary>Optional mirror site (e.g. https://launcher.example.com). Opened instead of GitHub when set.</summary>
-    public string DownloadSiteUrl { get; set; } = "";
+    public string DownloadSiteUrl { get; set; } = "https://ada1f3c4ba9a13ac3.app.workbuddy.host/?sharecode=2TEW6KGZWT";
 
     // AI
     public string DefaultProviderId { get; set; } = "deepseek";
