@@ -17,7 +17,7 @@
           <TextBlock Text="API Key" Classes="muted" />
           <TextBox Classes="field" PasswordChar="●" Text="{Binding ApiKey}" />
           <TextBlock Text="{Binding ProviderHint}" Classes="muted" TextWrapping="Wrap" />
-          <Border Background="#F8FAFD" CornerRadius="8" Padding="8">
+          <Border Background="#111111" CornerRadius="8" Padding="8">
             <TextBlock Text="{Binding ToolSummary}" Classes="muted" TextWrapping="Wrap" FontSize="11" />
           </Border>
           <Button Classes="ghost" Content="保存配置" Command="{Binding SaveProviderCommand}" />
@@ -58,7 +58,7 @@
                       Classes.tool="{Binding IsTool}"
                       Classes.system="{Binding IsSystem}">
                 <StackPanel Spacing="4">
-                  <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Foreground="#111111" FontSize="13" />
+                  <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Foreground="#FFFFFF" FontSize="13" />
                   <TextBlock Text="{Binding Meta}" Classes="muted" />
                 </StackPanel>
               </Border>

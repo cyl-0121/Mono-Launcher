@@ -23,7 +23,7 @@
               <DataTemplate>
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="4">
                   <StackPanel Spacing="2">
-                    <TextBlock Text="{Binding Motd}" Foreground="#111111" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Motd}" Foreground="#FFFFFF" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding Endpoint}" Classes="muted" />
                   </StackPanel>
                   <Button Grid.Column="1" Classes="ghost" Content="加入" Padding="12,5"
@@ -51,7 +51,7 @@
               <DataTemplate>
                 <StackPanel>
                   <TextBlock Text="{Binding Name}" />
-                  <TextBlock Text="{Binding VersionText}" FontSize="10" Foreground="#888888" />
+                  <TextBlock Text="{Binding VersionText}" FontSize="10" Foreground="#8A8A8A" />
                 </StackPanel>
               </DataTemplate>
             </ComboBox.ItemTemplate>
@@ -65,7 +65,7 @@
 
           <Border Background="#12000000" BorderBrush="#F2F2F2" BorderThickness="1" CornerRadius="3" Padding="12">
             <StackPanel Spacing="6">
-              <TextBlock Text="公网联机" Foreground="#111111" FontWeight="SemiBold" FontSize="13" />
+              <TextBlock Text="公网联机" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="13" />
               <TextBlock Text="当前版本支持「局域网发现 + 直连」。跨公网联机需要中继/端口映射服务，本版本尚未实现，暂不提供一键开服。"
                          Classes="muted" TextWrapping="Wrap" />
               <TextBlock Text="若已有公网服务器或已做端口映射，直接在上方填地址即可连接。"

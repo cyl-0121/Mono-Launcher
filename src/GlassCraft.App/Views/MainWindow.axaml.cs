@@ -31,6 +31,7 @@ public partial class MainWindow : Window
     private void OnOpened(object? sender, EventArgs e)
     {
         FitToScreen();
+        WindowSizing.Fix(this);
         AppServices.Log.Info("layout", $"opened client={ClientSize} scaling={RenderScaling}");
 
         _fps = new FpsCounter(this);

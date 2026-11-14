@@ -2,60 +2,93 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="GlassCraft.App.Views.AgreementWindow"
         Title="用户协议与免责声明"
-        Width="680" Height="620"
+        Width="720" Height="620"
         WindowStartupLocation="CenterScreen"
         CanResize="False"
         SystemDecorations="BorderOnly"
-        Background="#F7F7F7"
+        Background="#000000"
         FontFamily="Microsoft YaHei UI, Segoe UI">
-  <Grid RowDefinitions="Auto,*,Auto">
-    <Border Grid.Row="0" Background="#111111" Height="52">
+  <Window.Styles>
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="Foreground" Value="#000000" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="22,0" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#E6E6E6" />
+    </Style>
+    <Style Selector="Button.ghost">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#B0B0B0" />
+      <Setter Property="BorderBrush" Value="#3A3A3A" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="18,0" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1A1A1A" />
+    </Style>
+  </Window.Styles>
+
+  <DockPanel LastChildFill="True">
+    <!-- Title -->
+    <Border DockPanel.Dock="Top" Background="#000000" BorderBrush="#1F1F1F" BorderThickness="0,0,0,1" Height="56">
       <StackPanel Orientation="Horizontal" Spacing="10" Margin="20,0" VerticalAlignment="Center">
-        <TextBlock Text="用户协议与免责声明" FontSize="16" FontWeight="SemiBold" Foreground="White" />
+        <TextBlock Text="用户协议与免责声明" FontSize="16" FontWeight="SemiBold" Foreground="#FFFFFF" />
         <TextBlock Text="首次启动必须同意" FontSize="11" Foreground="#9A9A9A" VerticalAlignment="Center" />
       </StackPanel>
     </Border>
 
-    <Border Grid.Row="1" Background="White" BorderBrush="#E5E5E5" BorderThickness="1" Margin="16,14,16,0"
-            CornerRadius="8">
-      <ScrollViewer Margin="18" VerticalScrollBarVisibility="Auto"
-                    HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch">
-        <StackPanel Spacing="10" MaxWidth="600" HorizontalAlignment="Stretch">
-          <TextBlock Text="一、软件性质" FontWeight="SemiBold" Foreground="#111111" />
-          <TextBlock TextWrapping="Wrap" MaxWidth="600" Foreground="#555555" FontSize="12" LineHeight="20" Text="GlassCraft 是一个开源的 Minecraft: Java Edition 第三方启动器，用于管理本地游戏版本、Mod 与启动参数。本软件与 Mojang Studios、Microsoft 没有任何隶属或授权关系，Minecraft 是 Mojang Studios 的商标。"/>
+    <!-- Actions (docked bottom, always visible) -->
+    <Border DockPanel.Dock="Bottom" Background="#000000" BorderBrush="#1F1F1F" BorderThickness="0,1,0,0"
+            Padding="18,12">
+      <Grid ColumnDefinitions="*,Auto,Auto">
+        <TextBlock Text="v1.0 · 首次启动需确认" Foreground="#7A7A7A" FontSize="11" VerticalAlignment="Center" />
+        <Button Grid.Column="1" Name="DeclineButton" Classes="ghost" Content="不同意并退出"
+                Height="42" Margin="0,0,10,0" Click="OnDecline" />
+        <Button Grid.Column="2" Name="AcceptButton" Classes="primary" Content="同意并继续"
+                Height="42" Click="OnAccept" />
+      </Grid>
+    </Border>
 
-          <TextBlock Text="二、不提供游戏内容" FontWeight="SemiBold" Foreground="#111111" />
-          <TextBlock TextWrapping="Wrap" MaxWidth="600" Foreground="#555555" FontSize="12" LineHeight="20" Text="本软件不内置、不分发任何 Minecraft 游戏本体、资源文件或账号。所有游戏文件均由用户凭合法拥有的账号，从 Mojang/Microsoft 官方服务地址下载，并遵守其最终用户许可协议。请勿使用本软件下载或传播盗版内容。"/>
+    <!-- Terms -->
+    <Border Background="#0A0A0A" BorderBrush="#1F1F1F" BorderThickness="1" Margin="16,14,16,14"
+            CornerRadius="8" ClipToBounds="True">
+      <ScrollViewer Margin="18" VerticalScrollBarVisibility="Auto" MaxHeight="465"
+                    HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="10" MaxWidth="620">
+          <TextBlock Text="一、软件性质" FontWeight="SemiBold" Foreground="#FFFFFF" />
+          <TextBlock TextWrapping="Wrap" Foreground="#B0B0B0" FontSize="12" LineHeight="20" Text="GlassCraft 是一个开源的 Minecraft: Java Edition 第三方启动器，用于管理本地游戏版本、Mod 与启动参数。本软件与 Mojang Studios、Microsoft 没有任何隶属或授权关系，Minecraft 是 Mojang Studios 的商标。"/>
 
-          <TextBlock Text="三、账号与凭据" FontWeight="SemiBold" Foreground="#111111" />
-          <TextBlock TextWrapping="Wrap" MaxWidth="600" Foreground="#555555" FontSize="12" LineHeight="20" Text="登录凭据仅保存在本机（Windows DPAPI 加密），不会上传到任何第三方服务器。用户应自行保管账号密码，因账号共享、泄露或违规使用造成的损失由用户自行承担。"/>
+          <TextBlock Text="二、不提供游戏内容" FontWeight="SemiBold" Foreground="#FFFFFF" />
+          <TextBlock TextWrapping="Wrap" Foreground="#B0B0B0" FontSize="12" LineHeight="20" Text="本软件不内置、不分发任何 Minecraft 游戏本体、资源文件或账号。所有游戏文件均由用户凭合法拥有的账号，从 Mojang/Microsoft 官方服务地址下载，并遵守其最终用户许可协议。请勿使用本软件下载或传播盗版内容。"/>
 
-          <TextBlock Text="四、第三方服务" FontWeight="SemiBold" Foreground="#111111" />
-          <TextBlock TextWrapping="Wrap" MaxWidth="600" Foreground="#555555" FontSize="12" LineHeight="20" Text="版本清单、资源下载、Modrinth 搜索、AI 模型调用分别依赖 Mojang、BMCLAPI、Modrinth 与各 LLM 提供商。这些服务的可用性、内容与条款由各自运营方负责，本软件不对其可用性或内容作任何担保。"/>
+          <TextBlock Text="三、账号与凭据" FontWeight="SemiBold" Foreground="#FFFFFF" />
+          <TextBlock TextWrapping="Wrap" Foreground="#B0B0B0" FontSize="12" LineHeight="20" Text="登录凭据仅保存在本机（Windows DPAPI 加密），不会上传到任何第三方服务器。用户应自行保管账号密码，因账号共享、泄露或违规使用造成的损失由用户自行承担。"/>
 
-          <TextBlock Text="五、免责声明" FontWeight="SemiBold" Foreground="#111111" />
-          <TextBlock TextWrapping="Wrap" MaxWidth="600" Foreground="#555555" FontSize="12" LineHeight="20" Text="本软件按「现状」提供，不附带任何明示或暗示的担保。对于因使用或无法使用本软件导致的存档损坏、数据丢失、账号封禁、服务器纠纷、财产损失或任何间接损失，作者与贡献者不承担责任。请在使用前自行备份重要存档。"/>
+          <TextBlock Text="四、第三方服务" FontWeight="SemiBold" Foreground="#FFFFFF" />
+          <TextBlock TextWrapping="Wrap" Foreground="#B0B0B0" FontSize="12" LineHeight="20" Text="版本清单、资源下载、Modrinth 搜索、AI 模型调用分别依赖 Mojang、BMCLAPI、Modrinth 与各 LLM 提供商。这些服务的可用性、内容与条款由各自运营方负责，本软件不对其可用性或内容作任何担保。"/>
 
-          <TextBlock Text="六、禁止行为" FontWeight="SemiBold" Foreground="#111111" />
-          <TextBlock TextWrapping="Wrap" MaxWidth="600" Foreground="#555555" FontSize="12" LineHeight="20" Text="禁止将本软件用于：传播盗版游戏、绕过正版验证、搭建未经授权的付费私服、诈骗或诱导未成年人充值、侵犯他人知识产权，以及其他违反当地法律法规的行为。"/>
+          <TextBlock Text="五、免责声明" FontWeight="SemiBold" Foreground="#FFFFFF" />
+          <TextBlock TextWrapping="Wrap" Foreground="#B0B0B0" FontSize="12" LineHeight="20" Text="本软件按「现状」提供，不附带任何明示或暗示的担保。对于因使用或无法使用本软件导致的存档损坏、数据丢失、账号封禁、服务器纠纷、财产损失或任何间接损失，作者与贡献者不承担责任。请在使用前自行备份重要存档。"/>
 
-          <TextBlock Text="七、协议变更" FontWeight="SemiBold" Foreground="#111111" />
-          <TextBlock TextWrapping="Wrap" MaxWidth="600" Foreground="#555555" FontSize="12" LineHeight="20" Text="本协议可能随版本更新而调整，更新后会在启动时重新提示。继续使用即视为接受更新后的条款。若不同意，请立即停止使用并删除本软件。"/>
+          <TextBlock Text="六、禁止行为" FontWeight="SemiBold" Foreground="#FFFFFF" />
+          <TextBlock TextWrapping="Wrap" Foreground="#B0B0B0" FontSize="12" LineHeight="20" Text="禁止将本软件用于：传播盗版游戏、绕过正版验证、搭建未经授权的付费私服、诈骗或诱导未成年人充值、侵犯他人知识产权，以及其他违反当地法律法规的行为。"/>
 
-          <Border Background="#F5F5F5" BorderBrush="#DDDDDD" BorderThickness="1" CornerRadius="6" Padding="10">
-            <TextBlock TextWrapping="Wrap" MaxWidth="600" Foreground="#555555" FontSize="12" LineHeight="20"
+          <TextBlock Text="七、协议变更" FontWeight="SemiBold" Foreground="#FFFFFF" />
+          <TextBlock TextWrapping="Wrap" Foreground="#B0B0B0" FontSize="12" LineHeight="20" Text="本协议可能随版本更新而调整，更新后会在启动时重新提示。继续使用即视为接受更新后的条款。若不同意，请立即停止使用并删除本软件。"/>
+
+          <Border Background="#141414" BorderBrush="#333333" BorderThickness="1" CornerRadius="6" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#B0B0B0" FontSize="12" LineHeight="20"
                        Text="点击「同意并继续」表示你已阅读、理解并接受以上全部条款。点击「不同意」将立即退出程序，不会创建任何游戏文件。"/>
           </Border>
         </StackPanel>
       </ScrollViewer>
     </Border>
-
-    <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" Margin="16,14,16,16">
-      <TextBlock Text="v1.0 · 首次启动需确认" Foreground="#888888" FontSize="11" VerticalAlignment="Center" />
-      <Button Grid.Column="1" Name="DeclineButton" Classes="ghost" Content="不同意并退出"
-              Height="38" Padding="18,0" Margin="0,0,10,0" Click="OnDecline" />
-      <Button Grid.Column="2" Name="AcceptButton" Classes="primary" Content="同意并继续"
-              Height="38" Padding="22,0" Click="OnAccept" />
-    </Grid>
-  </Grid>
+  </DockPanel>
 </Window>

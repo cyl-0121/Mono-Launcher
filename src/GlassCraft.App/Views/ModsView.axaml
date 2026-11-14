@@ -13,7 +13,7 @@
               <DataTemplate>
                 <StackPanel>
                   <TextBlock Text="{Binding Name}" />
-                  <TextBlock Text="{Binding VersionText}" FontSize="10" Foreground="#888888" />
+                  <TextBlock Text="{Binding VersionText}" FontSize="10" Foreground="#8A8A8A" />
                 </StackPanel>
               </DataTemplate>
             </ComboBox.ItemTemplate>
@@ -26,13 +26,13 @@
         <ListBox Grid.Row="2" ItemsSource="{Binding Mods}" Background="Transparent" BorderThickness="0">
           <ListBox.ItemTemplate>
             <DataTemplate>
-              <Border CornerRadius="10" Padding="10" Background="#F8FAFD" Margin="0,2">
+              <Border CornerRadius="10" Padding="10" Background="#111111" Margin="0,2">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                   <StackPanel Grid.Column="0" Spacing="2">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                      <TextBlock Text="{Binding Name}" Foreground="#111111" FontWeight="SemiBold" />
-                      <Border Background="#F2F2F2" CornerRadius="5" Padding="5,1">
-                        <TextBlock Text="{Binding Loader}" FontSize="10" Foreground="#888888" />
+                      <TextBlock Text="{Binding Name}" Foreground="#FFFFFF" FontWeight="SemiBold" />
+                      <Border Background="#111111" CornerRadius="5" Padding="5,1">
+                        <TextBlock Text="{Binding Loader}" FontSize="10" Foreground="#8A8A8A" />
                       </Border>
                     </StackPanel>
                     <TextBlock Text="{Binding FileName}" Classes="muted" TextTrimming="CharacterEllipsis" />
@@ -69,7 +69,7 @@
           <ListBox.ItemTemplate>
             <DataTemplate>
               <StackPanel Spacing="2" Margin="2">
-                <TextBlock Text="{Binding Title}" Foreground="#111111" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Title}" Foreground="#FFFFFF" FontWeight="SemiBold" />
                 <TextBlock Text="{Binding Description}" Classes="muted" TextWrapping="Wrap" MaxLines="2" />
                 <TextBlock Text="{Binding DownloadsText}" Classes="muted" />
               </StackPanel>

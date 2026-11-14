@@ -29,6 +29,8 @@ internal static class Program
         var launchIndex = Array.IndexOf(args, "--launch-instance");
         if (launchIndex >= 0 && launchIndex + 1 < args.Length)
             App.LaunchInstanceId = args[launchIndex + 1];
+        if (args.Contains("--screenshot-agreement"))
+            App.AgreementScreenshot = true;
 
         try
         {

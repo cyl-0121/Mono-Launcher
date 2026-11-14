@@ -25,7 +25,7 @@
               <ListBox.ItemTemplate>
                 <DataTemplate>
                   <StackPanel Spacing="1">
-                    <TextBlock Text="{Binding DisplayName}" Foreground="#111111" FontSize="12" />
+                    <TextBlock Text="{Binding DisplayName}" Foreground="#FFFFFF" FontSize="12" />
                     <TextBlock Text="{Binding ExecutablePath}" Classes="muted" TextTrimming="CharacterEllipsis" />
                   </StackPanel>
                 </DataTemplate>
@@ -51,11 +51,11 @@
             <NumericUpDown Value="{Binding DownloadConcurrency}" Minimum="1" Maximum="32" Increment="1" />
             <TextBlock Text="代理（http://host:port，留空直连）" Classes="muted" />
             <TextBox Classes="field" Text="{Binding ProxyUrl}" />
-            <CheckBox Content="启用 BMCLAPI 镜像作为备用源" IsChecked="{Binding UseMirror}" Foreground="#555555" />
+            <CheckBox Content="启用 BMCLAPI 镜像作为备用源" IsChecked="{Binding UseMirror}" Foreground="#B0B0B0" />
             <TextBlock Text="可视化与动画" Classes="h2" Margin="0,8,0,0" />
-            <CheckBox Content="启用过渡动画" IsChecked="{Binding AnimationsEnabled}" Foreground="#555555" />
-            <CheckBox Content="启用指针光照" IsChecked="{Binding PointerLighting}" Foreground="#555555" />
-            <CheckBox Content="帧率过低时自动降档" IsChecked="{Binding AutoDowngrade}" Foreground="#555555" />
+            <CheckBox Content="启用过渡动画" IsChecked="{Binding AnimationsEnabled}" Foreground="#B0B0B0" />
+            <CheckBox Content="启用指针光照" IsChecked="{Binding PointerLighting}" Foreground="#B0B0B0" />
+            <CheckBox Content="帧率过低时自动降档" IsChecked="{Binding AutoDowngrade}" Foreground="#B0B0B0" />
             <TextBlock Text="AI 流式刷新间隔 (ms)" Classes="muted" />
             <NumericUpDown Value="{Binding AiStreamFlushMs}" Minimum="10" Maximum="500" Increment="10" />
           </StackPanel>
@@ -67,7 +67,7 @@
           <StackPanel Spacing="4">
             <TextBlock Text="数据目录" Classes="h2" />
             <TextBlock Text="{Binding DataDirectory}" Classes="muted" TextTrimming="CharacterEllipsis" />
-            <TextBlock Text="{Binding StatusText}" Foreground="#888888" FontSize="12" />
+            <TextBlock Text="{Binding StatusText}" Foreground="#8A8A8A" FontSize="12" />
           </StackPanel>
           <Button Grid.Column="1" Classes="ghost" Content="打开数据目录" Command="{Binding OpenDataFolderCommand}" />
         </Grid>

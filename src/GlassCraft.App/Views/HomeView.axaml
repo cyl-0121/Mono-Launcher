@@ -5,24 +5,24 @@
   <Grid ColumnDefinitions="360,*" ColumnSpacing="16">
 
     <!-- Left: launch panel -->
-    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E5E5E5" BorderThickness="1"
+    <Border Grid.Column="0" Background="#0D0D0D" BorderBrush="#262626" BorderThickness="1"
             CornerRadius="10" Padding="22">
       <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="16">
         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
-          <Border Background="#F7F7F7" BorderBrush="#D5D5D5" BorderThickness="1" CornerRadius="14"
+          <Border Background="#121212" BorderBrush="#2A2A2A" BorderThickness="1" CornerRadius="14"
                   Padding="12,5">
-            <TextBlock Text="正版" FontSize="12" Foreground="#888888" />
+            <TextBlock Text="正版" FontSize="12" Foreground="#8A8A8A" />
           </Border>
-          <Border Background="#F2F2F2" BorderBrush="#D5D5D5" BorderThickness="1" CornerRadius="14"
+          <Border Background="#111111" BorderBrush="#2A2A2A" BorderThickness="1" CornerRadius="14"
                   Padding="12,5">
-            <TextBlock Text="离线" FontSize="12" Foreground="#111111" />
+            <TextBlock Text="离线" FontSize="12" Foreground="#FFFFFF" />
           </Border>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Spacing="14" Margin="0,10,0,0">
-          <Border Width="72" Height="72" CornerRadius="36" Background="#EDEDED" HorizontalAlignment="Center">
+          <Border Width="72" Height="72" CornerRadius="36" Background="#1A1A1A" HorizontalAlignment="Center">
             <TextBlock Text="{Binding SelectedAccount.Initial, FallbackValue=?}"
-                       FontSize="28" FontWeight="SemiBold" Foreground="#111111"
+                       FontSize="28" FontWeight="SemiBold" Foreground="#FFFFFF"
                        HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Border>
           <ComboBox Classes="field" HorizontalAlignment="Stretch" MinHeight="46"
@@ -32,7 +32,7 @@
               <DataTemplate>
                 <StackPanel>
                   <TextBlock Text="{Binding Name}" />
-                  <TextBlock Text="{Binding VersionText}" FontSize="10" Foreground="#888888" />
+                  <TextBlock Text="{Binding VersionText}" FontSize="10" Foreground="#8A8A8A" />
                 </StackPanel>
               </DataTemplate>
             </ComboBox.ItemTemplate>
@@ -49,7 +49,7 @@
             <StackPanel Spacing="3" VerticalAlignment="Center">
               <TextBlock Text="下载游戏" FontSize="14" HorizontalAlignment="Center" />
               <TextBlock Text="Mojang 官方版本 · 支持 Forge/NeoForge/Fabric"
-                         FontSize="10" Foreground="#888888" HorizontalAlignment="Center" />
+                         FontSize="10" Foreground="#8A8A8A" HorizontalAlignment="Center" />
             </StackPanel>
           </Button>
 
@@ -62,7 +62,7 @@
     <!-- Right: Today / announcement -->
     <Grid Grid.Column="1" RowDefinitions="Auto,*" RowSpacing="12">
       <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
-        <TextBlock Text="Today" FontSize="34" FontWeight="SemiBold" Foreground="#111111"
+        <TextBlock Text="Today" FontSize="34" FontWeight="SemiBold" Foreground="#FFFFFF"
                    FontFamily="avares://GlassCraft/Assets/Fonts#SF Pro Display, Microsoft YaHei UI" />
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
           <TextBlock Text="{Binding UpdateStatus}" Classes="muted" VerticalAlignment="Center" />
@@ -72,18 +72,18 @@
         </StackPanel>
       </Grid>
 
-      <Border Grid.Row="1" Background="#FFFFFF" BorderBrush="#E5E5E5" BorderThickness="1"
+      <Border Grid.Row="1" Background="#0D0D0D" BorderBrush="#262626" BorderThickness="1"
               CornerRadius="10" Padding="22">
         <Grid RowDefinitions="Auto,Auto,*" RowSpacing="10">
           <TextBlock Grid.Row="0" Text="{Binding AnnouncementTitle}" FontSize="20" FontWeight="SemiBold"
-                     Foreground="#111111" TextWrapping="Wrap" />
+                     Foreground="#FFFFFF" TextWrapping="Wrap" />
           <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10">
             <TextBlock Text="{Binding AnnouncementDate}" Classes="muted" />
             <TextBlock Text="{Binding UpdateTag}" Classes="muted" />
           </StackPanel>
           <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
             <TextBlock Text="{Binding AnnouncementBody}" TextWrapping="Wrap" FontSize="13"
-                       LineHeight="22" Foreground="#555555" />
+                       LineHeight="22" Foreground="#B0B0B0" />
           </ScrollViewer>
         </Grid>
       </Border>
