@@ -82,12 +82,14 @@ public sealed partial class HomeViewModel : ObservableObject
             var info = await AppServices.Updates.CheckAsync();
             if (info is null)
             {
+                var error = AppServices.Updates.LastError;
                 UpdateStatus = string.IsNullOrWhiteSpace(AppServices.Settings.Current.UpdateRepository)
                     ? "未配置更新源"
                     : "更新检查失败";
                 AnnouncementBody = string.IsNullOrWhiteSpace(AppServices.Settings.Current.UpdateRepository)
                     ? "在「设置」里填写 GitHub 仓库（owner/repo），启动时会自动拉取最新 Release 作为更新公告。"
-                    : "暂时无法连接 GitHub，稍后可点右上角「检查更新」重试。";
+                    : "暂时无法连接 GitHub，稍后可点右上角「检查更新」重试。" +
+                      (string.IsNullOrWhiteSpace(error) ? "" : $"\n\n错误信息：{error}");
                 AnnouncementDate = "";
                 return;
             }
