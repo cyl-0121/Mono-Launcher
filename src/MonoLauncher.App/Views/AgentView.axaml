@@ -36,18 +36,27 @@
             <Button Classes="ghost" Content="重新检测性能" Command="{Binding CheckHardwareCommand}"
                     HorizontalAlignment="Left" />
 
+            <TextBlock Text="用途" Classes="muted" />
+            <StackPanel Orientation="Horizontal" Spacing="16">
+              <RadioButton GroupName="use" Content="聊天 / 翻译" Foreground="#B0B0B0"
+                           IsChecked="{Binding !CodingMode}" />
+              <RadioButton GroupName="use" Content="写代码" Foreground="#B0B0B0"
+                           IsChecked="{Binding CodingMode}" />
+            </StackPanel>
+
             <TextBlock Text="选择模型" Classes="muted" />
             <ComboBox Classes="field" ItemsSource="{Binding LocalModels}"
                       SelectedItem="{Binding SelectedLocalModel}">
               <ComboBox.ItemTemplate>
                 <DataTemplate>
                   <StackPanel>
-                    <TextBlock Text="{Binding Name}" />
+                    <TextBlock Text="{Binding DisplayName}" />
                     <TextBlock Text="{Binding SizeText}" FontSize="10" Foreground="#8A8A8A" />
                   </StackPanel>
                 </DataTemplate>
               </ComboBox.ItemTemplate>
             </ComboBox>
+            <TextBlock Text="{Binding LocalModelHint}" Classes="muted" TextWrapping="Wrap" />
             <TextBlock Text="{Binding SelectedLocalModel.Note}" Classes="muted" TextWrapping="Wrap" />
             <TextBlock Text="{Binding SelectedLocalModel.RequirementText}" Classes="muted" />
 

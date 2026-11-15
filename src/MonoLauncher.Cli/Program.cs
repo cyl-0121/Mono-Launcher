@@ -108,13 +108,16 @@ async Task<int> RunAsync(string[] args)
         {
             var modelId = GetOption(args, "--model") ?? "qwen2.5-1.5b";
             var prompt = GetOption(args, "--prompt") ?? "用一句话介绍 Minecraft 是什么。";
+            var promptFile = GetOption(args, "--prompt-file");
+            if (!string.IsNullOrWhiteSpace(promptFile) && File.Exists(promptFile))
+                prompt = File.ReadAllText(promptFile, Encoding.UTF8).Trim();
             var spec = MonoLauncher.Agent.Local.LocalModelCatalog.ById(modelId)
                        ?? throw new ArgumentException("未知模型 " + modelId);
             var hw = MonoLauncher.Core.Hardware.HardwareProbe.Probe();
             Console.WriteLine($"硬件: {hw.RamText} / {hw.CpuText} → {hw.VerdictText}");
             if (!hw.CanRunLocalAi) { Console.WriteLine("性能过低，无法部署：" + hw.Summary); return 1; }
 
-            var deployer = new MonoLauncher.Agent.Local.LocalAiDeployer(http, paths);
+            var deployer = new MonoLauncher.Agent.Local.LocalAiDeployer(paths);
             var last = DateTime.MinValue;
             var progress = new Progress<MonoLauncher.Agent.Local.LocalDeployProgress>(p =>
             {
@@ -133,7 +136,10 @@ async Task<int> RunAsync(string[] args)
             if (!ok) return 1;
 
             sw.Restart();
-            var answer = await llama.CompleteAsync("你是 MonoLauncher 内置助手。", prompt, 128);
+            var sys = spec.IsCoding
+                ? "你是编程助手。给出完整可运行的代码，用 ```语言名 标注代码块，先代码后简短说明。"
+                : "你是 MonoLauncher 内置助手。";
+            var answer = await llama.CompleteAsync(sys, prompt, spec.MaxTokens, spec.IsCoding ? 0.25f : 0.7f);
             Console.WriteLine($"推理耗时 {sw.Elapsed.TotalSeconds:0.0}s");
             Console.WriteLine("回答: " + answer);
             return 0;

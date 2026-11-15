@@ -3,6 +3,12 @@ using MonoLauncher.Core.Hardware;
 
 namespace MonoLauncher.Agent.Local;
 
+public enum LocalModelUse
+{
+    Chat,
+    Coding
+}
+
 /// <summary>A downloadable GGUF model with its resource requirements.</summary>
 public sealed record LocalModelSpec(
     string Id,
@@ -12,20 +18,26 @@ public sealed record LocalModelSpec(
     int MinRamMb,
     int ContextSize,
     string Note,
-    IReadOnlyList<string> Urls)
+    IReadOnlyList<string> Urls,
+    LocalModelUse Use = LocalModelUse.Chat,
+    int MaxTokens = 512)
 {
+    public bool IsCoding => Use == LocalModelUse.Coding;
+
     public string SizeText => SizeBytes >= 1L << 30
         ? $"{SizeBytes / 1024.0 / 1024 / 1024:0.0} GB"
         : $"{SizeBytes / 1024.0 / 1024:0} MB";
 
     public string RequirementText => MinRamMb >= 1024
-        ? $"{MinRamMb / 1024} GB 内存起"
-        : $"{MinRamMb} MB 内存起";
+        ? $"{MinRamMb / 1024} GB 显存/内存起"
+        : $"{MinRamMb} MB 显存/内存起";
+
+    public string DisplayName => IsCoding ? $"{Name}（写代码）" : Name;
 }
 
 /// <summary>
-/// Curated small/medium GGUF models. All are Qwen2.5-Instruct Q4_K_M: good Chinese ability,
-/// small enough to run on CPU. hf-mirror (domestic) is tried before huggingface.co.
+/// Curated GGUF models: Qwen2.5-Instruct for chat and Qwen2.5-Coder-Instruct for coding,
+/// all Q4_K_M (good quality at a size that fits consumer GPUs). hf-mirror is tried first.
 /// </summary>
 public static class LocalModelCatalog
 {
@@ -34,14 +46,15 @@ public static class LocalModelCatalog
 
     public static IReadOnlyList<LocalModelSpec> All { get; } = new List<LocalModelSpec>
     {
+        // ---------- chat ----------
         new(
             Id: "qwen2.5-1.5b",
-            Name: "Qwen2.5 1.5B（轻量）",
+            Name: "Qwen2.5 1.5B 轻量",
             FileName: "qwen2.5-1.5b-instruct-q4_k_m.gguf",
             SizeBytes: 1_117_320_736,
             MinRamMb: 4096,
             ContextSize: 4096,
-            Note: "最省资源，回复速度快，适合低配机器做聊天 / 翻译",
+            Note: "最省资源、回复最快，适合低配机器简单聊天 / 翻译",
             Urls: new[]
             {
                 $"{Mirror}/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf",
@@ -49,12 +62,12 @@ public static class LocalModelCatalog
             }),
         new(
             Id: "qwen2.5-3b",
-            Name: "Qwen2.5 3B（均衡）",
+            Name: "Qwen2.5 3B 均衡",
             FileName: "qwen2.5-3b-instruct-q4_k_m.gguf",
             SizeBytes: 2_104_932_768,
-            MinRamMb: 8192,
+            MinRamMb: 4096,
             ContextSize: 4096,
-            Note: "效果明显更好，8 GB 内存以上的均衡选择",
+            Note: "效果明显更好，6 GB 显存以上可用",
             Urls: new[]
             {
                 $"{Mirror}/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_k_m.gguf",
@@ -62,17 +75,49 @@ public static class LocalModelCatalog
             }),
         new(
             Id: "qwen2.5-7b",
-            Name: "Qwen2.5 7B（高质量）",
+            Name: "Qwen2.5 7B 高质量",
             FileName: "Qwen2.5-7B-Instruct-Q4_K_M.gguf",
             SizeBytes: 4_683_074_240,
-            MinRamMb: 16384,
-            ContextSize: 4096,
-            Note: "回答质量最好，但 CPU 推理较慢，建议 16 GB 内存以上",
+            MinRamMb: 8192,
+            ContextSize: 8192,
+            Note: "日常聊天/翻译的最佳性价比，8 GB 显存可全放",
             Urls: new[]
             {
                 $"{Mirror}/bartowski/Qwen2.5-7B-Instruct-GGUF/resolve/main/Qwen2.5-7B-Instruct-Q4_K_M.gguf",
                 $"{Upstream}/bartowski/Qwen2.5-7B-Instruct-GGUF/resolve/main/Qwen2.5-7B-Instruct-Q4_K_M.gguf"
-            })
+            }),
+
+        // ---------- coding ----------
+        new(
+            Id: "coder-7b",
+            Name: "Qwen2.5-Coder 7B",
+            FileName: "qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+            SizeBytes: 4_683_073_536,
+            MinRamMb: 8192,
+            ContextSize: 8192,
+            Note: "写脚本、改单个文件、解释报错；8 GB 显存起步。独显很流畅，核显约需半分钟到一分钟出一段代码",
+            Urls: new[]
+            {
+                $"{Mirror}/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+                $"{Upstream}/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf"
+            },
+            Use: LocalModelUse.Coding,
+            MaxTokens: 1024),
+        new(
+            Id: "coder-14b",
+            Name: "Qwen2.5-Coder 14B",
+            FileName: "Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf",
+            SizeBytes: 8_988_111_072,
+            MinRamMb: 12288,
+            ContextSize: 8192,
+            Note: "多文件、复杂逻辑明显更强，需 12～16 GB 显存",
+            Urls: new[]
+            {
+                $"{Mirror}/bartowski/Qwen2.5-Coder-14B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf",
+                $"{Upstream}/bartowski/Qwen2.5-Coder-14B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf"
+            },
+            Use: LocalModelUse.Coding,
+            MaxTokens: 1536)
     };
 
     public static LocalModelSpec? ById(string? id) =>
@@ -80,18 +125,15 @@ public static class LocalModelCatalog
             ? null
             : All.FirstOrDefault(m => string.Equals(m.Id, id, StringComparison.OrdinalIgnoreCase));
 
-    /// <summary>The largest model this machine can comfortably run.</summary>
-    public static LocalModelSpec? Recommend(HardwareReport hardware) => hardware.Verdict switch
-    {
-        LocalAiVerdict.High => ById("qwen2.5-7b"),
-        LocalAiVerdict.Medium => ById("qwen2.5-3b"),
-        LocalAiVerdict.Low => ById("qwen2.5-1.5b"),
-        _ => null
-    };
+    /// <summary>The largest model of the requested use that this machine can run.</summary>
+    public static LocalModelSpec? Recommend(HardwareReport hardware, LocalModelUse use = LocalModelUse.Chat) =>
+        Usable(hardware, use).OrderByDescending(m => m.MinRamMb).FirstOrDefault();
 
-    /// <summary>Models that fit in the detected memory (used to populate the picker).</summary>
-    public static IReadOnlyList<LocalModelSpec> Usable(HardwareReport hardware) =>
-        All.Where(m => hardware.TotalRamMb >= m.MinRamMb).ToList();
+    /// <summary>Models of the requested use that fit the detected memory / VRAM budget.</summary>
+    public static IReadOnlyList<LocalModelSpec> Usable(HardwareReport hardware, LocalModelUse? use = null) =>
+        All.Where(m => hardware.EffectiveMemoryMb >= m.MinRamMb)
+           .Where(m => use is null || m.Use == use)
+           .ToList();
 
     public static string ModelDirectory(AppPaths paths) => Path.Combine(paths.DataDir, "models");
 }
@@ -111,6 +153,22 @@ public sealed class LocalAiDeployer
 {
     private readonly HttpClient _http;
     private readonly AppPaths _paths;
+
+    /// <summary>Model files are multi-GB, so the client must not impose a total timeout.</summary>
+    public LocalAiDeployer(AppPaths paths)
+    {
+        _paths = paths;
+        _http = new HttpClient(new System.Net.Http.SocketsHttpHandler
+        {
+            AutomaticDecompression = System.Net.DecompressionMethods.All,
+            PooledConnectionLifetime = TimeSpan.FromMinutes(10),
+            ConnectTimeout = TimeSpan.FromSeconds(30)
+        })
+        {
+            Timeout = Timeout.InfiniteTimeSpan
+        };
+        _http.DefaultRequestHeaders.UserAgent.ParseAdd("MonoLauncher/1.0 (launcher; local-model)");
+    }
 
     public LocalAiDeployer(HttpClient http, AppPaths paths)
     {
@@ -172,10 +230,7 @@ public sealed class LocalAiDeployer
         using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
 
         if (existing > 0 && response.StatusCode == System.Net.HttpStatusCode.RequestedRangeNotSatisfiable)
-        {
-            // .part is already complete; let the caller verify and rename.
-            return;
-        }
+            return; // .part is already complete; the caller verifies and renames.
         response.EnsureSuccessStatusCode();
 
         var append = existing > 0 && response.StatusCode == System.Net.HttpStatusCode.PartialContent ? existing : 0;
@@ -187,12 +242,28 @@ public sealed class LocalAiDeployer
         var buffer = new byte[1024 * 128];
         long done = existing;
         var sw = System.Diagnostics.Stopwatch.StartNew();
-        int read;
         progress?.Report(new LocalDeployProgress(expectedSize > 0 ? (double)done / expectedSize : 0, done, expectedSize, "开始下载"));
-        while ((read = await source.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
+
+        // Watchdog: abort only when the stream actually stalls, not because the whole file is big.
+        using var idle = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        void Arm() => idle.CancelAfter(TimeSpan.FromSeconds(90));
+        Arm();
+        while (true)
         {
+            int read;
+            try
+            {
+                read = await source.ReadAsync(buffer, idle.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                throw new TimeoutException("下载停滞超过 90 秒（网络中断或下载源不可用）");
+            }
+            if (read <= 0) break;
+
             await target.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
             done += read;
+            Arm();
             if (sw.ElapsedMilliseconds > 400)
             {
                 sw.Restart();

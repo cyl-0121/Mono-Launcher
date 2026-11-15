@@ -106,7 +106,7 @@ public static class AppServices
         Tools.QuickChat = QuickChatAsync;
         Providers = new AgentProviderFactory(Http, Secrets);
         LocalAi = new LocalLlamaService();
-        LocalDeployer = new LocalAiDeployer(Http, Paths);
+        LocalDeployer = new LocalAiDeployer(Paths);
 
         ApplySettings();
         Initialized = true;
@@ -167,8 +167,13 @@ public static class AppServices
             if (!ok)
                 throw new InvalidOperationException("本地模型加载失败：" + (LocalAi.Status.Error ?? "未知错误"));
         }
+        var spec = LocalModelCatalog.ById(s.LocalModelId);
+        var coding = spec?.IsCoding == true;
         return await LocalAi.CompleteAsync(
-            "你是 MonoLauncher 内置助手，回答使用简体中文，简洁具体。", prompt, 512, ct).ConfigureAwait(false);
+            coding
+                ? "你是编程助手，用简体中文回答并给出完整可运行代码。"
+                : "你是 MonoLauncher 内置助手，回答使用简体中文，简洁具体。",
+            prompt, spec?.MaxTokens ?? 512, coding ? 0.25f : 0.7f, ct).ConfigureAwait(false);
     }
 
     public static void ApplySettings()    {

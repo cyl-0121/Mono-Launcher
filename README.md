@@ -96,7 +96,9 @@
 - 流式输出、取消、工具调用中间状态
 - 高风险工具（安装 / 启动 / 部署 / 删除）强制原生确认框
 - LLamaSharp 本地 GGUF 推理（GPU 层数 / 上下文 / 线程可调）
-- **本地 AI 一键部署**：选「本地 AI（本机一键部署）」→ 自动检测 CPU / 内存 / 显卡并给出结论 → 一键下载 Qwen2.5 GGUF（1.5B / 3B / 7B，按内存推荐）→ 自动写入推理参数并加载。同一安装包内置 **CPU + Vulkan 双后端**，检测到可用显卡自动加速（AMD / Intel / NVIDIA），否则回退 CPU，不联网、不产生费用
+- **本地 AI 一键部署**：选「本地 AI（本机一键部署）」→ 自动检测 CPU / 内存 / **显存**并给出结论 → 按用途一键下载模型 → 自动写入推理参数并加载。同一安装包内置 **CPU + Vulkan 双后端**，检测到可用显卡自动全层加速（AMD / Intel / NVIDIA），否则回退 CPU，不联网、不产生费用
+  - 聊天 / 翻译：Qwen2.5 1.5B / 3B / 7B
+  - **写代码**：Qwen2.5-Coder 7B / 14B（低温采样、长上下文，按显存推荐）
 - 内置工具：`deploy_environment`（一键部署环境）、`install_mod_full`（装 Mod 连前置）、`get_project_detail` + `translate_text`（**Mod 简介翻译**）、`recommend_mods`（**按口味推荐 Mod**）、`diagnose_crash`（**崩溃原因排查**：汇总崩溃报告、日志与 Mod 列表后给出结论）、`optimize_memory` / `set_memory`（内存优化），以及实例/版本/日志查询
 
 ### 界面

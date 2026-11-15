@@ -188,6 +188,7 @@ public sealed class LocalLlamaService : IDisposable
     public async IAsyncEnumerable<string> InferAsync(
         string prompt,
         int maxTokens = 512,
+        float temperature = 0.7f,
         [EnumeratorCancellation] CancellationToken ct = default)
     {
         if (_executor is null)
@@ -196,18 +197,22 @@ public sealed class LocalLlamaService : IDisposable
         var inference = new InferenceParams
         {
             MaxTokens = maxTokens,
-            AntiPrompts = new[] { "<|im_end|>", "</s>", "\nUser:" }
+            AntiPrompts = new[] { "<|im_end|>", "</s>", "\nUser:" },
+            // Coding wants deterministic output; chat is fine a bit warmer.
+            SamplingPipeline = new LLama.Sampling.DefaultSamplingPipeline { Temperature = temperature }
         };
 
         await foreach (var token in _executor.InferAsync(prompt, inference, ct).ConfigureAwait(false))
             yield return token;
     }
 
-    public async Task<string> CompleteAsync(string systemPrompt, string userPrompt, int maxTokens = 512, CancellationToken ct = default)
+    public async Task<string> CompleteAsync(
+        string systemPrompt, string userPrompt, int maxTokens = 512, float temperature = 0.7f,
+        CancellationToken ct = default)
     {
         var prompt = BuildChatPrompt(systemPrompt, userPrompt);
         var sb = new StringBuilder();
-        await foreach (var token in InferAsync(prompt, maxTokens, ct).ConfigureAwait(false))
+        await foreach (var token in InferAsync(prompt, maxTokens, temperature, ct).ConfigureAwait(false))
             sb.Append(token);
         return sb.ToString().Trim();
     }

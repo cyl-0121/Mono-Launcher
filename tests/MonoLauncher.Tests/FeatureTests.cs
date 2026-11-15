@@ -216,27 +216,51 @@ public class LocalAiTests
         Assert.Equal(mem.OrderBy(x => x).ToList(), mem);
     }
 
-    private static HardwareReport Hw(int totalRamMb, LocalAiVerdict v) => new()
+    private static HardwareReport Hw(int totalRamMb, LocalAiVerdict v, int vramMb = 0) => new()
     {
         CpuCores = 8,
         CpuName = "Test CPU",
         TotalRamMb = totalRamMb,
         FreeRamMb = totalRamMb / 2,
+        VramMb = vramMb,
         Gpus = Array.Empty<string>(),
         Verdict = v,
         CanRunLocalAi = v != LocalAiVerdict.Unsupported,
         Summary = "test"
     };
 
-    [Theory]
-    [InlineData(LocalAiVerdict.High, "qwen2.5-7b")]
-    [InlineData(LocalAiVerdict.Medium, "qwen2.5-3b")]
-    [InlineData(LocalAiVerdict.Low, "qwen2.5-1.5b")]
-    public void RecommendMatchesVerdict(LocalAiVerdict verdict, string expectedId)
+    [Fact]
+    public void RecommendPicksLargestChatModelThatFits()
     {
-        var model = LocalModelCatalog.Recommend(Hw(16384, verdict));
-        Assert.NotNull(model);
-        Assert.Equal(expectedId, model!.Id);
+        Assert.Equal("qwen2.5-7b", LocalModelCatalog.Recommend(Hw(8192, LocalAiVerdict.Medium))!.Id);
+        var small = LocalModelCatalog.Recommend(Hw(4096, LocalAiVerdict.Low))!;
+        Assert.Contains(small.Id, new[] { "qwen2.5-1.5b", "qwen2.5-3b" });
+    }
+
+    [Fact]
+    public void RecommendPicksCodingModelForCodingUse()
+    {
+        Assert.Equal("coder-7b", LocalModelCatalog.Recommend(Hw(8192, LocalAiVerdict.Medium), LocalModelUse.Coding)!.Id);
+        Assert.Equal("coder-14b", LocalModelCatalog.Recommend(Hw(16384, LocalAiVerdict.High), LocalModelUse.Coding)!.Id);
+        Assert.Null(LocalModelCatalog.Recommend(Hw(4096, LocalAiVerdict.Low), LocalModelUse.Coding));
+    }
+
+    [Fact]
+    public void VramIsUsedAsTheSizingBudget()
+    {
+        // 8 GB discrete VRAM but 32 GB RAM -> coding budget is 8 GB, so Coder-7B fits, 14B does not.
+        var hw = Hw(32768, LocalAiVerdict.Medium, vramMb: 8192);
+        Assert.Equal(8192, hw.EffectiveMemoryMb);
+        var coding = LocalModelCatalog.Usable(hw, LocalModelUse.Coding);
+        Assert.Single(coding);
+        Assert.Equal("coder-7b", coding[0].Id);
+    }
+
+    [Fact]
+    public void IntegratedGpuSmallVramFallsBackToRamBudget()
+    {
+        var hw = Hw(16384, LocalAiVerdict.High, vramMb: 512);
+        Assert.Equal(16384, hw.EffectiveMemoryMb);
     }
 
     [Fact]
@@ -248,13 +272,15 @@ public class LocalAiTests
     }
 
     [Fact]
-    public void UsableFiltersOutModelsAboveMemory()
+    public void UsableFiltersOutModelsAboveBudget()
     {
         var hw = Hw(8192, LocalAiVerdict.Medium);
-        var usable = LocalModelCatalog.Usable(hw);
-        Assert.All(usable, m => Assert.True(m.MinRamMb <= 8192));
-        Assert.Contains(usable, m => m.Id == "qwen2.5-3b");
-        Assert.DoesNotContain(usable, m => m.Id == "qwen2.5-7b");
+        var chat = LocalModelCatalog.Usable(hw, LocalModelUse.Chat);
+        Assert.Contains(chat, m => m.Id == "qwen2.5-7b");
+        Assert.DoesNotContain(chat, m => m.IsCoding);
+        var coding = LocalModelCatalog.Usable(hw, LocalModelUse.Coding);
+        Assert.All(coding, m => Assert.True(m.MinRamMb <= 8192));
+        Assert.DoesNotContain(coding, m => m.Id == "coder-14b");
     }
 }
 

@@ -68,6 +68,12 @@ public sealed partial class AgentViewModel : ObservableObject
     [ObservableProperty] private double _localProgress;
     [ObservableProperty] private string _localDeployStatus = "";
     [ObservableProperty] private bool _localReady;
+    [ObservableProperty] private string _localModelHint = "";
+    /// <summary>true = 写代码（推荐 Coder 模型），false = 聊天 / 翻译。</summary>
+    [ObservableProperty] private bool _codingMode;
+    private HardwareReport? _hardware;
+
+    partial void OnCodingModeChanged(bool value) => RefreshModelChoices();
 
     /// <summary>True when the "本地 AI（本机一键部署）" provider is selected.</summary>
     public bool IsLocalProvider => SelectedProvider?.Id == "local";
@@ -129,22 +135,37 @@ public sealed partial class AgentViewModel : ObservableObject
     private void RefreshHardware()
     {
         var hw = HardwareProbe.Probe();
+        _hardware = hw;
         LocalCpu = hw.CpuText;
         LocalRam = hw.RamText;
-        LocalGpu = hw.GpuText;
+        LocalGpu = hw.VramMb >= 512
+            ? $"{string.Join(" / ", hw.Gpus)}（显存 {hw.VramText}）"
+            : hw.GpuText;
         LocalVerdict = hw.VerdictText;
         CanDeployLocal = hw.CanRunLocalAi;
         HardwareChecked = true;
-
-        LocalModels.Clear();
-        foreach (var m in LocalModelCatalog.Usable(hw)) LocalModels.Add(m);
-        SelectedLocalModel = LocalModelCatalog.Recommend(hw) ?? LocalModels.FirstOrDefault();
+        RefreshModelChoices();
 
         var s = AppServices.Settings.Current;
         LocalReady = !string.IsNullOrWhiteSpace(s.LocalModelPath) && File.Exists(s.LocalModelPath);
         LocalDeployStatus = LocalReady
-            ? $"已部署：{LocalModelCatalog.ById(s.LocalModelId)?.Name ?? Path.GetFileName(s.LocalModelPath)}"
+            ? $"已部署：{LocalModelCatalog.ById(s.LocalModelId)?.DisplayName ?? Path.GetFileName(s.LocalModelPath)}"
             : CanDeployLocal ? "点「一键部署 AI」自动下载并配置" : "性能过低，无法部署本地 AI";
+    }
+
+    /// <summary>Repopulates the model picker for the current use (chat vs coding) and hardware.</summary>
+    private void RefreshModelChoices()
+    {
+        if (_hardware is null) return;
+        var use = CodingMode ? LocalModelUse.Coding : LocalModelUse.Chat;
+        LocalModels.Clear();
+        foreach (var m in LocalModelCatalog.Usable(_hardware, use)) LocalModels.Add(m);
+        SelectedLocalModel = LocalModelCatalog.Recommend(_hardware, use) ?? LocalModels.FirstOrDefault();
+        LocalModelHint = LocalModels.Count > 0
+            ? $"可用 {LocalModels.Count} 个{(CodingMode ? "写代码" : "聊天")}模型（按本机显存/内存推荐）"
+            : CodingMode
+                ? $"显存/内存不足以跑写代码模型，至少需要 {8} GB（Coder-7B）"
+                : "显存/内存不足以跑任何模型";
     }
 
     /// <summary>Downloads the chosen GGUF, writes the inference settings and loads it.</summary>
@@ -366,9 +387,15 @@ public sealed partial class AgentViewModel : ObservableObject
         }
 
         StatusText = "本地模型生成中…";
-        var prompt = LocalLlamaService.BuildChatPrompt(
-            "你是 MonoLauncher 内置助手，回答使用简体中文，简洁具体；可以介绍启动器功能、解释游戏报错、翻译文本。", text);
-        await foreach (var token in AppServices.LocalAi.InferAsync(prompt, 512, ct))
+        var spec = LocalModelCatalog.ById(AppServices.Settings.Current.LocalModelId);
+        var coding = spec?.IsCoding == true;
+        var system = coding
+            ? "你是编程助手。回答给出完整可运行代码，用 ```语言名 标注代码块；先给代码再简短说明；不确定的地方直接说不确定，不要编造 API。"
+            : "你是 MonoLauncher 内置助手，回答使用简体中文，简洁具体；可以介绍启动器功能、解释游戏报错、翻译文本。";
+        var prompt = LocalLlamaService.BuildChatPrompt(system, text);
+        var maxTokens = spec?.MaxTokens ?? 512;
+        var temperature = coding ? 0.25f : 0.7f;
+        await foreach (var token in AppServices.LocalAi.InferAsync(prompt, maxTokens, temperature, ct))
         {
             sb.Append(token);
             assistant.Text = sb.ToString();
