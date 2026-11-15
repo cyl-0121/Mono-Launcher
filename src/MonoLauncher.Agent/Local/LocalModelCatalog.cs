@@ -43,6 +43,7 @@ public static class LocalModelCatalog
 {
     private const string Mirror = "https://hf-mirror.com";
     private const string Upstream = "https://huggingface.co";
+    private const string ModelScope = "https://modelscope.cn";
 
     public static IReadOnlyList<LocalModelSpec> All { get; } = new List<LocalModelSpec>
     {
@@ -58,6 +59,7 @@ public static class LocalModelCatalog
             Urls: new[]
             {
                 $"{Mirror}/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf",
+                $"{ModelScope}/models/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/master/qwen2.5-1.5b-instruct-q4_k_m.gguf",
                 $"{Upstream}/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf"
             }),
         new(
@@ -71,6 +73,7 @@ public static class LocalModelCatalog
             Urls: new[]
             {
                 $"{Mirror}/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_k_m.gguf",
+                $"{ModelScope}/models/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/master/qwen2.5-3b-instruct-q4_k_m.gguf",
                 $"{Upstream}/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_k_m.gguf"
             }),
         new(
@@ -99,6 +102,7 @@ public static class LocalModelCatalog
             Urls: new[]
             {
                 $"{Mirror}/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+                $"{ModelScope}/models/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/master/qwen2.5-coder-7b-instruct-q4_k_m.gguf",
                 $"{Upstream}/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf"
             },
             Use: LocalModelUse.Coding,
@@ -219,7 +223,125 @@ public sealed class LocalAiDeployer
         throw new InvalidOperationException("模型下载失败：\n" + string.Join("\n", errors));
     }
 
+    /// <summary>Number of parallel range requests. hf-mirror/ModelScope both answer 206, so this multiplies throughput.</summary>
+    private const int ParallelParts = 4;
+    private const int StallSeconds = 30;
+
+    /// <summary>
+    /// Downloads with several range requests in parallel, resuming each chunk from its own
+    /// <c>.partN</c> file, then merges them. Falls back to a single stream when the size is unknown.
+    /// </summary>
     private async Task DownloadAsync(
+        string url, string partFile, long expectedSize, IProgress<LocalDeployProgress>? progress, CancellationToken ct)
+    {
+        if (expectedSize <= 0)
+        {
+            await DownloadSingleAsync(url, partFile, expectedSize, progress, ct).ConfigureAwait(false);
+            return;
+        }
+
+        var parts = ParallelParts;
+        var chunk = (expectedSize + parts - 1) / parts;
+        var done = new long[1];
+        for (int i = 0; i < parts; i++)
+        {
+            var pf = partFile + "." + i;
+            if (File.Exists(pf)) done[0] += Math.Min(new FileInfo(pf).Length, chunk);
+        }
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        progress?.Report(new LocalDeployProgress((double)Volatile.Read(ref done[0]) / expectedSize,
+            Volatile.Read(ref done[0]), expectedSize, "开始下载"));
+
+        var tasks = new List<Task>(parts);
+        for (int i = 0; i < parts; i++)
+        {
+            var idx = i;
+            tasks.Add(Task.Run(async () =>
+            {
+                var start = (long)idx * chunk;
+                var end = Math.Min(expectedSize - 1, start + chunk - 1);
+                var want = end - start + 1;
+                var pf = partFile + "." + idx;
+                var have = File.Exists(pf) ? new FileInfo(pf).Length : 0;
+                if (have > want) { File.Delete(pf); have = 0; }
+                if (have == want) return;
+
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(start + have, end);
+                using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
+                if (response.StatusCode != System.Net.HttpStatusCode.PartialContent)
+                    throw new InvalidDataException($"下载源不支持分块（HTTP {(int)response.StatusCode}）");
+
+                await using var source = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+                await using var fs = new FileStream(pf, have > 0 ? FileMode.Append : FileMode.Create,
+                    FileAccess.Write, FileShare.None);
+                var buffer = new byte[1 << 16];
+                using var idle = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                void Arm() => idle.CancelAfter(TimeSpan.FromSeconds(StallSeconds));
+                Arm();
+
+                long left = want - have;
+                var lastBytes = Volatile.Read(ref done[0]);
+                var lastTicks = sw.ElapsedMilliseconds;
+                while (left > 0)
+                {
+                    int n;
+                    try
+                    {
+                        n = await source.ReadAsync(buffer.AsMemory(0, (int)Math.Min(buffer.Length, left)), idle.Token).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+                    {
+                        throw new TimeoutException($"下载停滞超过 {StallSeconds} 秒（网络中断或源不可用）");
+                    }
+                    if (n <= 0) break;
+                    await fs.WriteAsync(buffer.AsMemory(0, n), ct).ConfigureAwait(false);
+                    left -= n;
+                    Interlocked.Add(ref done[0], n);
+                    Arm();
+
+                    var now = sw.ElapsedMilliseconds;
+                    if (now - lastTicks >= 500)
+                    {
+                        var cur = Volatile.Read(ref done[0]);
+                        var speed = (cur - lastBytes) / ((now - lastTicks) / 1000.0);
+                        lastBytes = cur; lastTicks = now;
+                        var eta = speed > 65536 ? TimeSpan.FromSeconds((expectedSize - cur) / speed) : TimeSpan.Zero;
+                        progress?.Report(new LocalDeployProgress(
+                            Math.Min(1, (double)cur / expectedSize), cur, expectedSize,
+                            $"下载中… {cur / 1024.0 / 1024:0} / {expectedSize / 1024.0 / 1024:0} MB · {speed / 1024 / 1024:0.0} MB/s" +
+                            (eta > TimeSpan.Zero ? $" · 剩余 {eta:mm\\:ss}" : "")));
+                    }
+                }
+            }, ct));
+        }
+        await Task.WhenAll(tasks).ConfigureAwait(false);
+
+        for (int i = 0; i < parts; i++)
+        {
+            var start = (long)i * chunk;
+            var want = Math.Min(expectedSize - 1, start + chunk - 1) - start + 1;
+            var pf = partFile + "." + i;
+            if (!File.Exists(pf) || new FileInfo(pf).Length != want)
+                throw new InvalidDataException("分块下载不完整，请重试（会自动续传）");
+        }
+
+        progress?.Report(new LocalDeployProgress(1, expectedSize, expectedSize, "合并分块…"));
+        await using (var outFs = new FileStream(partFile, FileMode.Create, FileAccess.Write, FileShare.None, 1 << 20, true))
+        {
+            for (int i = 0; i < parts; i++)
+            {
+                var pf = partFile + "." + i;
+                await using (var fs = File.OpenRead(pf))
+                    await fs.CopyToAsync(outFs, ct).ConfigureAwait(false);
+                File.Delete(pf);
+            }
+        }
+        progress?.Report(new LocalDeployProgress(1, expectedSize, expectedSize, "校验中…"));
+    }
+
+    private async Task DownloadSingleAsync(
         string url, string partFile, long expectedSize, IProgress<LocalDeployProgress>? progress, CancellationToken ct)
     {
         var existing = File.Exists(partFile) ? new FileInfo(partFile).Length : 0;
