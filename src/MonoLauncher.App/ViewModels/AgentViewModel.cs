@@ -3,9 +3,11 @@ using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MonoLauncher.Agent;
+using MonoLauncher.Agent.Local;
 using MonoLauncher.Agent.Providers;
 using MonoLauncher.Agent.Tools;
 using MonoLauncher.App.Services;
+using MonoLauncher.Core.Hardware;
 using MonoLauncher.Core.Security;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -53,6 +55,23 @@ public sealed partial class AgentViewModel : ObservableObject
     [ObservableProperty] private bool _showSettings = true;
     [ObservableProperty] private string _providerHint = "";
 
+    // ---- built-in local AI ----
+    public ObservableCollection<LocalModelSpec> LocalModels { get; } = new();
+    [ObservableProperty] private LocalModelSpec? _selectedLocalModel;
+    [ObservableProperty] private string _localCpu = "—";
+    [ObservableProperty] private string _localRam = "—";
+    [ObservableProperty] private string _localGpu = "—";
+    [ObservableProperty] private string _localVerdict = "";
+    [ObservableProperty] private bool _hardwareChecked;
+    [ObservableProperty] private bool _canDeployLocal;
+    [ObservableProperty] private bool _isDeployingLocal;
+    [ObservableProperty] private double _localProgress;
+    [ObservableProperty] private string _localDeployStatus = "";
+    [ObservableProperty] private bool _localReady;
+
+    /// <summary>True when the "本地 AI（本机一键部署）" provider is selected.</summary>
+    public bool IsLocalProvider => SelectedProvider?.Id == "local";
+
     public string ToolSummary =>
         "已注册工具：deploy_environment（一键部署环境）· optimize_memory / set_memory（内存优化）· install_mod_full（装 Mod 连前置）· get_project_detail / translate_text（简介翻译）· recommend_mods（推荐 Mod）· diagnose_crash（崩溃排查）· list_instances · search_modrinth · install_version · launch_instance · read_log（高风险操作弹窗确认）";
     [ObservableProperty] private string? _errorText;
@@ -76,6 +95,7 @@ public sealed partial class AgentViewModel : ObservableObject
         BaseUrl = config.BaseUrl ?? "";
         ApiKey = AppServices.Providers.LoadApiKey(SelectedProvider.Id) ?? "";
         RefreshModels();
+        if (SelectedProvider.Id == "local") RefreshHardware();
         AddSystemMessage("选择提供商与模型，然后开始对话。密钥只保存在本机 DPAPI 加密存储中。");
     }
 
@@ -88,7 +108,115 @@ public sealed partial class AgentViewModel : ObservableObject
         ApiKey = AppServices.Providers.LoadApiKey(value.Id) ?? "";
         ProviderHint = def.Notes ?? "";
         RefreshModels();
-        StatusText = value.Id == "mock" ? "演示模式：本地生成流式文本" : $"提供商：{def.Name}";
+        OnPropertyChanged(nameof(IsLocalProvider));
+        if (value.Id == "local")
+        {
+            RefreshHardware();
+            StatusText = CanDeployLocal ? "本机已满足部署条件" : "本机性能过低";
+        }
+        else
+        {
+            StatusText = value.Id == "mock" ? "演示模式：本地生成流式文本" : $"提供商：{def.Name}";
+        }
+    }
+
+    // ================= built-in local AI =================
+
+    /// <summary>Re-runs the hardware probe (CPU / memory / GPU) and picks a suitable model.</summary>
+    [RelayCommand]
+    private void CheckHardware() => RefreshHardware();
+
+    private void RefreshHardware()
+    {
+        var hw = HardwareProbe.Probe();
+        LocalCpu = hw.CpuText;
+        LocalRam = hw.RamText;
+        LocalGpu = hw.GpuText;
+        LocalVerdict = hw.VerdictText;
+        CanDeployLocal = hw.CanRunLocalAi;
+        HardwareChecked = true;
+
+        LocalModels.Clear();
+        foreach (var m in LocalModelCatalog.Usable(hw)) LocalModels.Add(m);
+        SelectedLocalModel = LocalModelCatalog.Recommend(hw) ?? LocalModels.FirstOrDefault();
+
+        var s = AppServices.Settings.Current;
+        LocalReady = !string.IsNullOrWhiteSpace(s.LocalModelPath) && File.Exists(s.LocalModelPath);
+        LocalDeployStatus = LocalReady
+            ? $"已部署：{LocalModelCatalog.ById(s.LocalModelId)?.Name ?? Path.GetFileName(s.LocalModelPath)}"
+            : CanDeployLocal ? "点「一键部署 AI」自动下载并配置" : "性能过低，无法部署本地 AI";
+    }
+
+    /// <summary>Downloads the chosen GGUF, writes the inference settings and loads it.</summary>
+    [RelayCommand]
+    private async Task DeployLocalAiAsync()
+    {
+        if (SelectedLocalModel is null)
+        {
+            ErrorText = "请先选择一个模型（若列表为空，说明本机内存不足）";
+            return;
+        }
+        if (IsDeployingLocal) return;
+
+        IsDeployingLocal = true;
+        ErrorText = null;
+        LocalProgress = 0;
+        var spec = SelectedLocalModel;
+        try
+        {
+            LocalDeployStatus = $"准备下载 {spec.Name}（{spec.SizeText}）…";
+            var progress = new Progress<LocalDeployProgress>(p =>
+            {
+                LocalProgress = p.Fraction;
+                LocalDeployStatus = p.Stage + " " + p.DoneText;
+            });
+            var path = await AppServices.LocalDeployer.EnsureModelAsync(spec, progress, CancellationToken.None).ConfigureAwait(true);
+
+            var threads = Math.Max(1, Environment.ProcessorCount - 1);
+            using (var scope = AppServices.Settings.BeginUpdate())
+            {
+                var s2 = scope.Settings;
+                s2.LocalModelPath = path;
+                s2.LocalModelId = spec.Id;
+                s2.LocalContextSize = spec.ContextSize;
+                // Auto: offload to Vulkan GPU when one is usable, otherwise llama.cpp keeps running on CPU.
+                s2.LocalGpuLayers = LocalLlamaService.GpuLayersAuto;
+                s2.LocalThreads = threads;
+                s2.LocalBatchSize = 512;
+                s2.DefaultProviderId = "local";
+            }
+            AppServices.LocalAi.Unload();
+
+            LocalDeployStatus = "正在加载模型（优先使用显卡，首次加载需要几十秒）…";
+            LocalProgress = 0.99;
+            var ok = await AppServices.LocalAi.LoadAutoAsync(path, spec.ContextSize, threads, 512, null).ConfigureAwait(true);
+            LocalReady = ok;
+            LocalProgress = 1;
+            if (ok)
+            {
+                // Remember the choice so the next launch starts on the local model.
+                _store.Save(new StoredAgentConfig { ProviderId = "local", Model = spec.Id, BaseUrl = "" });
+                LocalDeployStatus = "部署完成，可以直接对话了";
+                StatusText = "本地 AI 就绪";
+                AddSystemMessage($"本地模型已就绪：{spec.Name}（{spec.SizeText}）。推理在本机 CPU 完成，不联网、不产生费用。");
+            }
+            else
+            {
+                LocalDeployStatus = "模型加载失败：" + (AppServices.LocalAi.Status.Error ?? "未知错误");
+                StatusText = "本地模型加载失败";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorText = ex.Message;
+            LocalDeployStatus = "部署失败";
+            StatusText = "部署失败";
+            AppServices.Log.Error("agent", "本地 AI 部署失败", ex);
+        }
+        finally
+        {
+            IsDeployingLocal = false;
+        }
     }
 
     private void RefreshModels()
@@ -149,6 +277,11 @@ public sealed partial class AgentViewModel : ObservableObject
 
         try
         {
+            if (SelectedProvider.Id == "local")
+            {
+                await StreamLocalAsync(assistant, text, new System.Text.StringBuilder(), _cts.Token);
+                return;
+            }
             _session ??= CreateSession();
             var sb = new System.Text.StringBuilder();
             await foreach (var ev in _session.SendAsync(text, _cts.Token))
@@ -216,6 +349,33 @@ public sealed partial class AgentViewModel : ObservableObject
 
     private static string sbSafe(string existing, string append) =>
         string.IsNullOrWhiteSpace(existing) ? append : existing + "\n\n" + append;
+
+    /// <summary>Streams tokens from the built-in local GGUF model. Local mode has no tool calling.</summary>
+    private async Task StreamLocalAsync(AgentMessage assistant, string text, System.Text.StringBuilder sb, CancellationToken ct)
+    {
+        var s = AppServices.Settings.Current;
+        if (!AppServices.LocalAi.IsReady)
+        {
+            if (string.IsNullOrWhiteSpace(s.LocalModelPath) || !File.Exists(s.LocalModelPath))
+                throw new InvalidOperationException("本地 AI 尚未部署：请在左侧点「一键部署 AI」");
+            StatusText = "正在加载本地模型…";
+            var ok = await AppServices.LocalAi.LoadAutoAsync(s.LocalModelPath!, s.LocalContextSize,
+                s.LocalThreads, s.LocalBatchSize, null, ct);
+            if (!ok)
+                throw new InvalidOperationException("本地模型加载失败：" + (AppServices.LocalAi.Status.Error ?? "未知错误"));
+        }
+
+        StatusText = "本地模型生成中…";
+        var prompt = LocalLlamaService.BuildChatPrompt(
+            "你是 MonoLauncher 内置助手，回答使用简体中文，简洁具体；可以介绍启动器功能、解释游戏报错、翻译文本。", text);
+        await foreach (var token in AppServices.LocalAi.InferAsync(prompt, 512, ct))
+        {
+            sb.Append(token);
+            assistant.Text = sb.ToString();
+            StatusText = $"正在生成… {sb.Length} 字符";
+        }
+        StatusText = "完成";
+    }
 
     private bool CanSend() => !IsStreaming;
 

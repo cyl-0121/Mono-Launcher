@@ -6,21 +6,77 @@
     <controls:GlassCard Grid.Column="0" CornerRadius="18" TintOpacity="0.28" Padding="18">
       <ScrollViewer HorizontalContentAlignment="Stretch">
         <StackPanel Spacing="10">
-          <TextBlock Text="Agent 提供商" Classes="h2" />
-          <ComboBox Classes="field" ItemsSource="{Binding Providers}"
-                    SelectedItem="{Binding SelectedProvider}" />
-          <TextBlock Text="模型" Classes="muted" />
-          <ComboBox Classes="field" IsEditable="True" ItemsSource="{Binding Models}"
-                    Text="{Binding Model}" />
-          <TextBlock Text="Base URL（自定义端点）" Classes="muted" />
-          <TextBox Classes="field" Text="{Binding BaseUrl}" />
-          <TextBlock Text="API Key" Classes="muted" />
-          <TextBox Classes="field" PasswordChar="●" Text="{Binding ApiKey}" />
-          <TextBlock Text="{Binding ProviderHint}" Classes="muted" TextWrapping="Wrap" />
-          <Border Background="#111111" CornerRadius="8" Padding="8">
-            <TextBlock Text="{Binding ToolSummary}" Classes="muted" TextWrapping="Wrap" FontSize="11" />
-          </Border>
-          <Button Classes="ghost" Content="保存配置" Command="{Binding SaveProviderCommand}" />
+
+          <!-- ===== 本地 AI：检测性能 → 一键部署 ===== -->
+          <StackPanel Spacing="10" IsVisible="{Binding IsLocalProvider}">
+            <TextBlock Text="本地 AI（本机部署）" Classes="h2" />
+            <TextBlock Text="先检测本机性能，够用就一键下载模型。已内置 CPU 与显卡（Vulkan）双后端：检测到可用显卡就自动加速，否则回退 CPU。不联网、不产生费用。"
+                       Classes="muted" TextWrapping="Wrap" />
+            <Border Background="#111111" CornerRadius="10" Padding="10">
+              <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="52,*">
+                  <TextBlock Text="CPU" Classes="muted" VerticalAlignment="Top" />
+                  <TextBlock Grid.Column="1" Text="{Binding LocalCpu}" FontSize="12"
+                             Foreground="#E0E0E0" TextWrapping="Wrap" />
+                </Grid>
+                <Grid ColumnDefinitions="52,*">
+                  <TextBlock Text="内存" Classes="muted" VerticalAlignment="Top" />
+                  <TextBlock Grid.Column="1" Text="{Binding LocalRam}" FontSize="12"
+                             Foreground="#E0E0E0" TextWrapping="Wrap" />
+                </Grid>
+                <Grid ColumnDefinitions="52,*">
+                  <TextBlock Text="显卡" Classes="muted" VerticalAlignment="Top" />
+                  <TextBlock Grid.Column="1" Text="{Binding LocalGpu}" FontSize="12"
+                             Foreground="#E0E0E0" TextWrapping="Wrap" />
+                </Grid>
+                <TextBlock Text="{Binding LocalVerdict}" FontSize="13" Foreground="#FFFFFF"
+                           TextWrapping="Wrap" Margin="0,4,0,0" />
+              </StackPanel>
+            </Border>
+            <Button Classes="ghost" Content="重新检测性能" Command="{Binding CheckHardwareCommand}"
+                    HorizontalAlignment="Left" />
+
+            <TextBlock Text="选择模型" Classes="muted" />
+            <ComboBox Classes="field" ItemsSource="{Binding LocalModels}"
+                      SelectedItem="{Binding SelectedLocalModel}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel>
+                    <TextBlock Text="{Binding Name}" />
+                    <TextBlock Text="{Binding SizeText}" FontSize="10" Foreground="#8A8A8A" />
+                  </StackPanel>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Text="{Binding SelectedLocalModel.Note}" Classes="muted" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding SelectedLocalModel.RequirementText}" Classes="muted" />
+
+            <Button Classes="primary" Content="⚡  一键部署 AI" HorizontalAlignment="Stretch"
+                    Command="{Binding DeployLocalAiCommand}" IsEnabled="{Binding CanDeployLocal}" />
+            <ProgressBar Value="{Binding LocalProgress}" Maximum="1" Height="6"
+                         IsVisible="{Binding IsDeployingLocal}" />
+            <TextBlock Text="{Binding LocalDeployStatus}" Classes="muted" TextWrapping="Wrap" />
+          </StackPanel>
+
+          <!-- ===== 云端 / 外部提供商 ===== -->
+          <StackPanel Spacing="10" IsVisible="{Binding !IsLocalProvider}">
+            <TextBlock Text="Agent 提供商" Classes="h2" />
+            <ComboBox Classes="field" ItemsSource="{Binding Providers}"
+                      SelectedItem="{Binding SelectedProvider}" />
+            <TextBlock Text="模型" Classes="muted" />
+            <ComboBox Classes="field" IsEditable="True" ItemsSource="{Binding Models}"
+                      Text="{Binding Model}" />
+            <TextBlock Text="Base URL（自定义端点）" Classes="muted" />
+            <TextBox Classes="field" Text="{Binding BaseUrl}" />
+            <TextBlock Text="API Key" Classes="muted" />
+            <TextBox Classes="field" PasswordChar="●" Text="{Binding ApiKey}" />
+            <TextBlock Text="{Binding ProviderHint}" Classes="muted" TextWrapping="Wrap" />
+            <Border Background="#111111" CornerRadius="8" Padding="8">
+              <TextBlock Text="{Binding ToolSummary}" Classes="muted" TextWrapping="Wrap" FontSize="11" />
+            </Border>
+            <Button Classes="ghost" Content="保存配置" Command="{Binding SaveProviderCommand}" />
+          </StackPanel>
+
           <Button Classes="ghost" Content="清空对话" Command="{Binding ClearChatCommand}" />
           <TextBlock Text="{Binding ErrorText}" Foreground="#C62828" FontSize="12" TextWrapping="Wrap" />
         </StackPanel>

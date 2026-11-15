@@ -92,6 +92,52 @@ async Task<int> RunAsync(string[] args)
             Console.WriteLine(result.Summary);
             return 0;
         }
+        case "hardware":
+        {
+            var hw = MonoLauncher.Core.Hardware.HardwareProbe.Probe();
+            Console.WriteLine($"CPU: {hw.CpuText}");
+            Console.WriteLine($"内存: {hw.RamText}");
+            Console.WriteLine($"显卡: {hw.GpuText}");
+            Console.WriteLine($"结论: {hw.VerdictText} （可部署={hw.CanRunLocalAi}）");
+            Console.WriteLine("可用模型:");
+            foreach (var m in MonoLauncher.Agent.Local.LocalModelCatalog.Usable(hw))
+                Console.WriteLine($"  · {m.Name}  {m.SizeText}  {m.RequirementText}");
+            return 0;
+        }
+        case "local-run":
+        {
+            var modelId = GetOption(args, "--model") ?? "qwen2.5-1.5b";
+            var prompt = GetOption(args, "--prompt") ?? "用一句话介绍 Minecraft 是什么。";
+            var spec = MonoLauncher.Agent.Local.LocalModelCatalog.ById(modelId)
+                       ?? throw new ArgumentException("未知模型 " + modelId);
+            var hw = MonoLauncher.Core.Hardware.HardwareProbe.Probe();
+            Console.WriteLine($"硬件: {hw.RamText} / {hw.CpuText} → {hw.VerdictText}");
+            if (!hw.CanRunLocalAi) { Console.WriteLine("性能过低，无法部署：" + hw.Summary); return 1; }
+
+            var deployer = new MonoLauncher.Agent.Local.LocalAiDeployer(http, paths);
+            var last = DateTime.MinValue;
+            var progress = new Progress<MonoLauncher.Agent.Local.LocalDeployProgress>(p =>
+            {
+                if ((DateTime.UtcNow - last).TotalSeconds < 2 && p.Fraction < 1) return;
+                last = DateTime.UtcNow;
+                Console.WriteLine($"  · {p.Stage} {p.DoneText}");
+            });
+            var path = await deployer.EnsureModelAsync(spec, progress, CancellationToken.None);
+            Console.WriteLine("模型路径: " + path);
+
+            using var llama = new MonoLauncher.Agent.Local.LocalLlamaService();
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var threads2 = Math.Max(1, Environment.ProcessorCount - 1);
+            var ok = await llama.LoadAutoAsync(path, spec.ContextSize, threads2);
+            Console.WriteLine($"加载={ok} 用时 {sw.Elapsed.TotalSeconds:0.0}s 层数={llama.Status.GpuLayers} {(ok ? "" : llama.Status.Error)}");
+            if (!ok) return 1;
+
+            sw.Restart();
+            var answer = await llama.CompleteAsync("你是 MonoLauncher 内置助手。", prompt, 128);
+            Console.WriteLine($"推理耗时 {sw.Elapsed.TotalSeconds:0.0}s");
+            Console.WriteLine("回答: " + answer);
+            return 0;
+        }
         case "nettest":
         {
             foreach (var url in new[]

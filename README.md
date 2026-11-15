@@ -19,7 +19,7 @@
 | **GitHub Releases（主）** | [github.com/cyl-0121/Mono-Launcher/releases](https://github.com/cyl-0121/Mono-Launcher/releases) |
 | 国内镜像 | [ada1f3c4ba9a13ac3.app.workbuddy.host](https://ada1f3c4ba9a13ac3.app.workbuddy.host/?sharecode=2TEW6KGZWT) |
 
-下载 `MonoLauncher-win-x64.zip`（约 68 MB），解压后双击 `MonoLauncher.exe` 即可，**不需要安装 .NET**。
+下载 `MonoLauncher-win-x64.zip`（约 84 MB），解压后双击 `MonoLauncher.exe` 即可，**不需要安装 .NET**。
 
 数据目录：`%APPDATA%\MonoLauncher`（存档、实例、配置都在这里，删程序不会丢）。
 
@@ -96,6 +96,7 @@
 - 流式输出、取消、工具调用中间状态
 - 高风险工具（安装 / 启动 / 部署 / 删除）强制原生确认框
 - LLamaSharp 本地 GGUF 推理（GPU 层数 / 上下文 / 线程可调）
+- **本地 AI 一键部署**：选「本地 AI（本机一键部署）」→ 自动检测 CPU / 内存 / 显卡并给出结论 → 一键下载 Qwen2.5 GGUF（1.5B / 3B / 7B，按内存推荐）→ 自动写入推理参数并加载。同一安装包内置 **CPU + Vulkan 双后端**，检测到可用显卡自动加速（AMD / Intel / NVIDIA），否则回退 CPU，不联网、不产生费用
 - 内置工具：`deploy_environment`（一键部署环境）、`install_mod_full`（装 Mod 连前置）、`get_project_detail` + `translate_text`（**Mod 简介翻译**）、`recommend_mods`（**按口味推荐 Mod**）、`diagnose_crash`（**崩溃原因排查**：汇总崩溃报告、日志与 Mod 列表后给出结论）、`optimize_memory` / `set_memory`（内存优化），以及实例/版本/日志查询
 
 ### 界面
@@ -133,7 +134,7 @@ Compress-Archive -Path publish/win-x64/MonoLauncher.exe `
   -DestinationPath publish/MonoLauncher-win-x64.zip -CompressionLevel Optimal
 ```
 
-`publish/MonoLauncher-win-x64.zip` 约 68 MB，解压后只有一个 `MonoLauncher.exe`，双击即可运行，**不需要安装 .NET**。
+`publish/MonoLauncher-win-x64.zip` 约 84 MB，解压后只有一个 `MonoLauncher.exe`，双击即可运行，**不需要安装 .NET**。
 
 ---
 
@@ -223,7 +224,7 @@ website/
 2. 微软登录端点需要网络可达，部分网络环境要在设置里填代理。
 3. 自动更新要求程序所在目录可写；放在 `Program Files` 下会提示没有写入权限。
 4. 陶瓦联机的公共节点由 Terracotta 项目维护，本项目不担保其可用性。
-5. 单文件发布体积约 68 MB（含 LLamaSharp CPU 后端）。
+5. 单文件发布体积约 90 MB / zip 约 84 MB（含 CPU 与 Vulkan 双推理后端）。
 6. 镜像站依赖第三方静态托管，可能要求分享码或延迟同步。
 
 ---

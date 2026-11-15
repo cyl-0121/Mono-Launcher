@@ -1,8 +1,10 @@
 using System.Reflection;
 using Microsoft.SemanticKernel;
+using MonoLauncher.Agent.Local;
 using MonoLauncher.Agent.Tools;
 using MonoLauncher.Core;
 using MonoLauncher.Core.Auth;
+using MonoLauncher.Core.Hardware;
 using MonoLauncher.Core.Java;
 using MonoLauncher.Core.Launch;
 using MonoLauncher.Core.Models;
@@ -188,6 +190,71 @@ public class LoaderLibraryUrlTests
         var files = await installer.CollectFilesAsync(version, null);
         var guava = files.Single(f => f.DisplayName.Contains("guava"));
         Assert.StartsWith("https://libraries.minecraft.net/", guava.Url);
+    }
+}
+
+public class LocalAiTests
+{
+    [Fact]
+    public void CatalogEntriesAreWellFormed()
+    {
+        Assert.NotEmpty(LocalModelCatalog.All);
+        foreach (var m in LocalModelCatalog.All)
+        {
+            Assert.False(string.IsNullOrWhiteSpace(m.Id));
+            Assert.True(m.SizeBytes > 0, $"{m.Id} size");
+            Assert.True(m.ContextSize >= 512, $"{m.Id} context");
+            Assert.NotEmpty(m.Urls);
+            Assert.All(m.Urls, u => Assert.StartsWith("https://", u));
+        }
+    }
+
+    [Fact]
+    public void CatalogIsOrderedByMemoryRequirement()
+    {
+        var mem = LocalModelCatalog.All.Select(m => m.MinRamMb).ToList();
+        Assert.Equal(mem.OrderBy(x => x).ToList(), mem);
+    }
+
+    private static HardwareReport Hw(int totalRamMb, LocalAiVerdict v) => new()
+    {
+        CpuCores = 8,
+        CpuName = "Test CPU",
+        TotalRamMb = totalRamMb,
+        FreeRamMb = totalRamMb / 2,
+        Gpus = Array.Empty<string>(),
+        Verdict = v,
+        CanRunLocalAi = v != LocalAiVerdict.Unsupported,
+        Summary = "test"
+    };
+
+    [Theory]
+    [InlineData(LocalAiVerdict.High, "qwen2.5-7b")]
+    [InlineData(LocalAiVerdict.Medium, "qwen2.5-3b")]
+    [InlineData(LocalAiVerdict.Low, "qwen2.5-1.5b")]
+    public void RecommendMatchesVerdict(LocalAiVerdict verdict, string expectedId)
+    {
+        var model = LocalModelCatalog.Recommend(Hw(16384, verdict));
+        Assert.NotNull(model);
+        Assert.Equal(expectedId, model!.Id);
+    }
+
+    [Fact]
+    public void UnsupportedHasNoRecommendationAndNoUsableModels()
+    {
+        var hw = Hw(2048, LocalAiVerdict.Unsupported);
+        Assert.Null(LocalModelCatalog.Recommend(hw));
+        Assert.Empty(LocalModelCatalog.Usable(hw));
+    }
+
+    [Fact]
+    public void UsableFiltersOutModelsAboveMemory()
+    {
+        var hw = Hw(8192, LocalAiVerdict.Medium);
+        var usable = LocalModelCatalog.Usable(hw);
+        Assert.All(usable, m => Assert.True(m.MinRamMb <= 8192));
+        Assert.Contains(usable, m => m.Id == "qwen2.5-3b");
+        Assert.DoesNotContain(usable, m => m.Id == "qwen2.5-7b");
     }
 }
 

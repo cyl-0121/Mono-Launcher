@@ -49,6 +49,8 @@ public sealed class AppSettings
 
     // Local model
     public string? LocalModelPath { get; set; }
+    /// <summary>Id of the model deployed by the built-in one-click local AI (e.g. qwen2.5-1.5b).</summary>
+    public string? LocalModelId { get; set; }
     public int LocalGpuLayers { get; set; } = 0;
     public int LocalContextSize { get; set; } = 4096;
     public int LocalThreads { get; set; } = 0;

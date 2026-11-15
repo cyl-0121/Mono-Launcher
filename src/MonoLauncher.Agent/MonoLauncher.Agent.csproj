@@ -9,6 +9,9 @@
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" />
     <PackageReference Include="LLamaSharp" />
     <PackageReference Include="LLamaSharp.Backend.Cpu" />
+    <!-- Vulkan backend (AMD/Intel/NVIDIA). The launcher picks GPU when available and falls back to CPU. -->
+    <PackageReference Include="LLamaSharp.Backend.Vulkan.Windows"
+                      Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
   <ItemGroup>

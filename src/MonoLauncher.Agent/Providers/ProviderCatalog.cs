@@ -103,6 +103,13 @@ public static class ProviderCatalog
         },
         new()
         {
+            Id = "local", Name = "本地 AI（本机一键部署）", BaseUrl = "",
+            DefaultModel = "qwen2.5-1.5b", RequiresApiKey = false, IsLocal = true,
+            Models = new[] { "qwen2.5-1.5b", "qwen2.5-3b", "qwen2.5-7b" },
+            Notes = "无需联网、无需注册：先检测本机性能，再一键下载 GGUF 模型在本机推理（CPU）"
+        },
+        new()
+        {
             Id = "ollama", Name = "Ollama (本地)", BaseUrl = "http://localhost:11434/v1",
             DefaultModel = "qwen2.5:7b", RequiresApiKey = false, IsLocal = true,
             Models = new[] { "qwen2.5:7b", "llama3.2", "deepseek-r1:7b", "gemma3:4b" },

@@ -46,6 +46,7 @@ public static class AppServices
     public static LauncherTools Tools { get; private set; } = null!;
     public static AgentProviderFactory Providers { get; private set; } = null!;
     public static LocalLlamaService LocalAi { get; private set; } = null!;
+    public static LocalAiDeployer LocalDeployer { get; private set; } = null!;
     public static DownloadCenter Downloads { get; } = new();
     public static bool Initialized { get; private set; }
 
@@ -105,6 +106,7 @@ public static class AppServices
         Tools.QuickChat = QuickChatAsync;
         Providers = new AgentProviderFactory(Http, Secrets);
         LocalAi = new LocalLlamaService();
+        LocalDeployer = new LocalAiDeployer(Http, Paths);
 
         ApplySettings();
         Initialized = true;
@@ -125,6 +127,11 @@ public static class AppServices
         {
             chat = new MockChatService();
         }
+        else if (string.Equals(providerId, "local", StringComparison.OrdinalIgnoreCase))
+        {
+            // Built-in local model: make sure it is loaded, then run inference directly.
+            return await LocalCompleteAsync(prompt, ct).ConfigureAwait(false);
+        }
         else
         {
             var apiKey = Providers.LoadApiKey(providerId);
@@ -144,6 +151,24 @@ public static class AppServices
             new ChatHistory { new ChatMessageContent(AuthorRole.User, prompt) },
             null, null, ct).ConfigureAwait(false);
         return string.Join("\n", reply.Select(r => r.Content ?? "")).Trim();
+    }
+
+    /// <summary>Runs a one-shot prompt on the built-in local GGUF model, loading it if needed.</summary>
+    public static async Task<string> LocalCompleteAsync(string prompt, CancellationToken ct = default)
+    {
+        var s = Settings.Current;
+        if (!LocalAi.IsReady)
+        {
+            var path = s.LocalModelPath;
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+                throw new InvalidOperationException("本地 AI 尚未部署，请到「AI」页选择「本地 AI（本机一键部署）」并点击「一键部署 AI」");
+            var ok = await LocalAi.LoadAutoAsync(path, s.LocalContextSize,
+                s.LocalThreads, s.LocalBatchSize, null, ct).ConfigureAwait(false);
+            if (!ok)
+                throw new InvalidOperationException("本地模型加载失败：" + (LocalAi.Status.Error ?? "未知错误"));
+        }
+        return await LocalAi.CompleteAsync(
+            "你是 MonoLauncher 内置助手，回答使用简体中文，简洁具体。", prompt, 512, ct).ConfigureAwait(false);
     }
 
     public static void ApplySettings()    {

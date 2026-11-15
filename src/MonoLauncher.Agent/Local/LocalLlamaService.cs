@@ -138,6 +138,36 @@ public sealed class LocalLlamaService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Layer count meaning "offload everything". llama.cpp ignores it on CPU-only machines, so a
+    /// single value works for both the GPU and CPU paths.
+    /// </summary>
+    public const int GpuLayersAuto = 99;
+
+    /// <summary>
+    /// Loads a model preferring the GPU (Vulkan) backend and silently falls back to pure CPU.
+    /// A missing or outdated Vulkan driver is the usual reason a GPU load fails, so the retry
+    /// with 0 layers keeps the feature usable on every machine.
+    /// </summary>
+    public async Task<bool> LoadAutoAsync(
+        string modelPath, int contextSize, int threads, int batchSize = 512,
+        IProgress<double>? progress = null, CancellationToken ct = default)
+    {
+        if (await LoadAsync(modelPath, GpuLayersAuto, contextSize, threads, batchSize, progress, ct).ConfigureAwait(false))
+            return true;
+
+        SetStatus(new LocalModelStatus
+        {
+            State = LocalModelState.Loading,
+            ModelPath = modelPath,
+            GpuLayers = 0,
+            ContextSize = contextSize,
+            Message = "显卡加载失败，正在回退 CPU…",
+            Progress = 0.5
+        });
+        return await LoadAsync(modelPath, 0, contextSize, threads, batchSize, progress, ct).ConfigureAwait(false);
+    }
+
     public void Unload()
     {
         _gate.Wait();
