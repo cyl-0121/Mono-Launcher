@@ -92,7 +92,7 @@ public static class AppServices
         Updates = new UpdateService(Http, Paths)
         {
             Repository = Settings.Current.UpdateRepository,
-            CurrentVersion = "1.0.3",
+            CurrentVersion = "1.0.4",
             DownloadSiteUrl = Settings.Current.DownloadSiteUrl
         };
         Tools = new LauncherTools(

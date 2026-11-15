@@ -8,7 +8,7 @@
 
 没有 WebView，没有 HTML / CSS，界面全部由 Avalonia 控件与 Skia 自绘。
 
-**当前版本：v1.0.3** · Windows 10/11 x64 · 免安装
+**当前版本：v1.0.4** · Windows 10/11 x64 · 免安装
 
 ---
 
