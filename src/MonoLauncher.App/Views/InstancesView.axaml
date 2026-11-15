@@ -4,7 +4,7 @@
              x:Class="MonoLauncher.App.Views.InstancesView">
   <Grid ColumnDefinitions="400,*" ColumnSpacing="14">
     <controls:GlassCard Grid.Column="0" CornerRadius="18" TintOpacity="0.28" Padding="16">
-      <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" RowSpacing="10">
+      <Grid RowDefinitions="Auto,Auto,*,Auto,Auto,Auto" RowSpacing="10">
         <StackPanel Grid.Row="0" Spacing="2">
           <TextBlock Text="实例" Classes="h2" />
           <TextBlock Text="每个实例拥有独立游戏目录，互不干扰。" Classes="muted" />
@@ -21,7 +21,7 @@
         </Grid>
 
         <ListBox Grid.Row="2" ItemsSource="{Binding Instances}" SelectedItem="{Binding SelectedInstance}"
-                 Background="Transparent" BorderThickness="0">
+                 Background="Transparent" BorderThickness="0" MinHeight="120">
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Border CornerRadius="10" Padding="10" Background="#111111" Margin="0,2">
@@ -68,6 +68,31 @@
                     Command="{Binding ImportCommand}" />
           </StackPanel>
         </Border>
+
+        <Expander Grid.Row="5" Header="⚡ 一键部署环境" HorizontalAlignment="Stretch"
+                  HorizontalContentAlignment="Stretch" Margin="0,4,0,0">
+          <StackPanel Spacing="8" Margin="0,8,0,0">            <TextBlock Text="自动装 Java 运行时、版本与 Loader、创建实例、内存优化，并可带上 Fabric API 前置。"
+                       Classes="muted" TextWrapping="Wrap" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+              <ComboBox Grid.Column="0" Classes="field" ItemsSource="{Binding Deploy.Versions}"
+                        SelectedItem="{Binding Deploy.Version}" PlaceholderText="版本" />
+              <ComboBox Grid.Column="1" Classes="field" ItemsSource="{Binding Deploy.Loaders}"
+                        SelectedItem="{Binding Deploy.Loader}" PlaceholderText="Loader" />
+            </Grid>
+            <TextBox Classes="field" Watermark="实例名（可留空）" Text="{Binding Deploy.InstanceName}" />
+            <StackPanel Orientation="Horizontal" Spacing="14">
+              <CheckBox Content="装 Fabric API 前置" IsChecked="{Binding Deploy.InstallFabricApi}" Foreground="#B0B0B0" />
+              <CheckBox Content="内存优化" IsChecked="{Binding Deploy.OptimizeMemory}" Foreground="#B0B0B0" />
+            </StackPanel>
+            <TextBlock Text="{Binding Deploy.MemoryHint}" Classes="muted" TextWrapping="Wrap" />
+            <Button Classes="primary" Content="▶  一键部署" HorizontalAlignment="Stretch"
+                    Command="{Binding Deploy.DeployCommand}" />
+            <TextBlock Text="{Binding Deploy.StatusText}" Classes="muted" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Deploy.ErrorText}" Foreground="#C62828" FontSize="12" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Deploy.Summary}" FontSize="12" Foreground="#B0B0B0" TextWrapping="Wrap"
+                       LineHeight="19" IsVisible="{Binding Deploy.HasSummary}" />
+          </StackPanel>
+        </Expander>
       </Grid>
     </controls:GlassCard>
 

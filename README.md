@@ -8,7 +8,7 @@
 
 没有 WebView，没有 HTML / CSS，界面全部由 Avalonia 控件与 Skia 自绘。
 
-**当前版本：v1.0.1** · Windows 10/11 x64 · 免安装
+**当前版本：v1.0.3** · Windows 10/11 x64 · 免安装
 
 ---
 
@@ -66,6 +66,15 @@
 - 导入现有 `.minecraft`、PCL、HMCL、Prism 实例
 - Mod 识别 Fabric / Quilt / NeoForge / Forge 元数据，支持启停、删除（移到回收站）
 - 从 Modrinth 搜索并安装 Mod
+- **安装 Mod 自动补齐前置**：按 Modrinth 的 `required` 依赖递归下载前置模组，去重、校验 SHA-1
+- **一键部署环境**：自动下载缺失的 Java 运行时（Temurin）、装版本与 Loader、建实例、应用内存优化，可顺带装 Fabric API
+
+### 内存优化
+
+- PCL 风格的内存建议：读取本机真实物理内存，按总量给出 `-Xms/-Xmx`，并始终为系统留出余量
+- 一键开启 Aikar/G1 调优参数（`-XX:+UseG1GC`、`G1NewSizePercent`、`StringDeduplication` 等）
+- 可作用到单个实例，也可作为全局默认；重复应用不会产生重复参数
+- AI 工具 `optimize_memory` / `set_memory` 可让助手代劳
 
 ### 联机
 
@@ -85,8 +94,9 @@
 
 - Semantic Kernel 多提供商：OpenAI、Azure OpenAI、Anthropic、Gemini、DeepSeek、OpenRouter、智谱、通义、Kimi、硅基流动、Ollama、LM Studio 及任意 OpenAI 兼容端点
 - 流式输出、取消、工具调用中间状态
-- 高风险工具（安装 / 启动 / 删除）强制原生确认框
+- 高风险工具（安装 / 启动 / 部署 / 删除）强制原生确认框
 - LLamaSharp 本地 GGUF 推理（GPU 层数 / 上下文 / 线程可调）
+- 内置工具：`deploy_environment`（一键部署环境）、`install_mod_full`（装 Mod 连前置）、`get_project_detail` + `translate_text`（**Mod 简介翻译**）、`recommend_mods`（**按口味推荐 Mod**）、`diagnose_crash`（**崩溃原因排查**：汇总崩溃报告、日志与 Mod 列表后给出结论）、`optimize_memory` / `set_memory`（内存优化），以及实例/版本/日志查询
 
 ### 界面
 
@@ -115,6 +125,15 @@ dotnet publish src/MonoLauncher.App -c Release -r win-x64 --self-contained true 
   -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true \
   -p:EnableCompressionInSingleFile=true -p:DebugType=None -o publish/win-x64
 ```
+
+打包发布包（约定：产物统一压成 zip，只放单个 exe，不带 pdb / runtimes 残留）：
+
+```powershell
+Compress-Archive -Path publish/win-x64/MonoLauncher.exe `
+  -DestinationPath publish/MonoLauncher-win-x64.zip -CompressionLevel Optimal
+```
+
+`publish/MonoLauncher-win-x64.zip` 约 68 MB，解压后只有一个 `MonoLauncher.exe`，双击即可运行，**不需要安装 .NET**。
 
 ---
 
@@ -176,6 +195,9 @@ website/
 
 - 版本清单拉取、1.21.1 原版下载与启动（NeoForge 21.1.1 实例可进入游戏）
 - NeoForge 安装（含 BMCLAPI 镜像回退、版本元数据补全）
+- **Fabric 全链路**：1.21.1 + Fabric Loader 0.20.1 的 profile 解析、库下载、实例创建（实测曾暴露并修复 “`+0000` 时区解析” 与 “Loader 库被错拼到 Mojang 仓库” 两个问题）
+- **一键部署环境**：1.21.1 + Fabric + 自动前置（Fabric API）实测跑通，产出 889 MB 完整可玩目录
+- **内存优化**：读取真实物理内存（15.3 GB → 1536–6144 MB）并落盘到设置与实例
 - 下载引擎断点续传、校验、重试
 - 实例导入（PCL / HMCL / Prism / .minecraft 格式）
 - Modrinth 搜索与安装、Mod 启停
@@ -183,11 +205,12 @@ website/
 - Terracotta 二进制下载、启动、`/state` 轮询、优雅退出
 - 微软设备码申请（拿到 `user_code` 与 `verification_uri`）
 - **应用内自动更新全流程**：下载 68 MB → 解压 → 备份 73 MB → 替换 → 新程序正常启动
+- 38 项单元测试（含启动参数合并、工具注册、宽松时间戳解析、Loader 仓库地址）
 
 **未验证（缺少对应条件，按公开协议实现）：**
 
 - 微软正版登录的 XBL / XSTS / Minecraft Services 换取环节（没有正版账号）
-- Fabric / Quilt / Forge 的实际安装（NeoForge 已验证）
+- Quilt / Forge 的实际安装（Fabric 与 NeoForge 已验证）
 - 陶瓦联机的创建 / 加入房间全流程（需要两名玩家和游戏内局域网开放）
 - 真实 LLM 调用与本地 GGUF 推理（没有 API Key / 模型文件）
 - 整合包（`.mrpack`）与 CurseForge 支持（未实现）

@@ -12,6 +12,8 @@ public sealed class AppSettings
     // Memory
     public int MinMemoryMb { get; set; } = 512;
     public int MaxMemoryMb { get; set; } = 4096;
+    /// <summary>Global default: prepend the advisor's G1 tuning flags on every launch.</summary>
+    public bool OptimizeJvmArguments { get; set; }
 
     // Download
     public int DownloadConcurrency { get; set; } = 8;
@@ -105,5 +107,23 @@ public sealed class SettingsService
     {
         lock (_lock) mutate(_current);
         Save();
+    }
+
+    /// <summary>Multi-property update scope: mutate Settings freely, everything is saved on Dispose.</summary>
+    public SettingsUpdateScope BeginUpdate() => new(this);
+}
+
+public sealed class SettingsUpdateScope(SettingsService service) : IDisposable
+{
+    private readonly SettingsService _service = service;
+    private bool _disposed;
+
+    public AppSettings Settings => _service.Current;
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        _service.Save();
     }
 }

@@ -30,10 +30,12 @@ public sealed partial class InstancesViewModel : ObservableObject
     [ObservableProperty] private string _gameLog = "";
     [ObservableProperty] private string _gameState = "未启动";
     [ObservableProperty] private ImportCandidate? _selectedCandidate;
+    public EnvironmentDeployViewModel Deploy { get; } = new();
 
     public InstancesViewModel()
     {
         Refresh();
+        Deploy.Deployed += Refresh;
     }
 
     public void Refresh()
@@ -237,7 +239,9 @@ public sealed partial class InstancesViewModel : ObservableObject
                 ServerAddress = serverHost,
                 ServerPort = serverPort,
                 ExtraJvmArguments = rec.Launch.ExtraJvmArguments,
-                ExtraGameArguments = rec.Launch.ExtraGameArguments
+                ExtraGameArguments = rec.Launch.ExtraGameArguments,
+                // Instance-level toggle wins; otherwise honour the global default.
+                OptimizeJvmArguments = rec.Launch.OptimizeJvmArguments || AppServices.Settings.Current.OptimizeJvmArguments
             };
 
             var plan = AppServices.Launch.CreatePlan(resolved, account, java, gameDir, settings);

@@ -100,12 +100,17 @@ public sealed class VersionInstaller
             }
             else if (!string.IsNullOrWhiteSpace(lib.Name) && lib.Name.Contains(':'))
             {
-                // Legacy metadata without a downloads block: derive from maven path.
+                // Metadata without a downloads block. Loader profiles (Fabric/Quilt/NeoForge)
+                // declare their own "url" pointing at their maven; only vanilla libs fall back
+                // to Mojang's libraries host.
                 var path = MavenCoordinate.ToPath(lib.Name);
+                var baseUrl = string.IsNullOrWhiteSpace(lib.Url) ? LibrariesBase : lib.Url!;
+                if (!baseUrl.EndsWith('/')) baseUrl += "/";
                 items.Add(new DownloadItem
                 {
-                    Url = LibrariesBase + path.Replace('\\', '/'),
+                    Url = baseUrl + path.Replace('\\', '/'),
                     Destination = Path.Combine(_paths.LibrariesDir, path),
+                    Sha1 = lib.Sha1,
                     DisplayName = lib.Name
                 });
             }

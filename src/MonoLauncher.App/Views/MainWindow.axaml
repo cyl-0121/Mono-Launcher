@@ -32,21 +32,27 @@
       <!-- Segoe UI sits ~2px high inside the line box on Skia; nudge the glyphs down. -->
       <Setter Property="Margin" Value="0,1,0,0" />
     </Style>
+    <!-- Skia measures Segoe UI with a tall ascent, so glyphs sit high in the line box.
+         A slightly larger line height plus a font-size-proportional nudge centres them. -->
     <Style Selector="TextBlock.h1">
       <Setter Property="FontSize" Value="24" />
       <Setter Property="FontWeight" Value="Bold" />
       <Setter Property="Foreground" Value="#FFFFFF" />
-      <Setter Property="Margin" Value="0,1,0,0" />
+      <Setter Property="LineHeight" Value="30" />
+      <Setter Property="Margin" Value="0,3,0,0" />
     </Style>
     <Style Selector="TextBlock.h2">
       <Setter Property="FontSize" Value="15" />
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="Foreground" Value="#FFFFFF" />
-      <Setter Property="Margin" Value="0,1,0,0" />
+      <Setter Property="LineHeight" Value="20" />
+      <Setter Property="Margin" Value="0,2,0,0" />
     </Style>
     <Style Selector="TextBlock.muted">
       <Setter Property="Foreground" Value="#8A8A8A" />
       <Setter Property="FontSize" Value="12" />
+      <Setter Property="LineHeight" Value="17" />
+      <Setter Property="Margin" Value="0,1,0,0" />
     </Style>
 
     <!-- Top navigation -->
@@ -100,6 +106,8 @@
       <Setter Property="Padding" Value="16,8" />
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="FontSize" Value="13" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
     <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
       <Setter Property="Background" Value="#E0E0E0" />
@@ -115,6 +123,8 @@
       <Setter Property="CornerRadius" Value="6" />
       <Setter Property="Padding" Value="12,7" />
       <Setter Property="FontSize" Value="12" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
     <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
       <Setter Property="Background" Value="#1A1A1A" />

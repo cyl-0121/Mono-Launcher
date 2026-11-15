@@ -85,6 +85,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string? _javaPath;
     [ObservableProperty] private int _minMemoryMb = 512;
     [ObservableProperty] private int _maxMemoryMb = 4096;
+    [ObservableProperty] private bool _optimizeJvmArguments;
     [ObservableProperty] private int _downloadConcurrency = 8;
     [ObservableProperty] private string? _proxyUrl;
     [ObservableProperty] private bool _useMirror;
@@ -104,6 +105,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         JavaPath = s.JavaPath;
         MinMemoryMb = s.MinMemoryMb;
         MaxMemoryMb = s.MaxMemoryMb;
+        OptimizeJvmArguments = s.OptimizeJvmArguments;
         DownloadConcurrency = s.DownloadConcurrency;
         ProxyUrl = s.ProxyUrl;
         UseMirror = s.UseMirror;
@@ -125,6 +127,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             s.JavaPath = string.IsNullOrWhiteSpace(JavaPath) ? null : JavaPath;
             s.MinMemoryMb = Math.Max(256, MinMemoryMb);
             s.MaxMemoryMb = Math.Max(s.MinMemoryMb + 256, MaxMemoryMb);
+            s.OptimizeJvmArguments = OptimizeJvmArguments;
             s.DownloadConcurrency = Math.Clamp(DownloadConcurrency, 1, 32);
             s.ProxyUrl = string.IsNullOrWhiteSpace(ProxyUrl) ? null : ProxyUrl;
             s.UseMirror = UseMirror;
@@ -139,6 +142,17 @@ public sealed partial class SettingsViewModel : ObservableObject
         AppServices.Updates.DownloadSiteUrl = DownloadSiteUrl.Trim();
         AppServices.ApplySettings();
         StatusText = "设置已保存";
+    }
+
+    [RelayCommand]
+    private void OptimizeMemory()
+    {
+        var plan = MonoLauncher.Core.Java.MemoryAdvisor.Recommend();
+        MinMemoryMb = plan.MinMb;
+        MaxMemoryMb = plan.MaxMb;
+        OptimizeJvmArguments = true;
+        Save();
+        StatusText = $"内存优化已保存：{plan.MinMb}-{plan.MaxMb} MB（物理内存 {plan.TotalText}）+ G1 调优";
     }
 
     [RelayCommand]

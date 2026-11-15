@@ -57,7 +57,7 @@
     </controls:GlassCard>
 
     <controls:GlassCard Grid.Column="1" CornerRadius="18" TintOpacity="0.30" Padding="16">
-      <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="8">
+      <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" RowSpacing="8">
         <TextBlock Text="Modrinth 搜索" Classes="h2" />
         <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
           <TextBox Grid.Column="0" Classes="field" Watermark="JEI / Sodium / 机械动力…"
@@ -76,8 +76,19 @@
             </DataTemplate>
           </ListBox.ItemTemplate>
         </ListBox>
-        <Button Grid.Row="3" Classes="primary" Content="安装所选 Mod（需确认）"
-                Command="{Binding InstallSelectedCommand}" />
+        <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="8">
+          <Button Grid.Column="0" Classes="primary" Content="安装（自动补前置）"
+                  Command="{Binding InstallWithDepsCommand}" />
+          <Button Grid.Column="1" Classes="ghost" Content="✦ 翻译简介"
+                  Command="{Binding TranslateSelectedCommand}" />
+        </Grid>
+        <Border Grid.Row="4" MaxHeight="150" Background="#0A000000" CornerRadius="8" Padding="8"
+                IsVisible="{Binding HasTranslation}">
+          <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <TextBlock Text="{Binding Translation}" TextWrapping="Wrap" FontSize="12" Foreground="#C9C9C9"
+                       LineHeight="19" />
+          </ScrollViewer>
+        </Border>
       </Grid>
     </controls:GlassCard>
   </Grid>

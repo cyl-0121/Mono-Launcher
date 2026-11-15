@@ -62,7 +62,7 @@
     <Grid Grid.Column="1" RowDefinitions="Auto,*" RowSpacing="12">
       <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
         <TextBlock Text="Today" FontSize="34" FontWeight="SemiBold" Foreground="#FFFFFF"
-                   FontFamily="Segoe UI, Microsoft YaHei UI" />
+                   FontFamily="Segoe UI, Microsoft YaHei UI" LineHeight="42" Margin="0,4,0,0" />
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
           <TextBlock Text="{Binding UpdateStatus}" Classes="muted" VerticalAlignment="Center" />
           <Button Classes="ghost" Content="检查更新" Command="{Binding CheckUpdateCommand}"
@@ -78,7 +78,7 @@
               CornerRadius="10" Padding="22">
         <Grid RowDefinitions="Auto,Auto,*" RowSpacing="10">
           <TextBlock Grid.Row="0" Text="{Binding AnnouncementTitle}" FontSize="20" FontWeight="SemiBold"
-                     Foreground="#FFFFFF" TextWrapping="Wrap" />
+                     Foreground="#FFFFFF" TextWrapping="Wrap" LineHeight="27" Margin="0,3,0,0" />
           <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10">
             <TextBlock Text="{Binding AnnouncementDate}" Classes="muted" />
             <TextBlock Text="{Binding UpdateTag}" Classes="muted" />

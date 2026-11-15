@@ -41,6 +41,10 @@
                 <NumericUpDown Value="{Binding MaxMemoryMb}" Minimum="512" Maximum="65536" Increment="512" />
               </StackPanel>
             </Grid>
+            <CheckBox Content="启用 G1 内存优化参数（PCL 风格调优）"
+                      IsChecked="{Binding OptimizeJvmArguments}" Foreground="#B0B0B0" />
+            <Button Classes="ghost" Content="⚡ 一键内存优化（按本机内存自动分配）"
+                    Command="{Binding OptimizeMemoryCommand}" HorizontalAlignment="Left" />
           </StackPanel>
         </controls:GlassCard>
 

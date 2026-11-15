@@ -30,7 +30,7 @@ public sealed record ModSearchItem(ModrinthProject Project)
 
 public sealed partial class ModsViewModel : ObservableObject
 {
-    private readonly ModManager _manager = new(AppServices.Paths);
+    private readonly ModManager _manager = AppServices.Mods;
 
     public ObservableCollection<InstanceItem> Instances { get; } = new();
     public ObservableCollection<ModItem> Mods { get; } = new();
@@ -42,6 +42,14 @@ public sealed partial class ModsViewModel : ObservableObject
     [ObservableProperty] private string _statusText = "";
     [ObservableProperty] private string? _errorText;
     [ObservableProperty] private ModSearchItem? _selectedSearchItem;
+    [ObservableProperty] private string _translation = "";
+    [ObservableProperty] private bool _hasTranslation;
+    [ObservableProperty] private bool _isBusy;
+
+    partial void OnTranslationChanged(string value) => HasTranslation = !string.IsNullOrWhiteSpace(value);
+
+    public bool CanAct => !IsBusy;
+    public bool HasSelection => SelectedSearchItem is not null && !IsBusy;
 
     public ModsViewModel()
     {
@@ -58,6 +66,21 @@ public sealed partial class ModsViewModel : ObservableObject
     }
 
     partial void OnSelectedInstanceChanged(InstanceItem? value) => RefreshMods();
+    partial void OnIsBusyChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanAct));
+        OnPropertyChanged(nameof(HasSelection));
+        InstallWithDepsCommand.NotifyCanExecuteChanged();
+        TranslateSelectedCommand.NotifyCanExecuteChanged();
+        InstallSelectedCommand.NotifyCanExecuteChanged();
+    }
+    partial void OnSelectedSearchItemChanged(ModSearchItem? value)
+    {
+        OnPropertyChanged(nameof(HasSelection));
+        InstallWithDepsCommand.NotifyCanExecuteChanged();
+        TranslateSelectedCommand.NotifyCanExecuteChanged();
+        InstallSelectedCommand.NotifyCanExecuteChanged();
+    }
 
     public void RefreshMods()
     {
@@ -145,7 +168,73 @@ public sealed partial class ModsViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
+    /// <summary>Installs the selected Mod AND every required prerequisite via ModInstaller.</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private async Task InstallWithDepsAsync()
+    {
+        if (SelectedInstance is null || SelectedSearchItem is null) return;
+        var project = SelectedSearchItem.Project;
+        IsBusy = true;
+        ErrorText = null;
+        try
+        {
+            var rec = SelectedInstance.Record;
+            var loader = rec.Loader is null or "vanilla" ? null : rec.Loader;
+            var modsDir = Path.Combine(AppServices.Instances.GameDirectory(rec), "mods");
+            StatusText = $"安装 {project.Title}（含前置）…";
+            var report = await AppServices.ModsInstaller.InstallAsync(
+                modsDir, string.IsNullOrWhiteSpace(project.Id) ? project.Slug : project.Id,
+                rec.MinecraftVersion, loader, new Progress<string>(s => StatusText = s)).ConfigureAwait(true);
+            RefreshMods();
+            StatusText = report.Summary;
+            AppServices.Log.Info("mods", report.Summary);
+        }
+        catch (Exception ex)
+        {
+            ErrorText = ex.Message;
+            StatusText = "安装失败";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>Asks the configured AI provider to translate the selected Mod's intro into Chinese.</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private async Task TranslateSelectedAsync()
+    {
+        if (SelectedSearchItem is null) return;
+        var project = SelectedSearchItem.Project;
+        IsBusy = true;
+        ErrorText = null;
+        Translation = "";
+        try
+        {
+            StatusText = $"获取 {project.Title} 完整介绍…";
+            var detail = await AppServices.Modrinth.GetProjectAsync(
+                string.IsNullOrWhiteSpace(project.Id) ? project.Slug : project.Id).ConfigureAwait(true);
+            if (detail is null) throw new InvalidOperationException("没有找到项目详情");
+
+            StatusText = "AI 翻译中…";
+            var prompt = "把下面的 Minecraft Mod 介绍翻译成简体中文，保留专有名词与格式，只输出译文：\n\n" +
+                         (detail.Body.Length > 4000 ? detail.Body[..4000] : detail.Body);
+            // Uses the saved provider, so it works even if the AI page was never opened.
+            Translation = (await AppServices.QuickChatAsync(prompt).ConfigureAwait(true)).Trim();
+            StatusText = "翻译完成";
+        }
+        catch (Exception ex)
+        {
+            ErrorText = ex.Message;
+            StatusText = "翻译失败";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
     private async Task InstallSelectedAsync()
     {
         if (SelectedInstance is null || SelectedSearchItem is null) return;

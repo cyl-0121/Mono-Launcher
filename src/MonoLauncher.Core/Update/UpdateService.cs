@@ -49,7 +49,7 @@ public sealed class UpdateService
     }
 
     public string? Repository { get; set; }
-    public string CurrentVersion { get; set; } = "1.0.2";
+    public string CurrentVersion { get; set; } = "1.0.3";
 
     /// <summary>Mirror site (may carry a share code). Checked first; GitHub is the fallback.</summary>
     public string? DownloadSiteUrl { get; set; }

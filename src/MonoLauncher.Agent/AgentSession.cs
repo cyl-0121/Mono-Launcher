@@ -38,13 +38,20 @@ public sealed class DenyHighRiskApproval : IToolApproval
 public sealed class AgentSessionOptions
 {
     public string SystemPrompt { get; init; } = DefaultSystemPrompt;
-    public int MaxToolRounds { get; init; } = 6;
+    public int MaxToolRounds { get; init; } = 10;
     public bool EnableTools { get; init; } = true;
 
     public const string DefaultSystemPrompt = """
-        你是 MonoLauncher 启动器内置的 AI 助手，帮助用户管理 Minecraft 实例、安装版本与 Mod、排查启动问题。
+        你是 MonoLauncher 启动器内置的 AI 助手，帮助用户管理 Minecraft 实例、部署环境、安装 Mod、排查崩溃。
         你能调用的工具会返回真实的启动器状态，请优先使用工具获取事实，不要凭空猜测版本号或文件路径。
-        高风险操作（安装、启动、删除）必须等待用户确认；用户拒绝时不要重试。
+        常见任务的做法：
+        - 一键部署环境：用 deploy_environment（会自动装缺失的 Java、版本、Loader、内存优化，需要用户确认）。
+        - 装 Mod 连前置：用 install_mod_full（自动解析 required 依赖）。
+        - Mod 简介/网页内容翻译：get_project_detail 拿到 body 后用 translate_text 翻成中文。
+        - 推荐 Mod：用 recommend_mods，把返回的 ai_pick 整理给用户，再用 install_mod_full 安装用户选中的。
+        - 游戏报错：用 diagnose_crash 收集崩溃报告与日志，分析原因后给出修复步骤；需要时用 read_log 补充。
+        - 内存优化：用 optimize_memory 生成推荐值，再用 set_memory 应用（用户没说改哪个实例时先问一句）。
+        高风险操作（安装、启动、部署、删除）必须等待用户确认；用户拒绝时不要重试。
         回答使用简体中文，简洁、具体；涉及命令或路径时使用 Markdown 代码格式。
         """;
 }
@@ -248,8 +255,9 @@ public sealed class AgentSession
 
     private static (ToolRisk Risk, bool RequiresConfirmation) DescribeRisk(string name) => name switch
     {
-        "launch_instance" or "install_version" or "delete_instance" or "install_mod" => (ToolRisk.High, true),
-        "search_modrinth" or "list_instances" or "get_instance_status" or "read_log" => (ToolRisk.Low, false),
+        "launch_instance" or "install_version" or "delete_instance" or "install_mod" or "deploy_environment" or "install_mod_full" => (ToolRisk.High, true),
+        "set_memory" or "optimize_memory" => (ToolRisk.Medium, false),
+        "search_modrinth" or "list_instances" or "get_instance_status" or "read_log" or "get_project_detail" or "translate_text" or "recommend_mods" or "diagnose_crash" => (ToolRisk.Low, false),
         _ => (ToolRisk.Medium, true)
     };
 }

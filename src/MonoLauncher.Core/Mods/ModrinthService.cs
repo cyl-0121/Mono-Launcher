@@ -37,8 +37,25 @@ public sealed class ModrinthVersion
     public IReadOnlyList<string> GameVersions { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> Loaders { get; init; } = Array.Empty<string>();
     public IReadOnlyList<ModrinthFile> Files { get; init; } = Array.Empty<ModrinthFile>();
+    public IReadOnlyList<ModrinthDependency> Dependencies { get; init; } = Array.Empty<ModrinthDependency>();
 
     public ModrinthFile? PrimaryFile => Files.FirstOrDefault(f => f.Primary) ?? Files.FirstOrDefault();
+}
+
+public sealed record ModrinthDependency(string? ProjectId, string? VersionId, string DependencyType);
+
+/// <summary>Full project payload (includes the long README-style body).</summary>
+public sealed class ModrinthProjectDetail
+{
+    public string Id { get; init; } = "";
+    public string Slug { get; init; } = "";
+    public string Title { get; init; } = "";
+    public string Description { get; init; } = "";
+    public string Body { get; init; } = "";
+    public string? License { get; init; }
+    public long Downloads { get; init; }
+    public IReadOnlyList<string> Categories { get; init; } = Array.Empty<string>();
+    public string? IconUrl { get; init; }
 }
 
 /// <summary>
@@ -127,7 +144,8 @@ public sealed class ModrinthService
                 VersionType = item?["version_type"]?.GetValue<string>() ?? "release",
                 GameVersions = item?["game_versions"]?.AsArray().Select(v => v?.GetValue<string>() ?? "").ToList() ?? new(),
                 Loaders = item?["loaders"]?.AsArray().Select(v => v?.GetValue<string>() ?? "").ToList() ?? new(),
-                Files = ParseFiles(item?["files"])
+                Files = ParseFiles(item?["files"]),
+                Dependencies = ParseDependencies(item?["dependencies"])
             });
         }
         return result;
@@ -153,6 +171,43 @@ public sealed class ModrinthService
             });
         }
         return files;
+    }
+
+    private static List<ModrinthDependency> ParseDependencies(JsonNode? node)
+    {
+        var result = new List<ModrinthDependency>();
+        if (node is not JsonArray arr) return result;
+        foreach (var d in arr)
+        {
+            var projectId = d?["project_id"]?.GetValue<string>();
+            var versionId = d?["version_id"]?.GetValue<string>();
+            if (string.IsNullOrWhiteSpace(projectId) && string.IsNullOrWhiteSpace(versionId)) continue;
+            result.Add(new ModrinthDependency(
+                string.IsNullOrWhiteSpace(projectId) ? null : projectId,
+                string.IsNullOrWhiteSpace(versionId) ? null : versionId,
+                d?["dependency_type"]?.GetValue<string>() ?? "required"));
+        }
+        return result;
+    }
+
+    /// <summary>Fetches the full project payload (title, summary and the long body).</summary>
+    public async Task<ModrinthProjectDetail?> GetProjectAsync(string projectIdOrSlug, CancellationToken ct = default)
+    {
+        var url = $"{BaseUrl}/project/{Uri.EscapeDataString(projectIdOrSlug)}";
+        var json = await GetJsonAsync(url, ct).ConfigureAwait(false);
+        if (json is null) return null;
+        return new ModrinthProjectDetail
+        {
+            Id = json["id"]?.GetValue<string>() ?? "",
+            Slug = json["slug"]?.GetValue<string>() ?? "",
+            Title = json["title"]?.GetValue<string>() ?? "",
+            Description = json["description"]?.GetValue<string>() ?? "",
+            Body = json["body"]?.GetValue<string>() ?? "",
+            License = json["license"]?["id"]?.GetValue<string>(),
+            Downloads = json["downloads"]?.GetValue<long>() ?? 0,
+            Categories = json["categories"]?.AsArray().Select(c => c?.GetValue<string>() ?? "").ToList() ?? new(),
+            IconUrl = json["icon_url"]?.GetValue<string>()
+        };
     }
 
     private async Task<JsonNode?> GetJsonAsync(string url, CancellationToken ct)

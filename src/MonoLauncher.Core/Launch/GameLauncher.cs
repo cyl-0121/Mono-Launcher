@@ -91,7 +91,7 @@ public sealed class LaunchService
             DemoMode = settings.DemoMode,
             ServerAddress = settings.ServerAddress,
             ServerPort = settings.ServerPort,
-            ExtraJvmArguments = settings.ExtraJvmArguments,
+            ExtraJvmArguments = MergeJvmArguments(settings),
             ExtraGameArguments = settings.ExtraGameArguments,
             Log4jConfigPath = File.Exists(log4j) ? log4j : null,
             VersionType = resolved.Type,
@@ -114,6 +114,20 @@ public sealed class LaunchService
             MissingFiles = missing
         };
     }
+
+    /// <summary>
+    /// When the instance opts into JVM tuning, prepend the advisor's G1 flags.
+    /// Previously applied managed flags are stripped first so repeated applies never duplicate.
+    /// </summary>
+    private static IReadOnlyList<string> MergeJvmArguments(InstanceLaunchSettings settings)
+    {
+        var custom = settings.ExtraJvmArguments ?? new List<string>();
+        if (!settings.OptimizeJvmArguments)
+            return custom;
+        var merged = new List<string>(MemoryAdvisor.JvmOptimizationFlags);
+        merged.AddRange(custom.Where(a => !MemoryAdvisor.IsManagedFlag(a)));
+        return merged;
+    }
 }
 
 public sealed class InstanceLaunchSettings
@@ -128,6 +142,8 @@ public sealed class InstanceLaunchSettings
     public int? ServerPort { get; set; }
     public List<string> ExtraJvmArguments { get; set; } = new();
     public List<string> ExtraGameArguments { get; set; } = new();
+    /// <summary>Prepend the advisor's G1 tuning flags (PCL-style memory optimization).</summary>
+    public bool OptimizeJvmArguments { get; set; }
 }
 
 public sealed class GameSession : IDisposable

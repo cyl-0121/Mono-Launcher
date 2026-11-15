@@ -244,6 +244,7 @@ public sealed class JavaScanner
 
         var roots = new List<string>
         {
+            paths.JavaDir, // managed runtimes land in data/java/java-<major>/
             @"C:\Program Files\Java",
             @"C:\Program Files (x86)\Java",
             @"C:\Program Files\Eclipse Adoptium",

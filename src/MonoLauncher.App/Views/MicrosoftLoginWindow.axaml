@@ -16,6 +16,8 @@
     <Style Selector="Button TextBlock">
       <Setter Property="LineHeight" Value="17" />
       <Setter Property="VerticalAlignment" Value="Center" />
+      <!-- Same Skia ascent nudge as the main window. -->
+      <Setter Property="Margin" Value="0,1,0,0" />
     </Style>
     <Style Selector="Button.primary">
       <Setter Property="Background" Value="#FFFFFF" />

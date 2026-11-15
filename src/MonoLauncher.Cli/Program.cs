@@ -2,6 +2,8 @@ using System.Text;
 using MonoLauncher.Agent.Tools;
 using MonoLauncher.Core;
 using MonoLauncher.Core.Auth;
+using MonoLauncher.Core.Config;
+using MonoLauncher.Core.Deploy;
 using MonoLauncher.Core.Download;
 using MonoLauncher.Core.Instances;
 using MonoLauncher.Core.Java;
@@ -60,6 +62,36 @@ async Task<int> RunAsync(string[] args)
     var cmd = args.FirstOrDefault() ?? "help";
     switch (cmd)
     {
+        case "memory":
+        {
+            var (total, free) = MemoryAdvisor.GetMachineMemory();
+            Console.WriteLine($"物理内存: {total / 1024.0:0.0} GB，可用: {free / 1024.0:0.0} GB");
+            foreach (var aggressive in new[] { false, true })
+            {
+                var plan = MemoryAdvisor.Recommend(aggressive);
+                Console.WriteLine($"{(aggressive ? "激进" : "标准")}档: -Xms{plan.MinMb}M -Xmx{plan.MaxMb}M  ({plan.Note})");
+            }
+            Console.WriteLine("JVM 调优参数:");
+            foreach (var f in MemoryAdvisor.JvmOptimizationFlags) Console.WriteLine("  " + f);
+            return 0;
+        }
+        case "deploy":
+        {
+            var version = args.ElementAtOrDefault(1) ?? throw new ArgumentException("用法: deploy <版本> [loader]");
+            var loader = args.ElementAtOrDefault(2);
+            var depInstances = new InstanceStore(paths);
+            var depLoaders = new LoaderService(http, paths, versions);
+            var depModrinth = new ModrinthService(http);
+            var depJava = new JavaScanner();
+            var depJavaInstaller = new JavaRuntimeInstaller(http, paths);
+            var depMods = new ModManager(paths);
+            var deployer = new EnvironmentDeployer(paths, http, versions, depJava, depJavaInstaller,
+                depInstances, depLoaders, depModrinth, depMods);
+            var progress = new Progress<string>(s => Console.WriteLine("  · " + s));
+            var result = await deployer.DeployAsync(version, loader, null, true, true, progress);
+            Console.WriteLine(result.Summary);
+            return 0;
+        }
         case "nettest":
         {
             foreach (var url in new[]
@@ -158,8 +190,14 @@ async Task<int> RunAsync(string[] args)
             var launchService = new LaunchService(paths);
             var javaScanner = new JavaScanner();
             var bridge = new DownloadCenterBridge(_ => { }, _ => { }, _ => { });
+            var settings = new SettingsService(paths);
+            var mods = new ModManager(paths);
+            var javaInstaller = new JavaRuntimeInstaller(http, paths);
+            var deployer = new EnvironmentDeployer(paths, http, versions, javaScanner, javaInstaller,
+                instances, loaders, modrinth, mods);
+            var modInstaller = new ModInstaller(http, modrinth, mods, paths);
             var tools = new LauncherTools(paths, instances, versions, loaders, modrinth,
-                launchService, javaScanner, accounts, bridge);
+                launchService, javaScanner, accounts, bridge, deployer, modInstaller, mods, settings);
             Console.WriteLine("== list_instances ==");
             Console.WriteLine(tools.ListInstances());
             Console.WriteLine("== list_installed_versions ==");

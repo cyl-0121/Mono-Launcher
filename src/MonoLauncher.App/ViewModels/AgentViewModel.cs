@@ -54,7 +54,7 @@ public sealed partial class AgentViewModel : ObservableObject
     [ObservableProperty] private string _providerHint = "";
 
     public string ToolSummary =>
-        "已注册工具：list_instances · list_installed_versions · get_instance_status · install_version · launch_instance · read_log · get_instance_crash_report · search_modrinth（安装/启动前会弹窗确认）";
+        "已注册工具：deploy_environment（一键部署环境）· optimize_memory / set_memory（内存优化）· install_mod_full（装 Mod 连前置）· get_project_detail / translate_text（简介翻译）· recommend_mods（推荐 Mod）· diagnose_crash（崩溃排查）· list_instances · search_modrinth · install_version · launch_instance · read_log（高风险操作弹窗确认）";
     [ObservableProperty] private string? _errorText;
 
     public AgentViewModel()
@@ -245,6 +245,13 @@ public sealed partial class AgentViewModel : ObservableObject
 
         var kernel = Kernel.CreateBuilder().Build();
         kernel.Plugins.Add(LauncherTools.CreatePlugin(AppServices.Tools));
+        // Give the translate/recommend tools a one-shot chat channel on the same provider.
+        AppServices.Tools.QuickChat = async (prompt, ct) =>
+        {
+            var reply = await chat.GetChatMessageContentsAsync(
+                new ChatHistory { new ChatMessageContent(AuthorRole.User, prompt) }, null, kernel, ct).ConfigureAwait(false);
+            return string.Join("\n", reply.Select(r => r.Content ?? ""));
+        };
         var approval = new UiToolApproval { Handler = request => Dialogs.ConfirmToolAsync(request) };
         return new AgentSession(chat, kernel, approval, new AgentSessionOptions())
         {

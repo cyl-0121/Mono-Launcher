@@ -33,7 +33,7 @@ public static class Dialogs
             Height = 340,
             CanResize = false,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            Background = new SolidColorBrush(Color.Parse("#10141F")),
+            Background = new SolidColorBrush(Color.Parse("#0D0D0D")),
             ShowInTaskbar = false
         };
 
@@ -65,17 +65,19 @@ public static class Dialogs
                     Text = "确认执行工具调用",
                     FontSize = 18,
                     FontWeight = FontWeight.SemiBold,
-                    Foreground = new SolidColorBrush(Color.Parse("#EAF1FF"))
+                    Foreground = new SolidColorBrush(Color.Parse("#FFFFFF"))
                 },
                 new TextBlock
                 {
                     Text = $"工具：{request.Name}    风险：{request.Risk}",
                     FontSize = 13,
-                    Foreground = new SolidColorBrush(Color.Parse("#9EB0C9"))
+                    Foreground = new SolidColorBrush(Color.Parse("#9A9A9A"))
                 },
                 new Border
                 {
-                    Background = new SolidColorBrush(Color.Parse("#12FFFFFF")),
+                    Background = new SolidColorBrush(Color.Parse("#111111")),
+                    BorderBrush = new SolidColorBrush(Color.Parse("#2A2A2A")),
+                    BorderThickness = new Thickness(1),
                     CornerRadius = new CornerRadius(8),
                     Padding = new Thickness(12),
                     MaxHeight = 150,
@@ -87,7 +89,7 @@ public static class Dialogs
                             FontFamily = new FontFamily("Cascadia Mono, Consolas"),
                             FontSize = 11,
                             TextWrapping = TextWrapping.Wrap,
-                            Foreground = new SolidColorBrush(Color.Parse("#C7D2E5"))
+                            Foreground = new SolidColorBrush(Color.Parse("#B0B0B0"))
                         }
                     }
                 },

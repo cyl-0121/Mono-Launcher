@@ -1,10 +1,13 @@
 using System.Net.Http;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
 using MonoLauncher.Agent.Local;
 using MonoLauncher.Agent.Providers;
 using MonoLauncher.Agent.Tools;
 using MonoLauncher.Core;
 using MonoLauncher.Core.Auth;
 using MonoLauncher.Core.Config;
+using MonoLauncher.Core.Deploy;
 using MonoLauncher.Core.Download;
 using MonoLauncher.Core.Instances;
 using MonoLauncher.Core.Java;
@@ -35,6 +38,10 @@ public static class AppServices
     public static LaunchService Launch { get; private set; } = null!;
     public static LoaderService Loaders { get; private set; } = null!;
     public static ModrinthService Modrinth { get; private set; } = null!;
+    public static ModManager Mods { get; private set; } = null!;
+    public static JavaRuntimeInstaller JavaInstaller { get; private set; } = null!;
+    public static EnvironmentDeployer Deployer { get; private set; } = null!;
+    public static ModInstaller ModsInstaller { get; private set; } = null!;
     public static UpdateService Updates { get; private set; } = null!;
     public static LauncherTools Tools { get; private set; } = null!;
     public static AgentProviderFactory Providers { get; private set; } = null!;
@@ -76,10 +83,15 @@ public static class AppServices
         Launch = new LaunchService(Paths);
         Loaders = new LoaderService(Http, Paths, Versions);
         Modrinth = new ModrinthService(Http);
+        Mods = new ModManager(Paths);
+        JavaInstaller = new JavaRuntimeInstaller(Http, Paths);
+        Deployer = new EnvironmentDeployer(
+            Paths, Http, Versions, Java, JavaInstaller, Instances, Loaders, Modrinth, Mods);
+        ModsInstaller = new ModInstaller(Http, Modrinth, Mods, Paths);
         Updates = new UpdateService(Http, Paths)
         {
             Repository = Settings.Current.UpdateRepository,
-            CurrentVersion = "1.0.2",
+            CurrentVersion = "1.0.3",
             DownloadSiteUrl = Settings.Current.DownloadSiteUrl
         };
         Tools = new LauncherTools(
@@ -87,7 +99,10 @@ public static class AppServices
             new DownloadCenterBridge(
                 stage => Downloads.Begin(stage),
                 message => Downloads.Complete(message),
-                error => Downloads.Fail(error)));
+                error => Downloads.Fail(error)),
+            Deployer, ModsInstaller, Mods, Settings);
+        // Default AI channel for tools; the Agent page overrides it with its on-screen selection.
+        Tools.QuickChat = QuickChatAsync;
         Providers = new AgentProviderFactory(Http, Secrets);
         LocalAi = new LocalLlamaService();
 
@@ -96,8 +111,42 @@ public static class AppServices
         Log.Info("app", $"MonoLauncher 启动，数据目录 {Paths.Root}");
     }
 
-    public static void ApplySettings()
+    /// <summary>
+    /// One-shot chat using the saved provider settings. Lets features outside the Agent page
+    /// (Mod intro translation, mod recommendation) work even if that page was never opened.
+    /// </summary>
+    public static async Task<string> QuickChatAsync(string prompt, CancellationToken ct = default)
     {
+        var cfg = new ViewModels.AgentConfigStore(Paths).Load();
+        var providerId = string.IsNullOrWhiteSpace(cfg.ProviderId) ? "mock" : cfg.ProviderId;
+
+        IChatCompletionService chat;
+        if (string.Equals(providerId, "mock", StringComparison.OrdinalIgnoreCase))
+        {
+            chat = new MockChatService();
+        }
+        else
+        {
+            var apiKey = Providers.LoadApiKey(providerId);
+            var def = ProviderCatalog.Find(providerId);
+            if (string.IsNullOrWhiteSpace(apiKey) && string.IsNullOrWhiteSpace(cfg.BaseUrl))
+                throw new InvalidOperationException("还没有配置 AI 提供商，请先到「AI」页填写并保存提供商与密钥");
+            chat = Providers.Create(new AgentProviderConfig
+            {
+                ProviderId = providerId,
+                BaseUrl = string.IsNullOrWhiteSpace(cfg.BaseUrl) ? null : cfg.BaseUrl,
+                ApiKey = apiKey,
+                Model = string.IsNullOrWhiteSpace(cfg.Model) ? def?.DefaultModel ?? "" : cfg.Model
+            });
+        }
+
+        var reply = await chat.GetChatMessageContentsAsync(
+            new ChatHistory { new ChatMessageContent(AuthorRole.User, prompt) },
+            null, null, ct).ConfigureAwait(false);
+        return string.Join("\n", reply.Select(r => r.Content ?? "")).Trim();
+    }
+
+    public static void ApplySettings()    {
         var s = Settings.Current;
         PerformanceState.Apply(ParseTier(s.PerformanceTier), s.AnimationsEnabled, s.PointerLighting);
         AutoDegrade.Enabled = s.AutoDowngrade;

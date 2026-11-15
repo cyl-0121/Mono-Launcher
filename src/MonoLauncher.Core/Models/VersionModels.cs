@@ -117,6 +117,9 @@ public sealed class Library
     [JsonPropertyName("extract")] public ExtractRules? Extract { get; set; }
     [JsonPropertyName("rules")] public List<Rule>? Rules { get; set; }
     [JsonPropertyName("url")] public string? Url { get; set; }
+    // Loader profiles (Fabric/Quilt) put the hashes at the top level instead of a downloads block.
+    [JsonPropertyName("sha1")] public string? Sha1 { get; set; }
+    [JsonPropertyName("md5")] public string? Md5 { get; set; }
 
     /// <summary>True when the library declares platform natives via the legacy "natives" map.</summary>
     [JsonIgnore] public bool HasNatives => Natives is { Count: > 0 };
@@ -240,6 +243,7 @@ public static class JsonDefaults
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         WriteIndented = true,
-        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        Converters = { new FlexibleDateTimeOffsetConverter() }
     };
 }
